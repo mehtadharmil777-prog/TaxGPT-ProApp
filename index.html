@@ -14,16 +14,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
     <style>
-        /* Smooth Theme Transition */
         html { transition: background 0.3s, color 0.3s; }
-
         .dark body { background-color: #0d0d0d; color: #e5e5e5; }
 
-        .ai-output h2 {
-            font-size: 1.5rem;
-            margin-top: 1rem;
-            font-weight: 700;
-        }
+        .ai-output h2 { font-size: 1.5rem; margin-top: 1rem; font-weight: 700; }
 
         .content-scroll::-webkit-scrollbar { width: 8px; }
         .content-scroll::-webkit-scrollbar-thumb {
@@ -49,10 +43,7 @@
     </div>
 </div>
 
-<!-- MAIN LAYOUT -->
 <div class="flex h-screen">
-
-    <!-- SIDEBAR -->
     <aside class="hidden md:flex flex-col w-64 bg-white dark:bg-gray-900 border-r p-4">
         <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-6">
             TaxGPT Pro
@@ -69,12 +60,9 @@
         </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
     <main class="flex-1 flex flex-col items-center p-6">
-
         <h1 class="text-4xl font-bold text-indigo-600 md:hidden mb-6">TaxGPT Pro</h1>
 
-        <!-- INITIAL OPTIONS -->
         <div id="initial-view" class="text-center space-y-6">
             <h2 class="text-2xl">How can I help you?</h2>
 
@@ -94,25 +82,20 @@
             </div>
         </div>
 
-        <!-- CHAT HISTORY -->
         <div id="history"
              class="hidden content-scroll max-w-2xl w-full mt-6 p-4 border rounded-lg bg-white dark:bg-gray-800 h-96 overflow-y-auto space-y-4">
         </div>
 
-        <!-- FEATURE BUTTONS -->
         <div id="features" class="hidden mt-4 flex gap-3">
             <button id="takeaways" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">📝 Takeaways</button>
             <button id="simplify" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">👶 Simplify</button>
             <button id="research" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">🏛️ Research</button>
         </div>
 
-        <!-- INPUT -->
         <form id="form" class="flex w-full max-w-2xl mt-auto mb-8">
             <label class="mr-2 cursor-pointer">
                 <input type="file" id="file" accept="image/*" class="hidden">
-                <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-xl">
-                    +
-                </div>
+                <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-xl">+</div>
             </label>
 
             <input id="input" class="flex-1 p-3 border rounded-full dark:bg-gray-900 dark:border-gray-700"
@@ -120,23 +103,24 @@
 
             <button class="ml-3 w-12 h-12 bg-indigo-600 text-white rounded-full">→</button>
         </form>
-
     </main>
 </div>
 
 <script>
-/* -------------- FIREBASE SETUP -------------- */
+
+/* ---------------------- FIXED FIREBASE CONFIG ---------------------- */
 const firebaseConfig = {
-    apiKey: "AIzaSyC2yEjdOBRxrn4-GIM4Wyti9O6Oxxxxx",
+    apiKey: "AIzaSyC2yEjdOBRxrn4-GIM4Wyti9O6Oxxxxxxx",
     authDomain: "taxgpt-f688d.firebaseapp.com",
     projectId: "taxgpt-f688d",
-    storageBucket: "taxgpt-f688d.appspot.com",
+    storageBucket: "taxgpt-f688d.firebasestorage.app",
     messagingSenderId: "443595897158",
     appId: "1:443595897158:web:c4592fc15b4c07654e0d47",
     measurementId: "G-BXK7WNRM7C"
 };
 
 firebase.initializeApp(firebaseConfig);
+
 const db = firebase.firestore();
 const auth = firebase.auth();
 
@@ -144,8 +128,9 @@ let userId = null;
 let lastModelMsg = null;
 let imageBase64 = null;
 
-/* -------------- AUTH -------------- */
-auth.signInAnonymously();
+/* ---------------------- AUTH ---------------------- */
+auth.signInAnonymously().catch(console.error);
+
 auth.onAuthStateChanged(u => {
     if (!u) return;
     userId = u.uid;
@@ -153,16 +138,21 @@ auth.onAuthStateChanged(u => {
     listenHistory();
 });
 
-/* -------------- HISTORY LISTENER -------------- */
+/* ---------------------- HISTORY LISTENER ---------------------- */
 function listenHistory() {
-    db.collection("users").doc(userId).collection("chats").orderBy("timestamp")
-        .onSnapshot(snap => {
-            const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            renderHistory(data);
-        });
+    if (!userId) return;
+
+    db.collection("users")
+      .doc(userId)
+      .collection("chats")
+      .orderBy("timestamp")
+      .onSnapshot(snap => {
+          const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          renderHistory(history);
+      });
 }
 
-/* -------------- RENDER HISTORY -------------- */
+/* ---------------------- RENDER HISTORY ---------------------- */
 function renderHistory(history) {
     const box = document.getElementById("history");
     const features = document.getElementById("features");
@@ -191,26 +181,29 @@ function renderHistory(history) {
         <p>${lastModelMsg.display}</p>
         <div class="text-right text-xs opacity-70">${new Date(lastModelMsg.timestamp).toLocaleTimeString()}</div>
     `;
-
     box.appendChild(div);
 }
 
-/* -------------- SAVE MESSAGE -------------- */
+/* ---------------------- SAVE MESSAGE ---------------------- */
 function save(role, text, display = null) {
-    return db.collection("users").doc(userId).collection("chats").add({
-        role,
-        text,
-        display: display || text,
-        timestamp: Date.now()
-    });
+    if (!userId) return;
+
+    return db.collection("users")
+        .doc(userId)
+        .collection("chats")
+        .add({
+            role,
+            text,
+            display: display || text,
+            timestamp: Date.now()
+        });
 }
 
-/* -------------- THEME TOGGLE -------------- */
-document.getElementById("theme-toggle").onclick = () => {
+/* ---------------------- THEME TOGGLE ---------------------- */
+document.getElementById("theme-toggle").onclick = () =>
     document.documentElement.classList.toggle("dark");
-};
 
-/* -------------- GEMINI API -------------- */
+/* ---------------------- GEMINI API ---------------------- */
 const GEMINI_API_KEY = "AIzaSyBh8epAN_XqXxjBoQRweMZdblJJRNyzlgU";
 const MODEL = "gemini-1.5-flash";
 
@@ -245,9 +238,12 @@ async function callGemini(prompt, image = null) {
     return json?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
 }
 
-/* -------------- FORM SUBMIT -------------- */
+/* ---------------------- FORM SUBMISSION ---------------------- */
 document.getElementById("form").onsubmit = async (e) => {
     e.preventDefault();
+
+    if (!userId) return; // Safety
+
     const input = document.getElementById("input").value.trim();
     if (!input && !imageBase64) return;
 
@@ -256,7 +252,6 @@ document.getElementById("form").onsubmit = async (e) => {
     await save("user", input);
 
     const reply = await callGemini(input, imageBase64);
-
     await save("model", reply);
 
     imageBase64 = null;
@@ -266,23 +261,26 @@ document.getElementById("form").onsubmit = async (e) => {
     document.getElementById("loading").classList.add("hidden");
 };
 
-/* -------------- FILE UPLOAD -------------- */
-document.getElementById("file").onchange = (e) => {
+/* ---------------------- FILE UPLOAD ---------------------- */
+document.getElementById("file").onchange = e => {
     const file = e.target.files[0];
     const r = new FileReader();
-    r.onload = () => {
+    r.onload = () =>
         imageBase64 = r.result.split(",")[1];
-    };
     r.readAsDataURL(file);
 };
 
-/* -------------- NEW CHAT -------------- */
+/* ---------------------- NEW CHAT ---------------------- */
 function newChat() {
-    db.collection("users").doc(userId).collection("chats").get().then(snap =>
-        snap.forEach(doc => doc.ref.delete())
-    );
-}
-</script>
+    if (!userId) return;
 
+    db.collection("users")
+        .doc(userId)
+        .collection("chats")
+        .get()
+        .then(snap => snap.forEach(doc => doc.ref.delete()));
+}
+
+</script>
 </body>
 </html>
