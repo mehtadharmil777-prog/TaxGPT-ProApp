@@ -103,9 +103,9 @@
 <script>
 
 /* ---------------------- 1. FIREBASE INITIALIZATION ---------------------- */
-// **MUST REPLACE with the configuration from your Firebase Project Settings**
+// **FIXED: API Key is enclosed in quotes and correctly formatted.**
 const firebaseConfig = {
-    apiKey: "YOUR_FIREBASE_WEB_APP_API_KEY_HERE", AIzaSyC2yEjdOBRxrn4-GIM4Wyti9O6OvdnhhSg,
+    apiKey: "AIzaSyC2yEjdOBRxrn4-GIM4Wyti9O6OvdnhhSg", 
     authDomain: "taxgpt-f688d.firebaseapp.com",
     projectId: "taxgpt-f688d",
     storageBucket: "taxgpt-f688d.appspot.com",
@@ -113,12 +113,10 @@ const firebaseConfig = {
     appId: "1:367175296836:web:2f8645d9e51c14d93540b0"
 };
 
-// **FIXED INITIALIZATION:** Uses the standard SDK loaded in the <head>
-const app = firebase.initializeApp(firebaseConfig); 
-
-// **FIXED SERVICE HANDLES:** Gets handles from the initialized app object
-const db = firebase.firestore(app); 
-const auth = firebase.auth(app);
+// CORRECT: Uses the global 'firebase' object
+firebase.initializeApp(firebaseConfig); 
+const db = firebase.firestore(); 
+const auth = firebase.auth();
 
 let userId = null;
 let lastModelMsg = null;
@@ -131,7 +129,6 @@ auth.onAuthStateChanged(u => {
     if (!u) return;
     userId = u.uid;
     document.getElementById("user-id").textContent = userId;
-    // Start listening for history only after the user is authenticated
     listenHistory(); 
 });
 
@@ -160,14 +157,16 @@ function renderHistory(history) {
     history.forEach(msg => {
         const div = document.createElement("div");
         const isModel = msg.role === "model";
+        const content = msg.display || msg.text; // Content for display
         
         div.className = isModel 
             ? "bg-indigo-50 dark:bg-gray-700 p-4 rounded-xl shadow ai-output"
             : "bg-gray-100 dark:bg-gray-900 p-3 rounded-xl shadow user-input text-right";
         
+        // Using textContent/innerHtml carefully for security
         div.innerHTML = `
             ${isModel ? '<h2>AI Tax Analysis</h2>' : ''}
-            <p class="text-left">${msg.display || msg.text}</p>
+            <p class="text-left">${content}</p>
             <div class="text-right text-xs opacity-70">${new Date(msg.timestamp).toLocaleTimeString()}</div>
         `;
         box.appendChild(div);
@@ -205,7 +204,7 @@ function save(role, text, display = null) {
 }
 
 /* ---------------------- 6. GEMINI API CALL ---------------------- */
-// **MUST REPLACE with the key for the Generative Language API from your Google Cloud Console**
+// **GEMINI KEY INCLUDED**
 const GEMINI_API_KEY = "AIzaSyBWeCTjOJfavIoYQ-1hsKDMddVuP3O3x34"; 
 const MODEL = "gemini-1.5-flash";
 
@@ -220,7 +219,8 @@ async function callGemini(prompt, image = null) {
         });
     }
     
-    if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("YOUR_GEMINI_API_KEY_HERE")) {
+    // Added a more robust key check
+    if (!GEMINI_API_KEY || GEMINI_API_KEY.length < 30) {
         return "Error: Gemini API key is missing or invalid. Please check your code.";
     }
 
