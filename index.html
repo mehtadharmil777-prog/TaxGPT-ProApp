@@ -1,4 +1,855 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxGPT Pro</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar styling for better aesthetic */
+        .content-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .content-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .content-scroll::-webkit-scrollbar-thumb {
+            background: #a7a7a7;
+            border-radius: 10px;
+        }
+        .content-scroll::-webkit-scrollbar-thumb:hover {
+            background: #888;
+        }
+        /* Custom styling for AI output to ensure readability and markdown rendering */
+        .ai-output h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #312e81; /* Indigo-800 */
+            padding-bottom: 0.25rem;
+            border-bottom: 2px solid #e0e7ff; /* Indigo-100 */
+        }
+        .ai-output p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        .ai-output ul {
+            list-style-type: disc;
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .ai-output strong {
+            font-weight: 700;
+            color: #1e3a8a; /* Blue-800 for emphasis */
+        }
+        .disclaimer {
+            font-style: italic;
+            color: #ef4444; /* Red-500 */
+            border: 1px solid #fecaca; /* Red-200 */
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            background-color: #fef2f2; /* Red-50 */
+        }
+        .takeaways-list {
+            list-style-type: none;
+            margin-left: 0;
+            padding-left: 0;
+        }
+        .takeaways-list li {
+            padding-left: 1.5rem;
+            text-indent: -1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .takeaways-list li::before {
+            content: "✨";
+            margin-right: 0.5rem;
+        }
+
+        /* Full height minus margins for the main container (Now Flex-based) */
+        #main-layout {
+            height: 100vh;
+            display: flex;
+            width: 100%;
+        }
+
+        /* Sidebar Styling */
+        #sidebar {
+            width: 16rem; /* 256px, w-64 */
+            min-width: 16rem;
+        }
+        
+        /* Main Content Area */
+        #main-content {
+            flex-grow: 1;
+            padding: 1rem;
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+
+        /* Button Fix from previous request */
+        .option-button {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+            /* CRUCIAL FIX: Define all internal spacing here and ensure generous bottom padding */
+            padding: 1rem; 
+            padding-top: 1rem; 
+            padding-bottom: 1.5rem; 
+            height: 6.5rem; 
+        }
+        .option-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'indigo-600': '#4f46e5',
+                        'purple-600': '#9333ea',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+    <!-- Loading Overlay (Initial Hidden) -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white bg-opacity-80 flex justify-center items-center z-50 hidden">
+        <div class="flex flex-col items-center bg-white p-10 rounded-xl shadow-xl border border-gray-200">
+            <svg class="animate-spin h-8 w-8 text-indigo-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-gray-600 font-semibold">Processing Request...</p>
+        </div>
+    </div>
+
+    <!-- Main Application Layout Container -->
+    <div id="main-layout">
+        
+        <!-- Sidebar (Hidden on small screens) -->
+        <div id="sidebar" class="hidden sm:flex flex-col bg-white border-r border-gray-200 p-4 shadow-xl">
+            <div class="text-2xl font-bold text-indigo-600 mb-8 border-b pb-4">
+                TaxGPT Pro
+            </div>
+
+            <!-- New Chat Button -->
+            <button id="new-chat-btn" onclick="resetChatUI()"
+                    class="flex items-center w-full px-3 py-2 text-white bg-indigo-600 rounded-lg font-semibold hover:bg-indigo-700 transition duration-150 mb-4 shadow-md">
+                <!-- Icon for New Chat (Pencil/Edit) -->
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                </svg>
+                New Chat 
+            </button>
+
+            <!-- Search Chats -->
+            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition duration-150 mb-6">
+                <!-- Icon for Search -->
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                Search Chats
+            </a>
+
+            <div class="space-y-1">
+                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mt-4 mb-2">Projects</p>
+                <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition duration-150">
+                    <!-- Icon for Projects (Folder) -->
+                    <svg class="w-5 h-5 mr-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                    </svg>
+                    Q3 Tax Audit
+                </a>
+                <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition duration-150">
+                    <!-- Icon for Projects (Briefcase) -->
+                    <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.582 23.582 0 0112 15c-3.18 0-6.357-.732-9-2.245M12 12a5 5 0 110-10 5 5 0 010 10zm-3 1.255V19a2 2 0 002 2h2a2 2 0 002-2v-5.745"></path>
+                    </svg>
+                    Year-End Planning
+                </a>
+            </div>
+            
+            <!-- User Context -->
+            <div class="mt-auto pt-4 border-t border-gray-100 text-xs text-gray-500">
+                <p class="font-medium text-gray-700 mb-1">Session Info:</p>
+                <p>User ID: <span id="user-id-display" class="font-mono text-indigo-600 break-all">...</span></p>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div id="main-content" class="flex flex-col items-center">
+            
+            <!-- Dynamic Content Area -->
+            <div id="chat-interface-container" class="flex flex-col items-center flex-grow w-full max-w-3xl transition-all duration-500 p-2 pt-6">
+                
+                <!-- NEW: App Title at the top (Hidden on desktop as it's in the sidebar) -->
+                <h1 class="text-5xl font-extrabold text-indigo-600 mb-10 mt-4 tracking-tight sm:hidden">
+                    TaxGPT Pro
+                </h1>
+
+                <!-- Initial Prompt & Options (Shown when history is empty) -->
+                <div id="initial-prompt" class="flex flex-col items-center text-center transition-opacity duration-300 space-y-4">
+                    <h2 class="text-2xl sm:text-3xl font-light text-gray-800 mb-6">
+                        How can I help you with your tax needs?
+                    </h2>
+                    
+                    <div class="flex flex-wrap justify-center gap-4 max-w-lg">
+                        <button class="option-button w-40 bg-white border border-indigo-200 rounded-xl text-indigo-700 font-semibold flex flex-col justify-between items-start text-left" 
+                                data-prompt="I need quick advice on a tax topic, like deductions or filing status.">
+                            <span class="text-2xl mb-1">✍️</span> 
+                            <span class="text-base font-medium">Quick Tax Query</span>
+                        </button>
+                        <button class="option-button w-40 bg-white border border-indigo-200 rounded-xl text-indigo-700 font-semibold flex flex-col justify-between items-start text-left" 
+                                data-prompt="Perform deep legal research on a specific tax statute or case law.">
+                            <span class="text-2xl mb-1">🏛️</span> 
+                            <span class="text-base font-medium">Deep Research a Statute</span>
+                        </button>
+                        <button class="option-button w-40 bg-white border border-indigo-200 rounded-xl text-indigo-700 font-semibold flex flex-col justify-between items-start text-left" 
+                                data-prompt="Explain a fundamental tax concept to me, like capital gains or passive income.">
+                            <span class="text-2xl mb-1">💡</span> 
+                            <span class="text-base font-medium">Learn a New Concept</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Chat History Area (Hidden initially, grows to show context) -->
+                <div id="chat-history" class="content-scroll w-full overflow-y-auto p-4 space-y-4 transition-all duration-500 hidden opacity-0 bg-white rounded-lg border border-gray-200 shadow-inner max-w-4xl">
+                    <!-- AI responses will be dynamically added here -->
+                </div>
+
+                <!-- Feature Controls Area (Hidden initially, appears with history) -->
+                <div id="feature-controls" class="flex flex-wrap gap-3 mt-4 mb-4 w-full justify-center opacity-0 transition-all duration-500 hidden max-w-3xl">
+                    <button id="takeaways-btn" class="flex-1 min-w-[150px] py-2 px-3 rounded-xl text-sm font-semibold transition duration-200 bg-gray-200 text-gray-700 hover:bg-purple-100 hover:shadow-md disabled:opacity-50" title="Condense the latest analysis into 5 key points.">
+                        📝 Key Takeaways
+                    </button>
+                    <button id="simplify-btn" class="flex-1 min-w-[150px] py-2 px-3 rounded-xl text-sm font-semibold transition duration-200 bg-gray-200 text-gray-700 hover:bg-purple-100 hover:shadow-md disabled:opacity-50" title="Re-explain the latest analysis in simple, non-jargon language.">
+                        👶 Simplify Jargon
+                    </button>
+                    <button id="deep-research-btn" class="flex-1 min-w-[150px] py-2 px-3 rounded-xl text-sm font-semibold transition duration-200 bg-gray-200 text-gray-700 hover:bg-purple-100 hover:shadow-md disabled:opacity-50" title="Provide supporting statutes, case law, and deep legal analysis.">
+                        🏛️ Deep Tax Research
+                    </button>
+                </div>
+            </div>
+
+            <!-- Input Form (Redesigned to match the screenshot) -->
+            <form id="chat-form" class="flex w-full max-w-3xl mt-auto mb-12">
+                <!-- Left Icon: File Upload (+) -->
+                <label id="file-label" class="relative flex items-center justify-center w-12 h-12 rounded-full text-2xl cursor-pointer transition duration-200 text-gray-700 hover:bg-gray-100 mr-2" title="Upload Tax Document Image">
+                    <svg id="file-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                    <input id="file-upload" type="file" accept="image/png, image/jpeg" class="hidden">
+                </label>
+
+                <!-- Main Input Field and Right Icons -->
+                <div class="flex flex-grow bg-white border border-gray-300 rounded-full shadow-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl focus-within:shadow-xl">
+                    
+                    <input
+                        type="text"
+                        id="query-input"
+                        placeholder="Ask anything"
+                        class="flex-grow p-4 text-lg border-none outline-none bg-transparent disabled:bg-transparent"
+                        autocomplete="off"
+                    />
+
+                    <!-- Right Icons: Mic and Audio Wave Placeholder -->
+                    <div class="flex items-center space-x-2 p-2">
+                        <!-- Mic Icon (Placeholder) -->
+                        <button type="button" class="p-2 text-gray-500 hover:text-indigo-600 transition duration-150 rounded-full hover:bg-gray-100" title="Voice Input (Placeholder)">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7v0a7 7 0 01-7-7v0a7 7 0 017-7v0a7 7 0 017 7v0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18v3m3 0a3 3 0 01-6 0m6 0h-6"></path></svg>
+                        </button>
+                        <!-- Send/Loading Icon -->
+                        <button type="submit" id="submit-btn" class="p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition duration-150 w-10 h-10 flex items-center justify-center shadow-md disabled:opacity-50" title="Analyze">
+                            <svg id="submit-icon-send" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                            <!-- Spinner for loading state -->
+                            <svg id="submit-icon-spin" class="animate-spin h-6 w-6 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, addDoc, onSnapshot, collection, query as fsQuery, serverTimestamp, setLogLevel, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Global Context Variables (Mandatory) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // --- API CONFIGURATION ---
+        const API_KEY = "";
+        const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
+
+        // --- Global State Variables ---
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false;
+        let loading = false;
+        let uploadedFile = null;
+        let base64Image = null;
+        let initialLoad = true;
+        let lastModelMessage = null;
+
+        // --- DOM Elements ---
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const userIdDisplay = document.getElementById('user-id-display');
+        const chatHistory = document.getElementById('chat-history');
+        const chatForm = document.getElementById('chat-form');
+        const queryInput = document.getElementById('query-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const submitIconSend = document.getElementById('submit-icon-send');
+        const submitIconSpin = document.getElementById('submit-icon-spin');
+        const takeawaysBtn = document.getElementById('takeaways-btn');
+        const simplifyBtn = document.getElementById('simplify-btn');
+        const deepResearchBtn = document.getElementById('deep-research-btn');
+        const fileUpload = document.getElementById('file-upload');
+        const fileLabel = document.getElementById('file-label');
+        const fileIcon = document.getElementById('file-icon');
+        const featureControls = document.getElementById('feature-controls');
+        const initialPromptDiv = document.getElementById('initial-prompt'); 
+        const chatInterfaceContainer = document.getElementById('chat-interface-container');
+
+
+        // --- Utility Functions ---
+
+        /**
+         * Clears the UI to return to the initial state (New Chat).
+         */
+        window.resetChatUI = function() {
+            chatHistory.innerHTML = '';
+            queryInput.value = '';
+            clearFile();
+            
+            // Revert state to initial view
+            initialPromptDiv.classList.remove('hidden');
+            chatHistory.classList.add('hidden', 'opacity-0');
+            featureControls.classList.add('hidden', 'opacity-0');
+            
+            lastModelMessage = null;
+            
+            // Reset button styles
+            takeawaysBtn.classList.remove('bg-purple-600', 'text-white');
+            simplifyBtn.classList.remove('bg-purple-600', 'text-white');
+            deepResearchBtn.classList.remove('bg-purple-600', 'text-white');
+            
+            // Since we're not touching Firestore history yet, this simulates a new session start.
+            console.log("Starting a new chat session (UI reset).");
+        }
+        
+        /**
+         * Scrolls the chat history window to the bottom.
+         */
+        function scrollToBottom() {
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        /**
+         * Toggles the loading state of the application.
+         * @param {boolean} isLoading 
+         */
+        function setLoading(isLoading) {
+            loading = isLoading;
+            submitBtn.disabled = isLoading;
+            queryInput.disabled = isLoading;
+            fileUpload.disabled = isLoading;
+            
+            featureControls.querySelectorAll('button').forEach(btn => btn.disabled = isLoading || !lastModelMessage);
+            
+            if (isLoading) {
+                queryInput.placeholder = "Generating detailed analysis...";
+                submitIconSend.classList.add('hidden');
+                submitIconSpin.classList.remove('hidden');
+            } else {
+                queryInput.placeholder = "Ask anything";
+                submitIconSend.classList.remove('hidden');
+                submitIconSpin.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Clears the file upload state.
+         */
+        function clearFile() {
+            uploadedFile = null;
+            base64Image = null;
+            fileUpload.value = '';
+            updateFileLabel();
+        }
+
+        /**
+         * Updates the UI state for the file upload button.
+         */
+        function updateFileLabel() {
+            fileLabel.classList.remove('bg-green-600', 'text-white', 'hover:bg-gray-100');
+            fileLabel.classList.add('text-gray-700');
+            
+            if (uploadedFile) {
+                fileLabel.classList.add('bg-green-600', 'text-white', 'hover:bg-green-700');
+                // Change plus icon to a checkmark
+                fileIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>`;
+
+                // Create a clear button overlay
+                let clearBtn = document.getElementById('clear-file-btn');
+                if (!clearBtn) {
+                    clearBtn = document.createElement('button');
+                    clearBtn.id = 'clear-file-btn';
+                    clearBtn.type = 'button';
+                    clearBtn.className = 'absolute -top-1 -right-1 p-0.5 bg-white text-red-500 rounded-full text-xs leading-none border border-red-300 hover:bg-red-100 transition shadow';
+                    clearBtn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>';
+                    fileLabel.appendChild(clearBtn);
+                    clearBtn.onclick = (e) => { e.preventDefault(); clearFile(); };
+                }
+            } else {
+                fileIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>`;
+                fileLabel.classList.add('hover:bg-gray-100');
+                
+                // Remove clear button if it exists
+                const clearBtn = document.getElementById('clear-file-btn');
+                if (clearBtn) clearBtn.remove();
+            }
+        }
+        
+        // --- Firebase Initialization and Authentication ---
+
+        /**
+         * Initializes Firebase and handles authentication.
+         */
+        async function initializeFirebase() {
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.error("Firebase config is empty. Cannot initialize.");
+                return;
+            }
+
+            setLogLevel('debug');
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            const signIn = async () => {
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Firebase Sign In Error:", error);
+                }
+            };
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    userId = user.uid;
+                    isAuthReady = true;
+                    userIdDisplay.textContent = userId;
+                    loadingOverlay.classList.add('hidden');
+                    
+                    // Start listener only after auth is ready
+                    startHistoryListener();
+                } else {
+                    signIn();
+                }
+            });
+        }
+
+        /**
+         * Starts the Firestore listener for real-time history updates.
+         */
+        function startHistoryListener() {
+            if (!isAuthReady || !userId || !db) return;
+
+            // In a real multi-chat app, we would query a list of chats,
+            // but for this single-chat view, we just monitor the single consultation history.
+            const chatCollectionRef = collection(db, 'artifacts', appId, 'users', userId, 'consultations');
+            const q = fsQuery(chatCollectionRef);
+
+            onSnapshot(q, (snapshot) => {
+                const loadedHistory = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    let timestamp = data.timestamp && typeof data.timestamp.toDate === 'function' 
+                        ? data.timestamp.toDate() 
+                        : null;
+
+                    return {
+                        id: doc.id,
+                        ...data,
+                        timestamp: timestamp ? timestamp.toLocaleTimeString() : 'Syncing...'
+                    };
+                }).sort((a, b) => {
+                    // Sort by Firestore timestamp (or null placeholder)
+                    const timeA = a.timestamp === 'Syncing...' ? 0 : new Date(a.timestamp).getTime();
+                    const timeB = b.timestamp === 'Syncing...' ? 0 : new Date(b.timestamp).getTime();
+                    return timeA - timeB;
+                });
+
+                lastModelMessage = null;
+                
+                // Identify the last model message for toggling logic
+                if (loadedHistory.length > 0) {
+                    const latestModelMsg = loadedHistory.filter(m => m.role === 'model').pop();
+                    if (latestModelMsg) {
+                        lastModelMessage = latestModelMsg;
+                    }
+                }
+
+                if (loadedHistory.length === 0 && initialLoad) {
+                    // This is the true initial load state
+                }
+                
+                renderHistory(loadedHistory);
+                initialLoad = false;
+                setTimeout(scrollToBottom, 50);
+
+            }, (error) => {
+                console.error("Error listening to Firestore:", error);
+            });
+        }
+
+        /**
+         * Converts Markdown text to HTML for rendering.
+         * @param {string} markdownText 
+         * @returns {string} HTML string
+         */
+        function markdownToHtml(markdownText) {
+            if (!markdownText) return '';
+            let html = markdownText;
+
+            // 1. Disclaimer (Specific pattern)
+            html = html.replace(/\[DISCLAIMER\]([^]*?)\[\/DISCLAIMER\]/g, '<div class="disclaimer">$1</div>');
+            
+            // 2. Headings (H2)
+            html = html.replace(/^(#+\s*?)(.*)$/gm, '<h2>$2</h2>'); 
+
+            // 3. Bold Text
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
+
+            // 4. Paragraphs and Line breaks
+            html = html.replace(/\n\s*\n/g, '</p><p>');
+
+            // 5. Lists
+            html = html.replace(/(\*|\-|\d+\.)\s(.*?)(?=\n(\*|\-|\d+\.)|\n*$)/gs, (match, p1, p2) => {
+                if (p2.includes('✨ Key Takeaway')) {
+                    return `<li>${p2.replace('✨ Key Takeaway', '')}</li>`;
+                }
+                return `<li>${p2}</li>`;
+            });
+            html = html.replace(/^(?:<li>.*<\/li>\s*)+/gm, (match) => {
+                if (match.includes('✨')) {
+                    return `<ul class="takeaways-list">${match}</ul>`;
+                }
+                return `<ul>${match}</ul>`;
+            });
+
+            // 6. Wrap content in a paragraph tag (if not already handled)
+            if (!html.startsWith('<') && !html.startsWith('<h2>') && !html.startsWith('<div')) {
+                html = `<p>${html}</p>`;
+            } else if (html.startsWith('<h2>')) {
+                html = html.replace(/<\/h2>\s*([^<])/g, '</h2><p>$1');
+            }
+            
+            html = html.replace(/\n/g, ' '); 
+            
+            return html;
+        }
+
+
+        /**
+         * Renders the chat history to the DOM, only showing the last 'model' message.
+         * Also controls the visibility of the initial prompt and feature buttons.
+         * @param {Array<Object>} history 
+         */
+        function renderHistory(history) {
+            chatHistory.innerHTML = ''; 
+
+            // Filter: Only show the last model message
+            const latestModelMsg = history.filter(msg => msg.role === 'model').pop();
+
+            const hasHistory = !!latestModelMsg;
+
+            // --- UI State Management for Minimal Layout ---
+            
+            // 1. Toggle Prompt Div visibility
+            initialPromptDiv.classList.toggle('hidden', hasHistory);
+            
+            // 2. Toggle History and Feature Controls visibility
+            featureControls.classList.toggle('hidden', !hasHistory);
+            chatHistory.classList.toggle('hidden', !hasHistory);
+
+            // Animate fade-in
+            if (hasHistory) {
+                setTimeout(() => {
+                    chatHistory.classList.remove('opacity-0');
+                    featureControls.classList.remove('opacity-0');
+                }, 10);
+            } else {
+                 chatHistory.classList.add('opacity-0');
+                 featureControls.classList.add('opacity-0');
+            }
+            
+            // 3. Render the last AI message if present
+            if (latestModelMsg) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `flex justify-center w-full`;
+
+                const contentDiv = document.createElement('div');
+                const contentClasses = 'bg-white text-gray-800 border-gray-200 border ai-output';
+                const headerClasses = 'text-indigo-700 border-gray-200';
+                
+                contentDiv.className = `max-w-3xl p-6 rounded-xl shadow-lg text-base w-full ${contentClasses}`;
+
+                const header = document.createElement('p');
+                header.className = `font-bold mb-2 pb-1 border-b ${headerClasses}`;
+                header.textContent = 'AI Tax Analysis';
+                
+                contentDiv.appendChild(header);
+
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-body';
+                messageContent.innerHTML = markdownToHtml(latestModelMsg.display_text);
+                contentDiv.appendChild(messageContent);
+                
+                const timestampSpan = document.createElement('span');
+                timestampSpan.className = `block text-xs mt-2 text-gray-400 text-right`;
+                timestampSpan.textContent = latestModelMsg.timestamp;
+                contentDiv.appendChild(timestampSpan);
+                
+                messageDiv.appendChild(contentDiv);
+                chatHistory.appendChild(messageDiv);
+                
+                // 4. Update button states
+                const isNormal = latestModelMsg.mode === 'normal';
+                
+                takeawaysBtn.textContent = latestModelMsg.mode === 'takeaways' ? 'View Original' : '📝 Key Takeaways';
+                takeawaysBtn.classList.toggle('bg-purple-600', !isNormal && latestModelMsg.mode === 'takeaways');
+                takeawaysBtn.classList.toggle('text-white', !isNormal && latestModelMsg.mode === 'takeaways');
+
+                simplifyBtn.textContent = latestModelMsg.mode === 'simplify' ? 'View Original' : '👶 Simplify Jargon';
+                simplifyBtn.classList.toggle('bg-purple-600', !isNormal && latestModelMsg.mode === 'simplify');
+                simplifyBtn.classList.toggle('text-white', !isNormal && latestModelMsg.mode === 'simplify');
+
+                deepResearchBtn.textContent = latestModelMsg.mode === 'research' ? 'View Original' : '🏛️ Deep Tax Research';
+                deepResearchBtn.classList.toggle('bg-purple-600', !isNormal && latestModelMsg.mode === 'research');
+                deepResearchBtn.classList.toggle('text-white', !isNormal && latestModelMsg.mode === 'research');
+                
+                // Reset others to default style
+                if (isNormal) {
+                    takeawaysBtn.classList.remove('bg-purple-600', 'text-white');
+                    simplifyBtn.classList.remove('bg-purple-600', 'text-white');
+                    deepResearchBtn.classList.remove('bg-purple-600', 'text-white');
+                }
+            }
+        }
+        
+        // --- Core Gemini API Call Function ---
+
+        /**
+         * Generic function to call the Gemini API with exponential backoff.
+         */
+        async function runGeminiCall(payload, systemInstruction) {
+            payload.systemInstruction = { parts: [{ text: systemInstruction }] };
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+            let aiResponseText = "Sorry, I couldn't process this request due to a system or network error. Please try again.";
+            let attempts = 0;
+            const maxAttempts = 3;
+            
+            while (attempts < maxAttempts) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        return result.candidates?.[0]?.content?.parts?.[0]?.text || aiResponseText;
+                    } else {
+                        throw new Error(`API returned status ${response.status}`);
+                    }
+                } catch (error) {
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempts) * 1000));
+                    } else {
+                         console.error(`Final API attempt failed:`, error);
+                         return aiResponseText;
+                    }
+                }
+            }
+            return aiResponseText;
+        }
+
+
+        // --- Processing Toggles and Updates ---
+
+        /**
+         * Handles re-processing the last model message based on the requested mode.
+         */
+        async function processAnalysisUpdate(mode) {
+            if (loading || !lastModelMessage || !db) return;
+            let targetMode = mode;
+            if (lastModelMessage.mode === mode) {
+                 targetMode = 'normal';
+            }
+
+            const targetDocRef = doc(db, 'artifacts', appId, 'users', userId, 'consultations', lastModelMessage.id);
+            setLoading(true);
+
+            let newDisplayText = lastModelMessage.full_text;
+            let newMode = targetMode;
+
+            if (targetMode !== 'normal') {
+                const systemPromptMap = {
+                    'takeaways': "You are a legal summarization expert for tax professionals. Your task is to read the following tax analysis and condense it into a bulleted list of exactly 5 concise, actionable 'Key Takeaways'. Each takeaway must be prefixed with '✨ Key Takeaway'. Do not provide any introduction, conclusion, or other text outside of the numbered list. Always ensure the text is brief and highly relevant.",
+                    'simplify': "You are an expert tax simplifier. Your task is to re-explain the following technical tax analysis using extremely simple, non-technical language. Maintain a friendly and clear tone, explaining concepts in plain English. Use headings (##) and bolding (**) for clarity.",
+                    'research': "You are a Senior Tax Law Attorney specializing in compliance, statutory interpretation, and precedent research. Your task is to analyze the preceding tax analysis and perform a deep dive to provide supporting legal citations, statutory references (e.g., *26 U.S.C. § 162* or relevant jurisdiction codes), and summaries of applicable case law or regulatory guidance (IRS rulings, etc.). The output must be structured for a professional audience, using technical terms accurately. Begin with a section titled '## Deep Tax Research & Citation Analysis'. Use headings (##) and bolding (**) for clarity."
+                };
+                
+                const payload = {
+                    contents: [{ parts: [{ text: lastModelMessage.full_text }] }],
+                    tools: [{ "google_search": {} }],
+                };
+
+                newDisplayText = await runGeminiCall(payload, systemPromptMap[targetMode]);
+
+            } else {
+                newDisplayText = lastModelMessage.full_text;
+                newMode = 'normal';
+            }
+
+            try {
+                await updateDoc(targetDocRef, {
+                    display_text: newDisplayText,
+                    mode: newMode,
+                });
+            } catch (error) {
+                console.error("Error updating chat document:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        // --- Event Handlers ---
+
+        // Function to handle clicking the initial option buttons
+        function handleOptionClick(e) {
+            const prompt = e.currentTarget.getAttribute('data-prompt');
+            if (prompt) {
+                queryInput.value = prompt;
+                queryInput.focus();
+            }
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (loading || !isAuthReady || !db) return;
+
+            const userQuery = queryInput.value.trim();
+            if (!userQuery && !uploadedFile) return;
+
+            setLoading(true);
+
+            // 1. Add User Message to Firestore (Still saved, but hidden from rendering)
+            const chatCollectionRef = collection(db, 'artifacts', appId, 'users', userId, 'consultations');
+            await addDoc(chatCollectionRef, {
+                role: 'user',
+                text: uploadedFile ? `(Image attached: ${uploadedFile.name}) ${userQuery}` : userQuery,
+                timestamp: serverTimestamp(),
+            });
+
+            // 2. Construct Gemini API Call Payload
+            const parts = [{ text: userQuery }];
+            
+            if (base64Image) {
+                parts.push({
+                    inlineData: {
+                        mimeType: uploadedFile.type,
+                        data: base64Image
+                    }
+                });
+            }
+
+            const apiPayload = {
+                contents: [{ parts: parts }],
+                tools: [{ "google_search": {} }],
+            };
+            
+            const systemPrompt = "You are a highly detailed and professional Tax Consultant AI. Analyze the user's query and/or uploaded image (if present). Provide a thorough, well-structured response focusing on legal implications, potential deductions, or compliance issues related to taxes. All financial or legal advice must be preceded by a clear, non-technical disclaimer in markdown format: [DISCLAIMER]This information is for informational purposes only and does not constitute official tax advice. Consult a certified tax professional for guidance.[/DISCLAIMER] Use headings (##) and bolding (**) for clarity.";
+
+            // 3. Run Gemini API Call
+            const modelResponseText = await runGeminiCall(apiPayload, systemPrompt);
+            
+            // 4. Add Model Response to Firestore
+            const modelMessagePayload = {
+                role: 'model',
+                text: modelResponseText,
+                full_text: modelResponseText,
+                display_text: modelResponseText,
+                mode: 'normal',
+                timestamp: serverTimestamp(),
+            };
+
+            await addDoc(chatCollectionRef, modelMessagePayload);
+
+            // 5. Cleanup
+            queryInput.value = '';
+            clearFile();
+            setLoading(false);
+        });
+
+        fileUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) {
+                clearFile();
+                return;
+            }
+
+            uploadedFile = file;
+            updateFileLabel();
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                base64Image = reader.result.split(',')[1];
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // Event listeners for feature buttons
+        takeawaysBtn.addEventListener('click', () => processAnalysisUpdate('takeaways'));
+        simplifyBtn.addEventListener('click', () => processAnalysisUpdate('simplify'));
+        deepResearchBtn.addEventListener('click', () => processAnalysisUpdate('research'));
+
+        // Attach listeners to the new option buttons
+        document.querySelectorAll('.option-button').forEach(button => {
+            button.addEventListener('click', handleOptionClick);
+        });
+
+        // Initialize the application
+        initializeFirebase();
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>TaxGPT Pro App</title>
