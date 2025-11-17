@@ -1,121 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaxGPT Pro</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-
-    <style>
-        html { transition: background 0.3s, color 0.3s; }
-        .dark body { background-color: #0d0d0d; color: #e5e5e5; }
-        .ai-output h2 { font-size: 1.5rem; margin-top: 1rem; font-weight: 700; }
-        .content-scroll::-webkit-scrollbar { width: 8px; }
-        .content-scroll::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-    </style>
-</head>
-
-<body class="bg-gray-50 dark:bg-black dark:text-white">
-
-<button id="theme-toggle"
-    class="fixed top-4 right-4 z-50 bg-gray-200 dark:bg-gray-700 p-3 rounded-full shadow cursor-pointer">
-    🌙
-</button>
-
-<div id="loading"
-     class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-    <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg text-lg">
-        Processing...
-    </div>
-</div>
-
-<div class="flex h-screen">
-    <aside class="hidden md:flex flex-col w-64 bg-white dark:bg-gray-900 border-r p-4">
-        <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-6">
-            TaxGPT Pro
-        </div>
-
-        <button onclick="newChat()"
-            class="bg-indigo-600 text-white py-2 px-4 rounded-lg mb-4 shadow">
-            + New Chat
-        </button>
-
-        <div class="mt-auto text-xs text-gray-500">
-            User ID:
-            <div id="user-id" class="font-mono text-indigo-600 break-all"></div>
-        </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col items-center p-6">
-        <h1 class="text-4xl font-bold text-indigo-600 md:hidden mb-6">TaxGPT Pro</h1>
-
-        <div id="initial-view" class="text-center space-y-6">
-            <h2 class="text-2xl">How can I help you?</h2>
-
-            <div class="flex flex-wrap justify-center gap-4">
-                <button class="option bg-white dark:bg-gray-800 border p-4 rounded-xl w-40 shadow"
-                    data-text="I need quick tax advice.">
-                    ✍️ Quick Query
-                </button>
-                <button class="option bg-white dark:bg-gray-800 border p-4 rounded-xl w-40 shadow"
-                    data-text="Provide deep legal tax research.">
-                    🏛️ Deep Research
-                </button>
-                <button class="option bg-white dark:bg-gray-800 border p-4 rounded-xl w-40 shadow"
-                    data-text="Explain a basic tax concept.">
-                    💡 Learn Concept
-                </button>
-            </div>
-        </div>
-
-        <div id="history"
-             class="hidden content-scroll max-w-2xl w-full mt-6 p-4 border rounded-lg bg-white dark:bg-gray-800 h-96 overflow-y-auto space-y-4">
-        </div>
-
-        <div id="features" class="hidden mt-4 flex gap-3">
-            <button id="takeaways" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">📝 Takeaways</button>
-            <button id="simplify" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">👶 Simplify</button>
-            <button id="research" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">🏛️ Research</button>
-        </div>
-
-        <form id="form" class="flex w-full max-w-2xl mt-auto mb-8">
-            <label class="mr-2 cursor-pointer">
-                <input type="file" id="file" accept="image/*" class="hidden">
-                <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-xl">+</div>
-            </label>
-
-            <input id="input" class="flex-1 p-3 border rounded-full dark:bg-gray-900 dark:border-gray-700"
-                placeholder="Ask anything...">
-
-            <button class="ml-3 w-12 h-12 bg-indigo-600 text-white rounded-full">→</button>
-        </form>
-    </main>
-</div>
-
 <script>
 
 /* ---------------------- 1. FIREBASE INITIALIZATION ---------------------- */
-// **FIXED: API Key is enclosed in quotes and correctly formatted.**
+// **FIXED: This is the correct Firebase Web App API key.**
 const firebaseConfig = {
-    apiKey: "AIzaSyC2yEjdOBRxrn4-GIM4Wyti9O6OvdnhhSg", 
-    authDomain: "taxgpt-f688d.firebaseapp.com",
-    projectId: "taxgpt-f688d",
-    storageBucket: "taxgpt-f688d.appspot.com",
-    messagingSenderId: "367175296836",
-    appId: "1:367175296836:web:2f8645d9e51c14d93540b0"
+    apiKey: "AIzaSyBh8epAN_XqXxjBoQRweMZdblJJRNyzlgU", 
+    authDomain: "taxgpt-f688d.firebaseapp.com",
+    projectId: "taxgpt-f688d",
+    storageBucket: "taxgpt-f688d.appspot.com",
+    messagingSenderId: "367175296836",
+    appId: "1:367175296836:web:2f8645d9e51c14d93540b0"
 };
 
 // CORRECT: Uses the global 'firebase' object
-firebase.initializeApp(firebaseConfig); 
-const db = firebase.firestore(); 
+firebase.initializeApp(firebaseConfig); 
+const db = firebase.firestore(); 
 const auth = firebase.auth();
 
 let userId = null;
@@ -126,185 +24,181 @@ let imageBase64 = null;
 auth.signInAnonymously().catch(console.error);
 
 auth.onAuthStateChanged(u => {
-    if (!u) return;
-    userId = u.uid;
-    document.getElementById("user-id").textContent = userId;
-    listenHistory(); 
+    if (!u) return;
+    userId = u.uid;
+    document.getElementById("user-id").textContent = userId;
+    listenHistory(); 
 });
 
 /* ---------------------- 3. HISTORY LISTENER ---------------------- */
 function listenHistory() {
-    if (!userId) return;
+    if (!userId) return;
 
-    db.collection("users")
-      .doc(userId)
-      .collection("chats")
-      .orderBy("timestamp", "asc")
-      .onSnapshot(snap => {
-          const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          renderHistory(history);
-      });
+    db.collection("users")
+      .doc(userId)
+      .collection("chats")
+      .orderBy("timestamp", "asc")
+      .onSnapshot(snap => {
+          const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          renderHistory(history);
+      });
 }
 
 /* ---------------------- 4. RENDER HISTORY ---------------------- */
 function renderHistory(history) {
-    const box = document.getElementById("history");
-    const features = document.getElementById("features");
-    const initial = document.getElementById("initial-view");
+    const box = document.getElementById("history");
+    const features = document.getElementById("features");
+    const initial = document.getElementById("initial-view");
 
-    box.innerHTML = "";
+    box.innerHTML = "";
 
-    history.forEach(msg => {
-        const div = document.createElement("div");
-        const isModel = msg.role === "model";
-        const content = msg.display || msg.text; // Content for display
-        
-        div.className = isModel 
-            ? "bg-indigo-50 dark:bg-gray-700 p-4 rounded-xl shadow ai-output"
-            : "bg-gray-100 dark:bg-gray-900 p-3 rounded-xl shadow user-input text-right";
-        
-        // Using textContent/innerHtml carefully for security
-        div.innerHTML = `
-            ${isModel ? '<h2>AI Tax Analysis</h2>' : ''}
-            <p class="text-left">${content}</p>
-            <div class="text-right text-xs opacity-70">${new Date(msg.timestamp).toLocaleTimeString()}</div>
-        `;
-        box.appendChild(div);
-    });
+    history.forEach(msg => {
+        const div = document.createElement("div");
+        const isModel = msg.role === "model";
+        const content = msg.display || msg.text; 
+        
+        div.className = isModel 
+            ? "bg-indigo-50 dark:bg-gray-700 p-4 rounded-xl shadow ai-output"
+            : "bg-gray-100 dark:bg-gray-900 p-3 rounded-xl shadow user-input text-right";
+        
+        div.innerHTML = `
+            ${isModel ? '<h2>AI Tax Analysis</h2>' : ''}
+            <p class="text-left">${content}</p>
+            <div class="text-right text-xs opacity-70">${new Date(msg.timestamp).toLocaleTimeString()}</div>
+        `;
+        box.appendChild(div);
+    });
 
-    lastModelMsg = history.filter(x => x.role === "model").pop() || null;
+    lastModelMsg = history.filter(x => x.role === "model").pop() || null;
 
-    if (history.length === 0) {
-        initial.classList.remove("hidden");
-        box.classList.add("hidden");
-        features.classList.add("hidden");
-    } else {
-        initial.classList.add("hidden");
-        box.classList.remove("hidden");
-        features.classList.remove("hidden");
-    }
-    
-    // Scroll to bottom after rendering
-    box.scrollTop = box.scrollHeight;
+    if (history.length === 0) {
+        initial.classList.remove("hidden");
+        box.classList.add("hidden");
+        features.classList.add("hidden");
+    } else {
+        initial.classList.add("hidden");
+        box.classList.remove("hidden");
+        features.classList.remove("hidden");
+    }
+    
+    // Scroll to bottom after rendering
+    box.scrollTop = box.scrollHeight;
 }
 
 /* ---------------------- 5. SAVE MESSAGE ---------------------- */
 function save(role, text, display = null) {
-    if (!userId) return;
+    if (!userId) return;
 
-    return db.collection("users")
-        .doc(userId)
-        .collection("chats")
-        .add({
-            role,
-            text,
-            display: display || text,
-            timestamp: Date.now()
-        });
+    return db.collection("users")
+        .doc(userId)
+        .collection("chats")
+        .add({
+            role,
+            text,
+            display: display || text,
+            timestamp: Date.now()
+        });
 }
 
 /* ---------------------- 6. GEMINI API CALL ---------------------- */
 // **GEMINI KEY INCLUDED**
-const GEMINI_API_KEY = "AIzaSyBWeCTjOJfavIoYQ-1hsKDMddVuP3O3x34"; 
+const GEMINI_API_KEY = "AIzaSyBWeCTjOJfavIoYQ-1hsKDMddVuP3O3x34"; 
 const MODEL = "gemini-1.5-flash";
 
 async function callGemini(prompt, image = null) {
-    const parts = [{ text: prompt }];
-    if (image) {
-        parts.push({
-            inlineData: {
-                mimeType: "image/jpeg",
-                data: image
-            }
-        });
-    }
-    
-    // Added a more robust key check
-    if (!GEMINI_API_KEY || GEMINI_API_KEY.length < 30) {
-        return "Error: Gemini API key is missing or invalid. Please check your code.";
-    }
+    const parts = [{ text: prompt }];
+    if (image) {
+        parts.push({
+            inlineData: {
+                mimeType: "image/jpeg",
+                data: image
+            }
+        });
+    }
+    
+    if (!GEMINI_API_KEY || GEMINI_API_KEY.length < 30) {
+        return "Error: Gemini API key is missing or invalid. Please check your code.";
+    }
 
-    const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-        {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                contents: [{ role: "user", parts: parts }],
-                config: {
-                    systemInstruction: `[DISCLAIMER]This is not tax advice. Consult a professional.[/DISCLAIMER]\nProvide structured, clear analysis with headings.`
-                }
-            })
-        }
-    );
+    const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ role: "user", parts: parts }],
+                config: {
+                    systemInstruction: `[DISCLAIMER]This is not tax advice. Consult a professional.[/DISCLAIMER]\nProvide structured, clear analysis with headings.`
+                }
+            })
+        }
+    );
 
-    const json = await res.json();
-    return json?.candidates?.[0]?.content?.parts?.[0]?.text || "No response. (Check API key, network, and console for 400/403 errors).";
+    const json = await res.json();
+    return json?.candidates?.[0]?.content?.parts?.[0]?.text || "No response. (Check API key, network, and console for 400/403 errors).";
 }
 
 /* ---------------------- 7. FORM SUBMISSION ---------------------- */
 document.getElementById("form").onsubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault();
 
-    if (!userId) {
-        alert("Authentication failed. Please check the console for Firebase errors.");
-        return; 
-    } 
+    if (!userId) {
+        alert("Authentication failed. Please check the console for Firebase errors.");
+        return; 
+    } 
 
-    const inputElement = document.getElementById("input");
-    const input = inputElement.value.trim();
-    
-    if (!input && !imageBase64) return;
+    const inputElement = document.getElementById("input");
+    const input = inputElement.value.trim();
+    
+    if (!input && !imageBase64) return;
 
-    document.getElementById("loading").classList.remove("hidden");
+    document.getElementById("loading").classList.remove("hidden");
 
-    await save("user", input); 
+    await save("user", input); 
 
-    const reply = await callGemini(input, imageBase64);
-    await save("model", reply);
+    const reply = await callGemini(input, imageBase64);
+    await save("model", reply);
 
-    // Clean up
-    imageBase64 = null;
-    document.getElementById("file").value = "";
-    inputElement.value = "";
+    // Clean up
+    imageBase64 = null;
+    document.getElementById("file").value = "";
+    inputElement.value = "";
 
-    document.getElementById("loading").classList.add("hidden");
+    document.getElementById("loading").classList.add("hidden");
 };
 
 /* ---------------------- 8. FILE UPLOAD & THEME ---------------------- */
 document.getElementById("file").onchange = e => {
-    const file = e.target.files[0];
-    const r = new FileReader();
-    r.onload = () => {
-        imageBase64 = r.result.split(",")[1];
-        document.getElementById("input").placeholder = "Ask anything... (Image attached)";
-    };
-    r.readAsDataURL(file);
+    const file = e.target.files[0];
+    const r = new FileReader();
+    r.onload = () => {
+        imageBase64 = r.result.split(",")[1];
+        document.getElementById("input").placeholder = "Ask anything... (Image attached)";
+    };
+    r.readAsDataURL(file);
 };
 
 document.getElementById("theme-toggle").onclick = () =>
-    document.documentElement.classList.toggle("dark");
+    document.documentElement.classList.toggle("dark");
 
 /* ---------------------- 9. NEW CHAT ---------------------- */
 function newChat() {
-    if (!userId) return;
+    if (!userId) return;
 
-    document.getElementById("history").innerHTML = "";
-    document.getElementById("initial-view").classList.remove("hidden");
+    document.getElementById("history").innerHTML = "";
+    document.getElementById("initial-view").classList.remove("hidden");
 
-    db.collection("users")
-        .doc(userId)
-        .collection("chats")
-        .get()
-        .then(snap => snap.forEach(doc => doc.ref.delete()));
+    db.collection("users")
+        .doc(userId)
+        .collection("chats")
+        .get()
+        .then(snap => snap.forEach(doc => doc.ref.delete()));
 }
 
 /* ---------------------- 10. INITIAL OPTION HANDLERS ---------------------- */
 document.querySelectorAll(".option").forEach(btn => {
-    btn.onclick = () => {
-        document.getElementById("input").value = btn.getAttribute("data-text");
-    };
+    btn.onclick = () => {
+        document.getElementById("input").value = btn.getAttribute("data-text");
+    };
 });
 </script>
-</body>
-</html>
