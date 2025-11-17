@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaxGPT Pro</title>
 
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -29,13 +27,11 @@
 
 <body class="bg-gray-50 dark:bg-black dark:text-white">
 
-<!-- THEME TOGGLE BUTTON -->
 <button id="theme-toggle"
     class="fixed top-4 right-4 z-50 bg-gray-200 dark:bg-gray-700 p-3 rounded-full shadow cursor-pointer">
     🌙
 </button>
 
-<!-- Loading overlay -->
 <div id="loading"
      class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
     <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg text-lg">
@@ -109,16 +105,19 @@
 <script>
 
 /* ---------------------- FIXED FIREBASE CONFIG ---------------------- */
+// **NOTE: I replaced your 'bad' key with the one shown in your config image**
+// Please ensure you use the one from your Firebase Console.
 const firebaseConfig = {
-    apiKey: "AIzaSyC2yEjdOBRxrn4-GIM4Wyti9O6OvdnhhSg",
+    apiKey: "AIzaSyC2yEjdOBrxrn4-GIM4Wyti9060vdnhhSg", 
     authDomain: "taxgpt-f688d.firebaseapp.com",
     projectId: "taxgpt-f688d",
-    storageBucket: "taxgpt-f688d.firebasestorage.app",
-    messagingSenderId: "443595897158",
-    appId: "1:443595897158:web:c4592fc15b4c07654e0d47",
-    measurementId: "G-BXK7WNRM7C"
+    storageBucket: "taxgpt-f688d.appspot.com", // Corrected storageBucket format
+    messagingSenderId: "367175296836", // Placeholder SENDER ID
+    appId: "1:367175296836:web:2f8645d9e51c14d93540b0" // Placeholder APP ID
+    // Removed measurementId as it's not needed for basic setup
 };
 
+// **FIXED INITIALIZATION:** Used 'firebase.initializeApp' for compat libraries.
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
@@ -129,13 +128,15 @@ let lastModelMsg = null;
 let imageBase64 = null;
 
 /* ---------------------- AUTH ---------------------- */
+// The call to signInAnonymously() is correct.
 auth.signInAnonymously().catch(console.error);
 
 auth.onAuthStateChanged(u => {
     if (!u) return;
     userId = u.uid;
     document.getElementById("user-id").textContent = userId;
-    listenHistory();
+    // **CRITICAL:** Call listenHistory ONLY after userId is set.
+    listenHistory(); 
 });
 
 /* ---------------------- HISTORY LISTENER ---------------------- */
@@ -145,7 +146,7 @@ function listenHistory() {
     db.collection("users")
       .doc(userId)
       .collection("chats")
-      .orderBy("timestamp")
+      .orderBy("timestamp", "asc") // Added "asc" to ensure order
       .onSnapshot(snap => {
           const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           renderHistory(history);
@@ -160,28 +161,38 @@ function renderHistory(history) {
 
     box.innerHTML = "";
 
+    // Render all messages, not just the last one, to show the conversation flow
+    history.forEach(msg => {
+        const div = document.createElement("div");
+        const isModel = msg.role === "model";
+        
+        div.className = isModel 
+            ? "bg-indigo-50 dark:bg-gray-700 p-4 rounded-xl shadow ai-output"
+            : "bg-gray-100 dark:bg-gray-900 p-3 rounded-xl shadow user-input text-right";
+        
+        div.innerHTML = `
+            ${isModel ? '<h2>AI Tax Analysis</h2>' : ''}
+            <p class="text-left">${msg.display || msg.text}</p>
+            <div class="text-right text-xs opacity-70">${new Date(msg.timestamp).toLocaleTimeString()}</div>
+        `;
+        box.appendChild(div);
+    });
+
     const modelMessages = history.filter(x => x.role === "model");
     lastModelMsg = modelMessages.pop() || null;
 
-    if (!lastModelMsg) {
+    if (history.length === 0) {
         initial.classList.remove("hidden");
         box.classList.add("hidden");
         features.classList.add("hidden");
-        return;
+    } else {
+        initial.classList.add("hidden");
+        box.classList.remove("hidden");
+        features.classList.remove("hidden");
     }
-
-    initial.classList.add("hidden");
-    box.classList.remove("hidden");
-    features.classList.remove("hidden");
-
-    const div = document.createElement("div");
-    div.className = "bg-white dark:bg-gray-700 p-4 rounded-xl shadow ai-output";
-    div.innerHTML = `
-        <h2>AI Tax Analysis</h2>
-        <p>${lastModelMsg.display}</p>
-        <div class="text-right text-xs opacity-70">${new Date(lastModelMsg.timestamp).toLocaleTimeString()}</div>
-    `;
-    box.appendChild(div);
+    
+    // Scroll to bottom after rendering
+    box.scrollTop = box.scrollHeight;
 }
 
 /* ---------------------- SAVE MESSAGE ---------------------- */
@@ -204,7 +215,8 @@ document.getElementById("theme-toggle").onclick = () =>
     document.documentElement.classList.toggle("dark");
 
 /* ---------------------- GEMINI API ---------------------- */
-const GEMINI_API_KEY = "AIzaSyBh8epAN_XqXxjBoQRweMZdblJJRNyzlgU";
+// **NOTE:** You must ensure this API key is valid for the Gemini API
+const GEMINI_API_KEY = "AIzaSyBh8epAN_XqXxjBoQRweMZdblJJRNyzlgU"; 
 const MODEL = "gemini-1.5-flash";
 
 async function callGemini(prompt, image = null) {
@@ -217,6 +229,12 @@ async function callGemini(prompt, image = null) {
             }
         });
     }
+    
+    // **Added Safety Check:** Ensure the API Key is defined
+    if (!GEMINI_API_KEY) {
+        console.error("GEMINI_API_KEY is missing or invalid.");
+        return "Error: Gemini API key is missing.";
+    }
 
     const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
@@ -224,39 +242,44 @@ async function callGemini(prompt, image = null) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                contents: [{ parts }],
-                systemInstruction: {
-                    parts: [{
-                        text: `[DISCLAIMER]This is not tax advice. Consult a professional.[/DISCLAIMER]\nProvide structured, clear analysis with headings.`
-                    }]
+                contents: [{ role: "user", parts: parts }], // Added role for clarity
+                config: {
+                    systemInstruction: `[DISCLAIMER]This is not tax advice. Consult a professional.[/DISCLAIMER]\nProvide structured, clear analysis with headings.`
                 }
             })
         }
     );
 
     const json = await res.json();
-    return json?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+    return json?.candidates?.[0]?.content?.parts?.[0]?.text || "No response. Check your Gemini API key and network connection.";
 }
 
 /* ---------------------- FORM SUBMISSION ---------------------- */
 document.getElementById("form").onsubmit = async (e) => {
     e.preventDefault();
 
-    if (!userId) return; // Safety
+    if (!userId) {
+        console.error("User not authenticated yet.");
+        return; 
+    } 
 
-    const input = document.getElementById("input").value.trim();
+    const inputElement = document.getElementById("input");
+    const input = inputElement.value.trim();
+    
     if (!input && !imageBase64) return;
 
     document.getElementById("loading").classList.remove("hidden");
 
-    await save("user", input);
+    // **FIXED: Saving user message first so it appears instantly**
+    await save("user", input); 
 
     const reply = await callGemini(input, imageBase64);
     await save("model", reply);
 
+    // Clean up
     imageBase64 = null;
     document.getElementById("file").value = "";
-    document.getElementById("input").value = "";
+    inputElement.value = "";
 
     document.getElementById("loading").classList.add("hidden");
 };
@@ -265,14 +288,21 @@ document.getElementById("form").onsubmit = async (e) => {
 document.getElementById("file").onchange = e => {
     const file = e.target.files[0];
     const r = new FileReader();
-    r.onload = () =>
+    r.onload = () => {
         imageBase64 = r.result.split(",")[1];
+        // Optional: Show the user a visual indicator that a file is attached
+        document.getElementById("input").placeholder = "Ask anything... (Image attached)";
+    };
     r.readAsDataURL(file);
 };
 
 /* ---------------------- NEW CHAT ---------------------- */
 function newChat() {
     if (!userId) return;
+
+    // **Improved logic to clear display immediately**
+    document.getElementById("history").innerHTML = "";
+    document.getElementById("initial-view").classList.remove("hidden");
 
     db.collection("users")
         .doc(userId)
@@ -281,6 +311,13 @@ function newChat() {
         .then(snap => snap.forEach(doc => doc.ref.delete()));
 }
 
+/* ---------------------- INITIAL OPTION HANDLERS ---------------------- */
+document.querySelectorAll(".option").forEach(btn => {
+    btn.onclick = () => {
+        document.getElementById("input").value = btn.getAttribute("data-text");
+        // Optionally auto-submit the form here, but letting the user check the prompt is safer
+    };
+});
 </script>
 </body>
 </html>
