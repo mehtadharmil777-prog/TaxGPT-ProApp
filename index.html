@@ -1,97 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>TaxGPT Basic</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaxGPT Pro</title>
 
-<!-- Tailwind CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <style>
+        /* Smooth Theme Transition */
+        html { transition: background 0.3s, color 0.3s; }
+
+        .dark body { background-color: #0d0d0d; color: #e5e5e5; }
+
+        .ai-output h2 {
+            font-size: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 700;
+        }
+
+        .content-scroll::-webkit-scrollbar { width: 8px; }
+        .content-scroll::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 p-6 font-sans">
 
-<div class="max-w-2xl mx-auto bg-white shadow-xl rounded-xl p-6">
+<body class="bg-gray-50 dark:bg-black dark:text-white">
 
-    <h1 class="text-3xl font-bold text-indigo-600 mb-4 text-center">
-        TaxGPT (Basic Version)
-    </h1>
+<!-- THEME TOGGLE BUTTON -->
+<button id="theme-toggle"
+    class="fixed top-4 right-4 z-50 bg-gray-200 dark:bg-gray-700 p-3 rounded-full shadow cursor-pointer">
+    🌙
+</button>
 
-    <p class="text-gray-600 text-center mb-6">
-        Ask anything related to taxes below.
-    </p>
-
-    <!-- Input box -->
-    <textarea id="userInput"
-              placeholder="Type your question..."
-              class="w-full p-3 border rounded-lg mb-4 h-28"></textarea>
-
-    <!-- Button -->
-    <button onclick="sendToGemini()"
-            id="askBtn"
-            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold">
-        Ask AI
-    </button>
-
-    <!-- Output box -->
-    <div id="responseBox"
-         class="mt-6 p-4 bg-gray-50 border rounded-lg text-gray-800 whitespace-pre-wrap hidden"></div>
-
+<!-- Loading overlay -->
+<div id="loading"
+     class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg text-lg">
+        Processing...
+    </div>
 </div>
 
+<!-- MAIN LAYOUT -->
+<div class="flex h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="hidden md:flex flex-col w-64 bg-white dark:bg-gray-900 border-r p-4">
+        <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-6">
+            TaxGPT Pro
+        </div>
+
+        <button onclick="newChat()"
+            class="bg-indigo-600 text-white py-2 px-4 rounded-lg mb-4 shadow">
+            + New Chat
+        </button>
+
+        <div class="mt-auto text-xs text-gray-500">
+            User ID:
+            <div id="user-id" class="font-mono text-indigo-600 break-all"></div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col items-center p-6">
+
+        <h1 class="text-4xl font-bold text-indigo-600 md:hidden mb-6">TaxGPT Pro</h1>
+
+        <!-- INITIAL OPTIONS -->
+        <div id="initial-view" class="text-center space-y-6">
+            <h2 class="text-2xl">How can I help you?</h2>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <button class="option bg-white dark:bg-gray-800 border p-4 rounded-xl w-40 shadow"
+                    data-text="I need quick tax advice.">
+                    ✍️ Quick Query
+                </button>
+                <button class="option bg-white dark:bg-gray-800 border p-4 rounded-xl w-40 shadow"
+                    data-text="Provide deep legal tax research.">
+                    🏛️ Deep Research
+                </button>
+                <button class="option bg-white dark:bg-gray-800 border p-4 rounded-xl w-40 shadow"
+                    data-text="Explain a basic tax concept.">
+                    💡 Learn Concept
+                </button>
+            </div>
+        </div>
+
+        <!-- CHAT HISTORY -->
+        <div id="history"
+             class="hidden content-scroll max-w-2xl w-full mt-6 p-4 border rounded-lg bg-white dark:bg-gray-800 h-96 overflow-y-auto space-y-4">
+        </div>
+
+        <!-- FEATURE BUTTONS -->
+        <div id="features" class="hidden mt-4 flex gap-3">
+            <button id="takeaways" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">📝 Takeaways</button>
+            <button id="simplify" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">👶 Simplify</button>
+            <button id="research" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg">🏛️ Research</button>
+        </div>
+
+        <!-- INPUT -->
+        <form id="form" class="flex w-full max-w-2xl mt-auto mb-8">
+            <label class="mr-2 cursor-pointer">
+                <input type="file" id="file" accept="image/*" class="hidden">
+                <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-xl">
+                    +
+                </div>
+            </label>
+
+            <input id="input" class="flex-1 p-3 border rounded-full dark:bg-gray-900 dark:border-gray-700"
+                placeholder="Ask anything...">
+
+            <button class="ml-3 w-12 h-12 bg-indigo-600 text-white rounded-full">→</button>
+        </form>
+
+    </main>
+</div>
 
 <script>
-// ----------------------------
-// 🔧 Gemini API Configuration
-// ----------------------------
-const GEMINI_API_KEY = "AIzaSyBh8epAN_XqXxjBoQRweMZdblJJRNyzlgU"; 
-const MODEL = "gemini-2.0-flash";
+/* -------------- FIREBASE SETUP -------------- */
+const firebaseConfig = {
+    apiKey: "AIzaSyC2yEjdOBRxrn4-GIM4Wyti9O6Oxxxxx",
+    authDomain: "taxgpt-f688d.firebaseapp.com",
+    projectId: "taxgpt-f688d",
+    storageBucket: "taxgpt-f688d.appspot.com",
+    messagingSenderId: "443595897158",
+    appId: "1:443595897158:web:c4592fc15b4c07654e0d47",
+    measurementId: "G-BXK7WNRM7C"
+};
 
-// ----------------------------
-// 🚀 Function to Call Gemini
-// ----------------------------
-async function sendToGemini() {
-    const text = document.getElementById("userInput").value.trim();
-    const responseBox = document.getElementById("responseBox");
-    const askBtn = document.getElementById("askBtn");
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
 
-    if (!text) return;
+let userId = null;
+let lastModelMsg = null;
+let imageBase64 = null;
 
-    // show loading
-    askBtn.disabled = true;
-    askBtn.innerText = "Thinking...";
+/* -------------- AUTH -------------- */
+auth.signInAnonymously();
+auth.onAuthStateChanged(u => {
+    if (!u) return;
+    userId = u.uid;
+    document.getElementById("user-id").textContent = userId;
+    listenHistory();
+});
 
-    responseBox.classList.remove("hidden");
-    responseBox.innerText = "Processing your request...";
+/* -------------- HISTORY LISTENER -------------- */
+function listenHistory() {
+    db.collection("users").doc(userId).collection("chats").orderBy("timestamp")
+        .onSnapshot(snap => {
+            const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderHistory(data);
+        });
+}
 
-    try {
+/* -------------- RENDER HISTORY -------------- */
+function renderHistory(history) {
+    const box = document.getElementById("history");
+    const features = document.getElementById("features");
+    const initial = document.getElementById("initial-view");
 
-        const result = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-          {
+    box.innerHTML = "";
+
+    const modelMessages = history.filter(x => x.role === "model");
+    lastModelMsg = modelMessages.pop() || null;
+
+    if (!lastModelMsg) {
+        initial.classList.remove("hidden");
+        box.classList.add("hidden");
+        features.classList.add("hidden");
+        return;
+    }
+
+    initial.classList.add("hidden");
+    box.classList.remove("hidden");
+    features.classList.remove("hidden");
+
+    const div = document.createElement("div");
+    div.className = "bg-white dark:bg-gray-700 p-4 rounded-xl shadow ai-output";
+    div.innerHTML = `
+        <h2>AI Tax Analysis</h2>
+        <p>${lastModelMsg.display}</p>
+        <div class="text-right text-xs opacity-70">${new Date(lastModelMsg.timestamp).toLocaleTimeString()}</div>
+    `;
+
+    box.appendChild(div);
+}
+
+/* -------------- SAVE MESSAGE -------------- */
+function save(role, text, display = null) {
+    return db.collection("users").doc(userId).collection("chats").add({
+        role,
+        text,
+        display: display || text,
+        timestamp: Date.now()
+    });
+}
+
+/* -------------- THEME TOGGLE -------------- */
+document.getElementById("theme-toggle").onclick = () => {
+    document.documentElement.classList.toggle("dark");
+};
+
+/* -------------- GEMINI API -------------- */
+const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
+const MODEL = "gemini-2.5-flash";
+
+async function callGemini(prompt, image = null) {
+    const parts = [{ text: prompt }];
+    if (image) {
+        parts.push({
+            inlineData: {
+                mimeType: "image/jpeg",
+                data: image
+            }
+        });
+    }
+
+    const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+        {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              contents: [{ parts: [{ text }] }]
+                contents: [{ parts }],
+                systemInstruction: {
+                    parts: [{
+                        text: `[DISCLAIMER]This is not tax advice. Consult a professional.[/DISCLAIMER]\nProvide structured, clear analysis with headings.`
+                    }]
+                }
             })
-          }
-        );
+        }
+    );
 
-        const data = await result.json();
+    const json = await res.json();
+    return json?.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+}
 
-        const aiText =
-            data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-            "⚠️ Gemini did not return a response.";
+/* -------------- FORM SUBMIT -------------- */
+document.getElementById("form").onsubmit = async (e) => {
+    e.preventDefault();
+    const input = document.getElementById("input").value.trim();
+    if (!input && !imageBase64) return;
 
-        responseBox.innerText = aiText;
+    document.getElementById("loading").classList.remove("hidden");
 
-    } catch (err) {
-        responseBox.innerText = "❌ Error contacting Gemini API.";
-        console.error(err);
-    }
+    await save("user", input);
 
-    askBtn.disabled = false;
-    askBtn.innerText = "Ask AI";
+    const reply = await callGemini(input, imageBase64);
+
+    await save("model", reply);
+
+    imageBase64 = null;
+    document.getElementById("file").value = "";
+    document.getElementById("input").value = "";
+
+    document.getElementById("loading").classList.add("hidden");
+};
+
+/* -------------- FILE UPLOAD -------------- */
+document.getElementById("file").onchange = (e) => {
+    const file = e.target.files[0];
+    const r = new FileReader();
+    r.onload = () => {
+        imageBase64 = r.result.split(",")[1];
+    };
+    r.readAsDataURL(file);
+};
+
+/* -------------- NEW CHAT -------------- */
+function newChat() {
+    db.collection("users").doc(userId).collection("chats").get().then(snap =>
+        snap.forEach(doc => doc.ref.delete())
+    );
 }
 </script>
 
