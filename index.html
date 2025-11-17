@@ -5,477 +5,166 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaxGPT Pro</title>
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
 
     <style>
-        .content-scroll::-webkit-scrollbar { width: 8px; }
-        .content-scroll::-webkit-scrollbar-thumb { background: #a7a7a7; border-radius: 10px; }
-
-        #main-layout { height: 100vh; display: flex; width: 100%; }
-        #sidebar { width: 16rem; min-width: 16rem; }
-        #main-content { flex-grow: 1; padding: 1rem; max-height: 100vh; overflow-y: auto; }
-
-        .option-button {
-            transition: .3s;
-            padding: 1rem;
-            padding-bottom: 1.5rem;
-            height: 6.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .option-button:hover { transform: translateY(-2px); }
-
-        .ai-output h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-top: 1.5rem;
-        }
+        body { background: #f8f9ff; }
+        #chat-history { max-height: 70vh; overflow-y: auto; }
+        .msg-box { padding: 1rem; border-radius: 12px; margin: 0.7rem 0; }
     </style>
 </head>
 
-<body class="bg-gray-50 font-sans">
+<body class="flex flex-col items-center">
 
-<!-- LOADING OVERLAY -->
-<div id="loading-overlay"
-     class="fixed inset-0 bg-white bg-opacity-70 flex justify-center items-center hidden">
-    <div class="p-8 bg-white shadow-xl rounded-xl border">
-        <p class="text-gray-700 font-semibold text-lg">Processing request...</p>
-    </div>
-</div>
+    <h1 class="text-4xl font-bold text-indigo-600 mt-6">TaxGPT Pro</h1>
 
-<div id="main-layout">
+    <!-- CHAT HISTORY -->
+    <div id="chat-history" class="w-full max-w-3xl mt-8 bg-white shadow p-4 rounded-lg"></div>
 
-    <!-- SIDEBAR -->
-    <div id="sidebar"
-         class="hidden sm:flex flex-col bg-white border-r p-4 shadow-lg">
-
-        <div class="text-2xl font-bold text-indigo-600 mb-8 border-b pb-4">
-            TaxGPT Pro
-        </div>
-
-        <button id="new-chat-btn" onclick="resetChat()"
-            class="flex items-center px-3 py-2 text-white bg-indigo-600 rounded-lg mb-4">
-            New Chat
-        </button>
-
-        <a class="px-3 py-2 hover:bg-gray-100 rounded-lg mb-4 text-gray-700 flex items-center">
-            Search Chats
-        </a>
-
-        <div class="space-y-2 text-gray-700">
-            <p class="text-gray-500 text-sm uppercase font-semibold">Projects</p>
-            <p class="hover:bg-gray-100 p-2 rounded-lg cursor-pointer">Q3 Tax Audit</p>
-            <p class="hover:bg-gray-100 p-2 rounded-lg cursor-pointer">Year-End Planning</p>
-        </div>
-
-        <div class="mt-auto pt-4 border-t text-xs text-gray-500">
-            <p>User ID:</p>
-            <p id="user-id-display" class="font-mono text-indigo-600"></p>
-        </div>
-
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main-content" class="flex flex-col items-center">
-
-        <div id="chat-interface-container"
-             class="w-full max-w-3xl pt-6">
-
-            <h1 class="text-4xl font-bold text-indigo-600 sm:hidden text-center mb-8">
-                TaxGPT Pro
-            </h1>
-
-            <!-- INITIAL PROMPT -->
-            <div id="initial-prompt" class="text-center space-y-6">
-                <h2 class="text-2xl font-light">How can I help you with your tax needs?</h2>
-
-                <div class="flex flex-wrap gap-4 justify-center">
-                    <button class="option-button bg-white border border-indigo-200 rounded-xl text-indigo-700 font-semibold"
-                        data-prompt="I need quick advice on a tax topic.">
-                        ✍️ Quick Tax Query
-                    </button>
-
-                    <button class="option-button bg-white border border-indigo-200 rounded-xl text-indigo-700 font-semibold"
-                        data-prompt="Perform deep legal research on a tax statute.">
-                        🏛️ Deep Research
-                    </button>
-
-                    <button class="option-button bg-white border border-indigo-200 rounded-xl text-indigo-700 font-semibold"
-                        data-prompt="Explain a basic tax concept to me.">
-                        💡 Learn a Concept
-                    </button>
-                </div>
-            </div>
-
-            <!-- CHAT HISTORY -->
-            <div id="chat-history"
-                class="content-scroll hidden opacity-0 bg-white mt-4 rounded-lg border p-4 space-y-4 max-w-3xl">
-            </div>
-
-            <!-- FEATURE BUTTONS -->
-            <div id="feature-controls"
-                class="hidden opacity-0 flex flex-wrap gap-3 justify-center mt-4 max-w-3xl">
-
-                <button id="takeaways-btn"
-                    class="py-2 px-3 rounded-xl bg-gray-200 text-gray-700">
-                    📝 Key Takeaways
-                </button>
-
-                <button id="simplify-btn"
-                    class="py-2 px-3 rounded-xl bg-gray-200 text-gray-700">
-                    👶 Simplify
-                </button>
-
-                <button id="deep-research-btn"
-                    class="py-2 px-3 rounded-xl bg-gray-200 text-gray-700">
-                    🏛️ Research
-                </button>
-            </div>
-
-        </div>
-
-        <!-- INPUT FORM -->
-        <form id="chat-form"
-              class="flex w-full max-w-3xl mt-auto mb-10">
-
-            <label class="w-12 h-12 flex items-center justify-center rounded-full text-2xl cursor-pointer">
-                <input id="file-upload" type="file" accept="image/*" class="hidden">
-                <span>+</span>
-            </label>
-
-            <div class="flex flex-grow bg-white rounded-full border shadow-lg">
-                <input type="text" id="query-input" placeholder="Ask anything…"
-                    class="flex-grow px-4 py-3 outline-none">
-                <button type="submit"
-                    class="w-12 h-12 bg-indigo-600 text-white rounded-full m-1">→</button>
-            </div>
-
-        </form>
-
-    </div>
-</div>
+    <!-- INPUT -->
+    <form id="chat-form" class="w-full max-w-3xl flex mt-4">
+        <input id="query-input" 
+               class="flex-grow p-3 border rounded-l-lg" 
+               placeholder="Ask anything…" />
+        <button class="bg-indigo-600 text-white px-6 rounded-r-lg">Send</button>
+    </form>
 
 <script>
 /* ---------------------------------------------------------------
-   🔥 FIREBASE INITIALIZATION
-   --------------------------------------------------------------- */
-
+   🔥 FIREBASE CONFIG — REPLACE WITH YOURS
+--------------------------------------------------------------- */
 const firebaseConfig = {
-    apiKey: "AIzaSyC2yEjdOBRxrn4-GIM4Wyti9O6OvdnhhSg",
-    authDomain: "taxgpt-f688d.firebaseapp.com",
-    projectId: "taxgpt-f688d",
-    storageBucket: "taxgpt-f688d.firebasestorage.app",
-    messagingSenderId: "443595897158",
-    appId: "1:443595897158:web:c4592fc15b4c07654e0d47",
-    measurementId: "G-BXK7WNRM7C"
+  apiKey: "<YOUR_FIREBASE_API_KEY>",
+  authDomain: "<YOUR_PROJECT_ID>.firebaseapp.com",
+  projectId: "<YOUR_PROJECT_ID>",
+  storageBucket: "<YOUR_PROJECT_ID>.appspot.com",
+  messagingSenderId: "<YOUR_SENDER_ID>",
+  appId: "<YOUR_APP_ID>",
+  measurementId: "<YOUR_MEASUREMENT_ID>"
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
 const auth = firebase.auth();
-firebase.analytics();
+const db = firebase.firestore();
 
 let userId = null;
-let lastModelMessage = null;
-let uploadedFile = null;
-let base64Image = null;
-let loading = false;
 
 /* ---------------------------------------------------------------
-   🔥 AUTH – Anonymous Login
-   --------------------------------------------------------------- */
+   🔥 SIGN IN ANONYMOUSLY
+--------------------------------------------------------------- */
 auth.signInAnonymously()
-    .then(() => console.log("Signed in"))
-    .catch(err => console.error(err));
+  .then(() => console.log("Signed in"))
+  .catch(err => console.error("Auth error:", err));
 
-auth.onAuthStateChanged(user => {
-    if (!user) return;
-    userId = user.uid;
-    document.getElementById("user-id-display").textContent = userId;
-    startHistoryListener();
+auth.onAuthStateChanged(u => {
+    if (!u) return;
+    userId = u.uid;
+    startListener();
 });
 
 /* ---------------------------------------------------------------
    🔥 REALTIME LISTENER
-   --------------------------------------------------------------- */
-function startHistoryListener() {
-    db.collection("users").doc(userId)
+--------------------------------------------------------------- */
+function startListener() {
+    db.collection("users")
+      .doc(userId)
       .collection("consultations")
       .orderBy("timestamp")
-      .onSnapshot(snapshot => {
+      .onSnapshot(snap => {
+          const out = document.getElementById("chat-history");
+          out.innerHTML = "";
 
-        const history = snapshot.docs.map(d => ({
-            id: d.id,
-            ...d.data()
-        }));
+          snap.forEach(doc => {
+              const d = doc.data();
+              const div = document.createElement("div");
+              div.className = "msg-box bg-gray-100";
+              div.innerHTML = `<strong>${d.role.toUpperCase()}:</strong><br>${d.display_text}`;
+              out.appendChild(div);
+          });
 
-        renderHistory(history);
+          out.scrollTop = out.scrollHeight;
       });
 }
 
 /* ---------------------------------------------------------------
-   🔥 RENDER HISTORY
-   --------------------------------------------------------------- */
-function renderHistory(history) {
-    const chatHistory = document.getElementById("chat-history");
-    const initialPrompt = document.getElementById("initial-prompt");
-    const featureControls = document.getElementById("feature-controls");
-
-    chatHistory.innerHTML = "";
-
-    const lastModel = history.filter(h => h.role === "model").pop();
-    lastModelMessage = lastModel || null;
-
-    if (!lastModel) {
-        initialPrompt.classList.remove("hidden");
-        chatHistory.classList.add("hidden");
-        featureControls.classList.add("hidden");
-        return;
-    }
-
-    initialPrompt.classList.add("hidden");
-    chatHistory.classList.remove("hidden");
-    featureControls.classList.remove("hidden");
-
-    const box = document.createElement("div");
-    box.className = "bg-white p-6 rounded-xl shadow w-full ai-output";
-    box.innerHTML = `
-        <h2 class="font-bold text-indigo-600 mb-3">AI Tax Analysis</h2>
-
-        <div>${markdownToHtml(lastModel.display_text)}</div>
-
-        <div class="text-xs mt-2 text-gray-400 text-right">
-            ${new Date(lastModel.timestamp?.toDate()).toLocaleTimeString()}
-        </div>
-    `;
-    chatHistory.appendChild(box);
-    chatHistory.scrollTop = chatHistory.scrollHeight;
-}
-
-/* ---------------------------------------------------------------
-   🔥 MARKDOWN → HTML
-   --------------------------------------------------------------- */
-function markdownToHtml(text) {
-    if (!text) return "";
-    return text
-        .replace(/^## (.*$)/gim, "<h2>$1</h2>")
-        .replace(/\*\*(.*?)\*\*/gim, "<strong>$1</strong>")
-        .replace(/\n\n/g, "<br><br>");
-}
-
-/* ---------------------------------------------------------------
-   🔥 RESET CHAT
-   --------------------------------------------------------------- */
-function resetChat() {
-    db.collection("users").doc(userId)
-      .collection("consultations")
-      .get().then(q => q.forEach(doc => doc.ref.delete()));
-
-    lastModelMessage = null;
-
-    document.getElementById("initial-prompt").classList.remove("hidden");
-    document.getElementById("chat-history").classList.add("hidden");
-    document.getElementById("feature-controls").classList.add("hidden");
-}
-
-/* ---------------------------------------------------------------
-   🔥 LOADING STATE
-   --------------------------------------------------------------- */
-function setLoading(state) {
-    loading = state;
-    document.getElementById("loading-overlay").classList.toggle("hidden", !state);
-}
-
-/* ---------------------------------------------------------------
-   🔥 QUICK OPTION BUTTONS
-   --------------------------------------------------------------- */
-document.querySelectorAll(".option-button").forEach(btn => {
-    btn.onclick = () => {
-        document.getElementById("query-input").value = btn.dataset.prompt;
-    };
-});
-
-/* ---------------------------------------------------------------
-   🔥 IMAGE → BASE64
-   --------------------------------------------------------------- */
-document.getElementById("file-upload").addEventListener("change", e => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    uploadedFile = file;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-        base64Image = reader.result.split(",")[1];
-    };
-    reader.readAsDataURL(file);
-});
-
-/* ---------------------------------------------------------------
-   🔥 SAVE TO FIRESTORE
-   --------------------------------------------------------------- */
-function saveMessage(role, text, full = null, mode = "normal") {
+   🔥 SAVE MESSAGE
+--------------------------------------------------------------- */
+function saveMessage(role, text) {
     return db.collection("users")
              .doc(userId)
              .collection("consultations")
              .add({
                  role,
-                 text,
-                 full_text: full || text,
-                 display_text: full || text,
-                 mode,
+                 display_text: text,
                  timestamp: firebase.firestore.FieldValue.serverTimestamp()
              });
 }
-</script>
-<script>
+
 /* ---------------------------------------------------------------
-   🔥 GEMINI API CONFIG
-   --------------------------------------------------------------- */
-const GEMINI_API_KEY = "AIzaSyBh8epAN_XqXxjBoQRweMZdblJJRNyzlgU";
+   🔥 GEMINI API CONFIG — REPLACE KEY
+--------------------------------------------------------------- */
+const GEMINI_API_KEY = "<YOUR_GEMINI_API_KEY>";
 const GEMINI_MODEL = "gemini-2.0-flash";
 
 /* ---------------------------------------------------------------
-   🔥 GEMINI API CALL
-   --------------------------------------------------------------- */
-async function callGeminiAPI(prompt, imageData = null) {
+   🔥 GEMINI CALL (FULLY LOGGED + FIXED)
+--------------------------------------------------------------- */
+async function callGemini(prompt) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
-    const parts = [{ text: prompt }];
-
-    if (imageData) {
-        parts.push({
-            inlineData: {
-                mimeType: uploadedFile?.type || "image/jpeg",
-                data: imageData
-            }
-        });
-    }
-
     const body = {
-        contents: [{ parts }],
-        systemInstruction: {
-            parts: [{
-                text: `[DISCLAIMER]This information is for informational purposes only and does not constitute official tax advice. Consult a certified tax professional for guidance.[/DISCLAIMER]
-
-Provide a structured, professional UK or US tax analysis with headings, bullet points, and clear logic.`
-            }]
-        }
+        contents: [{ parts: [{ text: prompt }] }]
     };
 
-    const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-    });
+    try {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(body)
+        });
 
-    const data = await response.json();
-    return (
-        data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "Sorry — Gemini did not return a response."
-    );
+        const data = await res.json();
+        console.log("🔍 GEMINI RESPONSE:", data);
+
+        if (data.error) {
+            return "❌ Gemini Error: " + data.error.message;
+        }
+
+        return (
+            data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+            "⚠️ No output returned from Gemini."
+        );
+
+    } catch (err) {
+        console.error("❌ Fetch error:", err);
+        return "❌ Network error calling Gemini.";
+    }
 }
 
 /* ---------------------------------------------------------------
-   🔥 CHAT SUBMIT HANDLER
-   --------------------------------------------------------------- */
+   🔥 FORM SUBMIT
+--------------------------------------------------------------- */
 document.getElementById("chat-form").addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (loading) return;
 
     const input = document.getElementById("query-input");
     const text = input.value.trim();
-
-    if (!text && !base64Image) return;
-
-    setLoading(true);
-
-    // Save user message
-    await saveMessage("user", text);
-
-    // AI response
-    const aiResponse = await callGeminiAPI(text, base64Image);
-
-    // Save AI response
-    await saveMessage("model", aiResponse, aiResponse, "normal");
+    if (!text) return;
 
     input.value = "";
-    base64Image = null;
-    uploadedFile = null;
-    document.getElementById("file-upload").value = "";
 
-    setLoading(false);
+    await saveMessage("user", text);
+
+    const reply = await callGemini(text);
+
+    await saveMessage("model", reply);
 });
-
-/* ---------------------------------------------------------------
-   🔥 TAKEAWAYS BUTTON
-   --------------------------------------------------------------- */
-document.getElementById("takeaways-btn").onclick = async () => {
-    if (!lastModelMessage) return;
-
-    const prompt = `
-Turn this tax analysis into EXACTLY 5 clear, concise bullet points.
-Each MUST begin with "✨".
-
-TEXT:
-${lastModelMessage.full_text}
-    `;
-
-    setLoading(true);
-    const result = await callGeminiAPI(prompt);
-    await saveMessage("model", result, lastModelMessage.full_text, "takeaways");
-    setLoading(false);
-};
-
-/* ---------------------------------------------------------------
-   🔥 SIMPLIFY BUTTON
-   --------------------------------------------------------------- */
-document.getElementById("simplify-btn").onclick = async () => {
-    if (!lastModelMessage) return;
-
-    const prompt = `
-Rewrite this analysis in VERY simple language.
-Make it friendly, clear, and beginner-friendly.
-
-TEXT:
-${lastModelMessage.full_text}
-    `;
-
-    setLoading(true);
-    const result = await callGeminiAPI(prompt);
-    await saveMessage("model", result, lastModelMessage.full_text, "simplify");
-    setLoading(false);
-};
-
-/* ---------------------------------------------------------------
-   🔥 DEEP RESEARCH BUTTON
-   --------------------------------------------------------------- */
-document.getElementById("deep-research-btn").onclick = async () => {
-    if (!lastModelMessage) return;
-
-    const prompt = `
-Provide deep legal research on the following tax analysis.
-Include:
-⚖ Relevant statutes
-📘 Court cases
-📑 HMRC / IRS guidance
-📊 Technical interpretation
-
-TEXT:
-${lastModelMessage.full_text}
-    `;
-
-    setLoading(true);
-    const result = await callGeminiAPI(prompt);
-    await saveMessage("model", result, lastModelMessage.full_text, "research");
-    setLoading(false);
-};
 </script>
 
 </body>
