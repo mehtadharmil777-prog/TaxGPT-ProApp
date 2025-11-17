@@ -7,16 +7,14 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
 
     <style>
         html { transition: background 0.3s, color 0.3s; }
         .dark body { background-color: #0d0d0d; color: #e5e5e5; }
-
         .ai-output h2 { font-size: 1.5rem; margin-top: 1rem; font-weight: 700; }
-
         .content-scroll::-webkit-scrollbar { width: 8px; }
         .content-scroll::-webkit-scrollbar-thumb {
             background: #888;
@@ -104,56 +102,54 @@
 
 <script>
 
-/* ---------------------- FIXED FIREBASE CONFIG ---------------------- */
-// **NOTE: I replaced your 'bad' key with the one shown in your config image**
-// Please ensure you use the one from your Firebase Console.
+/* ---------------------- 1. FIREBASE INITIALIZATION ---------------------- */
+// **MUST REPLACE with the configuration from your Firebase Project Settings**
 const firebaseConfig = {
-    apiKey: "AIzaSyC2yEjdOBrxrn4-GIM4Wyti9060vdnhhSg", 
+    apiKey: "YOUR_FIREBASE_WEB_APP_API_KEY_HERE", AIzaSyC2yEjdOBrxrn4-GIM4Wyti9060vdnhhSg,
     authDomain: "taxgpt-f688d.firebaseapp.com",
     projectId: "taxgpt-f688d",
-    storageBucket: "taxgpt-f688d.appspot.com", // Corrected storageBucket format
-    messagingSenderId: "367175296836", // Placeholder SENDER ID
-    appId: "1:367175296836:web:2f8645d9e51c14d93540b0" // Placeholder APP ID
-    // Removed measurementId as it's not needed for basic setup
+    storageBucket: "taxgpt-f688d.appspot.com",
+    messagingSenderId: "367175296836",
+    appId: "1:367175296836:web:2f8645d9e51c14d93540b0"
 };
 
-// **FIXED INITIALIZATION:** Used 'firebase.initializeApp' for compat libraries.
-firebase.initializeApp(firebaseConfig);
+// **FIXED INITIALIZATION:** Uses the standard SDK loaded in the <head>
+const app = firebase.initializeApp(firebaseConfig); 
 
-const db = firebase.firestore();
-const auth = firebase.auth();
+// **FIXED SERVICE HANDLES:** Gets handles from the initialized app object
+const db = firebase.firestore(app); 
+const auth = firebase.auth(app);
 
 let userId = null;
 let lastModelMsg = null;
 let imageBase64 = null;
 
-/* ---------------------- AUTH ---------------------- */
-// The call to signInAnonymously() is correct.
+/* ---------------------- 2. AUTHENTICATION ---------------------- */
 auth.signInAnonymously().catch(console.error);
 
 auth.onAuthStateChanged(u => {
     if (!u) return;
     userId = u.uid;
     document.getElementById("user-id").textContent = userId;
-    // **CRITICAL:** Call listenHistory ONLY after userId is set.
+    // Start listening for history only after the user is authenticated
     listenHistory(); 
 });
 
-/* ---------------------- HISTORY LISTENER ---------------------- */
+/* ---------------------- 3. HISTORY LISTENER ---------------------- */
 function listenHistory() {
     if (!userId) return;
 
     db.collection("users")
       .doc(userId)
       .collection("chats")
-      .orderBy("timestamp", "asc") // Added "asc" to ensure order
+      .orderBy("timestamp", "asc")
       .onSnapshot(snap => {
           const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           renderHistory(history);
       });
 }
 
-/* ---------------------- RENDER HISTORY ---------------------- */
+/* ---------------------- 4. RENDER HISTORY ---------------------- */
 function renderHistory(history) {
     const box = document.getElementById("history");
     const features = document.getElementById("features");
@@ -161,7 +157,6 @@ function renderHistory(history) {
 
     box.innerHTML = "";
 
-    // Render all messages, not just the last one, to show the conversation flow
     history.forEach(msg => {
         const div = document.createElement("div");
         const isModel = msg.role === "model";
@@ -178,8 +173,7 @@ function renderHistory(history) {
         box.appendChild(div);
     });
 
-    const modelMessages = history.filter(x => x.role === "model");
-    lastModelMsg = modelMessages.pop() || null;
+    lastModelMsg = history.filter(x => x.role === "model").pop() || null;
 
     if (history.length === 0) {
         initial.classList.remove("hidden");
@@ -195,7 +189,7 @@ function renderHistory(history) {
     box.scrollTop = box.scrollHeight;
 }
 
-/* ---------------------- SAVE MESSAGE ---------------------- */
+/* ---------------------- 5. SAVE MESSAGE ---------------------- */
 function save(role, text, display = null) {
     if (!userId) return;
 
@@ -210,12 +204,8 @@ function save(role, text, display = null) {
         });
 }
 
-/* ---------------------- THEME TOGGLE ---------------------- */
-document.getElementById("theme-toggle").onclick = () =>
-    document.documentElement.classList.toggle("dark");
-
-/* ---------------------- GEMINI API ---------------------- */
-// **NOTE:** You must ensure this API key is valid for the Gemini API
+/* ---------------------- 6. GEMINI API CALL ---------------------- */
+// **MUST REPLACE with the key for the Generative Language API from your Google Cloud Console**
 const GEMINI_API_KEY = "AIzaSyBWeCTjOJfavIoYQ-1hsKDMddVuP3O3x34"; 
 const MODEL = "gemini-1.5-flash";
 
@@ -230,10 +220,8 @@ async function callGemini(prompt, image = null) {
         });
     }
     
-    // **Added Safety Check:** Ensure the API Key is defined
-    if (!GEMINI_API_KEY) {
-        console.error("GEMINI_API_KEY is missing or invalid.");
-        return "Error: Gemini API key is missing.";
+    if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("YOUR_GEMINI_API_KEY_HERE")) {
+        return "Error: Gemini API key is missing or invalid. Please check your code.";
     }
 
     const res = await fetch(
@@ -242,7 +230,7 @@ async function callGemini(prompt, image = null) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                contents: [{ role: "user", parts: parts }], // Added role for clarity
+                contents: [{ role: "user", parts: parts }],
                 config: {
                     systemInstruction: `[DISCLAIMER]This is not tax advice. Consult a professional.[/DISCLAIMER]\nProvide structured, clear analysis with headings.`
                 }
@@ -251,15 +239,15 @@ async function callGemini(prompt, image = null) {
     );
 
     const json = await res.json();
-    return json?.candidates?.[0]?.content?.parts?.[0]?.text || "No response. Check your Gemini API key and network connection.";
+    return json?.candidates?.[0]?.content?.parts?.[0]?.text || "No response. (Check API key, network, and console for 400/403 errors).";
 }
 
-/* ---------------------- FORM SUBMISSION ---------------------- */
+/* ---------------------- 7. FORM SUBMISSION ---------------------- */
 document.getElementById("form").onsubmit = async (e) => {
     e.preventDefault();
 
     if (!userId) {
-        console.error("User not authenticated yet.");
+        alert("Authentication failed. Please check the console for Firebase errors.");
         return; 
     } 
 
@@ -270,7 +258,6 @@ document.getElementById("form").onsubmit = async (e) => {
 
     document.getElementById("loading").classList.remove("hidden");
 
-    // **FIXED: Saving user message first so it appears instantly**
     await save("user", input); 
 
     const reply = await callGemini(input, imageBase64);
@@ -284,23 +271,24 @@ document.getElementById("form").onsubmit = async (e) => {
     document.getElementById("loading").classList.add("hidden");
 };
 
-/* ---------------------- FILE UPLOAD ---------------------- */
+/* ---------------------- 8. FILE UPLOAD & THEME ---------------------- */
 document.getElementById("file").onchange = e => {
     const file = e.target.files[0];
     const r = new FileReader();
     r.onload = () => {
         imageBase64 = r.result.split(",")[1];
-        // Optional: Show the user a visual indicator that a file is attached
         document.getElementById("input").placeholder = "Ask anything... (Image attached)";
     };
     r.readAsDataURL(file);
 };
 
-/* ---------------------- NEW CHAT ---------------------- */
+document.getElementById("theme-toggle").onclick = () =>
+    document.documentElement.classList.toggle("dark");
+
+/* ---------------------- 9. NEW CHAT ---------------------- */
 function newChat() {
     if (!userId) return;
 
-    // **Improved logic to clear display immediately**
     document.getElementById("history").innerHTML = "";
     document.getElementById("initial-view").classList.remove("hidden");
 
@@ -311,11 +299,10 @@ function newChat() {
         .then(snap => snap.forEach(doc => doc.ref.delete()));
 }
 
-/* ---------------------- INITIAL OPTION HANDLERS ---------------------- */
+/* ---------------------- 10. INITIAL OPTION HANDLERS ---------------------- */
 document.querySelectorAll(".option").forEach(btn => {
     btn.onclick = () => {
         document.getElementById("input").value = btn.getAttribute("data-text");
-        // Optionally auto-submit the form here, but letting the user check the prompt is safer
     };
 });
 </script>
