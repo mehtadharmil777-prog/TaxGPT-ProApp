@@ -1,258 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TaxGPT Pro</title>
+<meta charset="UTF-8">
+<title>TaxGPT Basic</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Tailwind CDN (OK for now) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
 
 </head>
-<body class="bg-gray-100 text-gray-900">
-  <div class="flex h-screen">
+<body class="bg-gray-100 p-6 font-sans">
 
-    <!-- Sidebar -->
-    <div class="w-64 bg-white shadow-lg p-6 flex flex-col">
-      <h1 class="text-2xl font-bold mb-6 text-indigo-600">TaxGPT Pro</h1>
+<div class="max-w-2xl mx-auto bg-white shadow-xl rounded-xl p-6">
 
-      <button id="newChatBtn" class="w-full bg-indigo-600 text-white py-2 rounded mb-4">
-        New Chat
-      </button>
+    <h1 class="text-3xl font-bold text-indigo-600 mb-4 text-center">
+        TaxGPT (Basic Version)
+    </h1>
 
-      <h2 class="text-gray-500 font-semibold mb-2">Projects</h2>
-      <ul id="projectList" class="space-y-2"></ul>
+    <p class="text-gray-600 text-center mb-6">
+        Ask anything related to taxes below.
+    </p>
 
-      <div class="mt-auto text-xs text-gray-400">
-        User ID: <span id="userIdLabel"></span>
-      </div>
-    </div>
+    <!-- Input box -->
+    <textarea id="userInput"
+              placeholder="Type your question..."
+              class="w-full p-3 border rounded-lg mb-4 h-28"></textarea>
 
-    <!-- Main Chat Window -->
-    <div class="flex-1 flex flex-col p-6">
-      <div id="chatContainer" class="flex-1 overflow-y-auto p-4 bg-white shadow rounded"></div>
+    <!-- Button -->
+    <button onclick="sendToGemini()"
+            id="askBtn"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold">
+        Ask AI
+    </button>
 
-      <!-- Chat Input -->
-      <div class="mt-4 flex items-center space-x-2">
-        <input id="chatInput" 
-               type="text"
-               placeholder="Ask anything..."
-               class="flex-1 border rounded px-4 py-2" />
-        <button id="sendBtn" class="bg-indigo-600 text-white rounded-full px-6 py-2">
-          →
-        </button>
-      </div>
-    </div>
+    <!-- Output box -->
+    <div id="responseBox"
+         class="mt-6 p-4 bg-gray-50 border rounded-lg text-gray-800 whitespace-pre-wrap hidden"></div>
 
-  </div>
+</div>
+
 
 <script>
-/* ---------------------------------------------------
-    FIREBASE CONFIG
----------------------------------------------------- */
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY_HERE",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "SENDER_ID",
-  appId: "APP_ID"
-};
+// ----------------------------
+// 🔧 Gemini API Configuration
+// ----------------------------
+const GEMINI_API_KEY = "YOUR_GEMINI_KEY_HERE"; 
+const MODEL = "gemini-2.5-flash";
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+// ----------------------------
+// 🚀 Function to Call Gemini
+// ----------------------------
+async function sendToGemini() {
+    const text = document.getElementById("userInput").value.trim();
+    const responseBox = document.getElementById("responseBox");
+    const askBtn = document.getElementById("askBtn");
 
-/* ---------------------------------------------------
-    AUTO LOGIN (ANONYMOUS)
----------------------------------------------------- */
-auth.signInAnonymously()
-  .then(() => {
-    console.log("✅ Firebase Auth: Signed in anonymously");
+    if (!text) return;
 
-    document.getElementById("userIdLabel").innerText =
-      auth.currentUser.uid;
+    // show loading
+    askBtn.disabled = true;
+    askBtn.innerText = "Thinking...";
 
-    loadProjects();
-  })
-  .catch((err) => console.error("Auth error:", err));
+    responseBox.classList.remove("hidden");
+    responseBox.innerText = "Processing your request...";
 
-/* ---------------------------------------------------
-    LOAD USER'S PROJECTS
----------------------------------------------------- */
-async function loadProjects() {
-  const uid = auth.currentUser.uid;
+    try {
 
-  const snapshot = await db
-    .collection("users")
-    .doc(uid)
-    .collection("consultations")
-    .get();
+        const result = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text }] }]
+            })
+          }
+        );
 
-  const list = document.getElementById("projectList");
-  list.innerHTML = "";
+        const data = await result.json();
 
-  snapshot.forEach((doc) => {
-    const li = document.createElement("li");
-    li.className = "cursor-pointer text-indigo-500 hover:underline";
-    li.innerText = doc.id;
-    li.onclick = () => loadChat(doc.id);
-    list.appendChild(li);
-  });
-}
+        const aiText =
+            data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+            "⚠️ Gemini did not return a response.";
 
-/* ---------------------------------------------------
-    LOAD CHAT HISTORY
----------------------------------------------------- */
-async function loadChat(chatId) {
-  const uid = auth.currentUser.uid;
+        responseBox.innerText = aiText;
 
-  const ref = db
-    .collection("users")
-    .doc(uid)
-    .collection("consultations")
-    .doc(chatId)
-    .collection("messages");
-
-  const snapshot = await ref.orderBy("timestamp").get();
-
-  const container = document.getElementById("chatContainer");
-  container.innerHTML = "";
-
-  snapshot.forEach((msg) => {
-    addMessageToUI(msg.data().role, msg.data().content);
-  });
-}
-
-/* ---------------------------------------------------
-    ADD MESSAGE TO UI
----------------------------------------------------- */
-function addMessageToUI(role, text) {
-  const container = document.getElementById("chatContainer");
-
-  const bubble = document.createElement("div");
-  bubble.className =
-    role === "user"
-      ? "text-right mb-2"
-      : "text-left mb-2";
-
-  bubble.innerHTML = `
-    <div class="inline-block px-4 py-2 rounded-lg ${
-      role === "user"
-        ? "bg-indigo-600 text-white"
-        : "bg-gray-200 text-gray-800"
-    }">
-      ${text}
-    </div>
-  `;
-
-  container.appendChild(bubble);
-  container.scrollTop = container.scrollHeight;
-}
-
-/* ---------------------------------------------------
-    GEMINI API CALL
----------------------------------------------------- */
-async function callGeminiAPI(message) {
-  console.log("📨 Sending to Gemini:", message);
-
-  const API_KEY = "YOUR_API_KEY_HERE";
-  const MODEL = "gemini-1.5-flash"; // 🔥 stable, fast, working
-
-  const url = `https://generativelanguage.googleapis.com/v1/models/${MODEL}:generateContent?key=${API_KEY}`;
-
-  const body = {
-    contents: [
-      { role: "user", parts: [{ text: message }] }
-    ]
-  };
-
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    });
-
-    const data = await res.json();
-
-    console.log("🔍 GEMINI RAW RESPONSE:", data);
-
-    if (!data.candidates) {
-      console.error("❌ Gemini returned no candidates:", data);
-      return "⚠️ AI Error: Check console.";
+    } catch (err) {
+        responseBox.innerText = "❌ Error contacting Gemini API.";
+        console.error(err);
     }
 
-    return data.candidates[0].content.parts[0].text;
-
-  } catch (err) {
-    console.error("❌ Network/Gemini error:", err);
-    return "⚠️ Network Error: See console.";
-  }
+    askBtn.disabled = false;
+    askBtn.innerText = "Ask AI";
 }
-
-/* ---------------------------------------------------
-    SAVE MESSAGE TO FIRESTORE
----------------------------------------------------- */
-async function saveMessage(chatId, role, content) {
-  const uid = auth.currentUser.uid;
-
-  const ref = db
-    .collection("users")
-    .doc(uid)
-    .collection("consultations")
-    .doc(chatId)
-    .collection("messages");
-
-  await ref.add({
-    role,
-    content,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  });
-}
-
-/* ---------------------------------------------------
-    NEW CHAT BUTTON
----------------------------------------------------- */
-document.getElementById("newChatBtn").onclick = async () => {
-  const uid = auth.currentUser.uid;
-
-  const newDoc = await db
-    .collection("users")
-    .doc(uid)
-    .collection("consultations")
-    .doc();
-
-  await newDoc.set({ createdAt: Date.now() });
-
-  loadProjects();
-};
-
-/* ---------------------------------------------------
-    SEND MESSAGE
----------------------------------------------------- */
-document.getElementById("sendBtn").onclick = async () => {
-  const text = document.getElementById("chatInput").value.trim();
-  if (!text) return;
-
-  const uid = auth.currentUser.uid;
-  const chatId = "default-session"; // simple single thread for now
-
-  addMessageToUI("user", text);
-  await saveMessage(chatId, "user", text);
-
-  document.getElementById("chatInput").value = "";
-
-  const reply = await callGeminiAPI(text);
-
-  addMessageToUI("assistant", reply);
-  await saveMessage(chatId, "assistant", reply);
-};
 </script>
 
 </body>
