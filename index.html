@@ -4,420 +4,152 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaxGPT Pro</title>
-
-    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
-        /* Smooth transitions for dark mode */
         html { transition: background 0.3s, color 0.3s; }
         .dark body { background-color: #0d0d0d; color: #e5e5e5; }
-
-        /* Custom scrollbar for chat history */
-        .content-scroll::-webkit-scrollbar { width: 8px; }
-        .content-scroll::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        
-        /* Chat bubble styles */
         .ai-output h2 { font-size: 1.5rem; margin-top: 1rem; font-weight: 700; }
-        .ai-output ul { list-style-type: disc; margin-left: 1.5rem; }
-        .ai-output p { margin-bottom: 0.5rem; }
+        #chatHistory::-webkit-scrollbar { width: 8px; }
+        #chatHistory::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
     </style>
 </head>
-
 <body class="bg-gray-50 dark:bg-black dark:text-white font-sans">
 
-<!-- Theme Toggle Button -->
-<button id="theme-toggle"
-    class="fixed top-4 right-4 z-50 bg-gray-200 dark:bg-gray-700 p-3 rounded-full shadow cursor-pointer hover:bg-gray-300 transition">
-    🌙
-</button>
+<button id="theme-toggle" class="fixed top-4 right-4 z-50 bg-gray-200 dark:bg-gray-700 p-3 rounded-full shadow cursor-pointer">🌙</button>
 
-<!-- Loading Overlay -->
-<div id="loading"
-     class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-    <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl text-lg font-semibold flex flex-col items-center gap-4">
-        <div class="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-        Processing...
-    </div>
+<div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl text-lg font-semibold">Processing...</div>
 </div>
 
 <div class="flex h-screen overflow-hidden">
-    <!-- Sidebar -->
     <aside class="hidden md:flex flex-col w-72 bg-white dark:bg-gray-900 border-r dark:border-gray-800 p-6 shadow-lg z-20">
-        <div class="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-8 tracking-tight">
-            TaxGPT Pro
-        </div>
-
-        <button onclick="newChat()"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-xl mb-6 shadow-md transition duration-200 font-medium flex items-center justify-center gap-2">
-            <span>+</span> New Chat
-        </button>
-
-        <div class="mt-auto pt-6 border-t dark:border-gray-800">
-            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">User ID</div>
-            <div id="user-id" class="font-mono text-xs text-indigo-600 dark:text-indigo-400 break-all bg-indigo-50 dark:bg-indigo-900/30 p-2 rounded">
-                Connecting...
-            </div>
-        </div>
+        <div class="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-8">TaxGPT Pro</div>
+        <button onclick="window.location.reload()" class="bg-indigo-600 text-white py-3 px-4 rounded-xl mb-6 shadow-md">+ New Chat</button>
     </aside>
 
-    <!-- Main Chat Area -->
     <main class="flex-1 flex flex-col relative h-full">
-        <!-- Mobile Header -->
-        <div class="md:hidden p-4 border-b dark:border-gray-800 bg-white dark:bg-gray-900 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-indigo-600">TaxGPT Pro</h1>
-            <button onclick="newChat()" class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg">New</button>
-        </div>
-
-        <!-- Welcome Screen -->
-        <div id="initial-view" class="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8 overflow-y-auto">
-            <div class="space-y-2">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white">How can I help you?</h2>
-                <p class="text-gray-500 dark:text-gray-400">Ask any tax-related question or choose a topic below.</p>
-            </div>
-
-            <div class="flex flex-wrap justify-center gap-4 max-w-2xl">
-                <button class="option bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border dark:border-gray-700 p-6 rounded-2xl w-40 shadow-sm hover:shadow-md transition duration-200 flex flex-col items-center gap-3"
-                    data-text="I need quick tax advice regarding...">
-                    <span class="text-2xl">⚡</span>
-                    <span class="font-medium">Quick Query</span>
-                </button>
-                <button class="option bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border dark:border-gray-700 p-6 rounded-2xl w-40 shadow-sm hover:shadow-md transition duration-200 flex flex-col items-center gap-3"
-                    data-text="Provide deep legal tax research on...">
-                    <span class="text-2xl">🏛️</span>
-                    <span class="font-medium">Deep Research</span>
-                </button>
-                <button class="option bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border dark:border-gray-700 p-6 rounded-2xl w-40 shadow-sm hover:shadow-md transition duration-200 flex flex-col items-center gap-3"
-                    data-text="Explain the concept of...">
-                    <span class="text-2xl">💡</span>
-                    <span class="font-medium">Learn Concept</span>
-                </button>
+        <div id="initial-view" class="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8">
+            <h2 class="text-3xl font-bold">How can I help you?</h2>
+            <div class="flex flex-wrap justify-center gap-4">
+                <button class="option bg-white dark:bg-gray-800 border p-6 rounded-2xl w-40 shadow-sm" onclick="setInput('I need quick tax advice regarding...')">⚡ Quick Query</button>
+                <button class="option bg-white dark:bg-gray-800 border p-6 rounded-2xl w-40 shadow-sm" onclick="setInput('Provide deep legal tax research on...')">🏛️ Deep Research</button>
             </div>
         </div>
 
-        <!-- Chat History -->
-        <div id="history" class="hidden flex-1 content-scroll w-full p-4 md:p-8 overflow-y-auto space-y-6 pb-32">
-            <!-- Messages will be injected here -->
-        </div>
+        <div id="history" class="hidden flex-1 w-full p-8 overflow-y-auto space-y-6 pb-32"></div>
 
-        <!-- Input Area -->
-        <div class="p-4 md:p-6 bg-gradient-to-t from-white via-white to-transparent dark:from-black dark:via-black">
-            <div class="max-w-3xl mx-auto relative">
-                <form id="form" class="flex items-end gap-2 bg-white dark:bg-gray-900 p-2 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
-                    <label class="p-2 cursor-pointer text-gray-400 hover:text-indigo-600 transition self-center" title="Attach Image">
-                        <input type="file" id="file" accept="image/*" class="hidden">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
-                        </svg>
-                    </label>
-
-                    <textarea id="input" rows="1" class="flex-1 p-3 bg-transparent border-0 focus:ring-0 resize-none max-h-32 dark:text-white placeholder-gray-400" 
-                        placeholder="Ask anything about taxes..."></textarea>
-
-                    <button type="submit" class="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition duration-200 self-end mb-0.5">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                        </svg>
-                    </button>
-                </form>
-                <div id="file-preview" class="hidden absolute -top-10 left-4 text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded border border-indigo-200">
-                    Image attached
-                </div>
-            </div>
+        <div class="p-6 bg-white dark:bg-black fixed bottom-0 w-full max-w-4xl left-0 right-0 mx-auto">
+            <form id="form" class="flex items-center gap-2 bg-gray-100 dark:bg-gray-900 p-2 rounded-2xl border">
+                <input type="file" id="file" accept="image/*" class="hidden">
+                <label for="file" class="p-2 cursor-pointer text-gray-400 hover:text-indigo-600">📎</label>
+                <input id="input" class="flex-1 p-3 bg-transparent border-0 focus:ring-0 dark:text-white" placeholder="Ask anything about taxes...">
+                <button type="submit" class="p-3 bg-indigo-600 text-white rounded-xl">➤</button>
+            </form>
+            <div id="file-preview" class="hidden text-xs text-indigo-600 mt-2">Image attached</div>
         </div>
     </main>
 </div>
 
-<!-- Main Application Logic -->
 <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getFirestore, collection, doc, orderBy, onSnapshot, addDoc, getDocs, deleteDoc, query } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+    import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-    // --- CONFIGURATION ---
-    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    const firebaseConfig = {
+      apiKey: "AIzaSyC2yEjdOBRxrn4-GIM4Wyti9O6OvdnhhSg",
+      authDomain: "taxgpt-f688d.firebaseapp.com",
+      projectId: "taxgpt-f688d",
+      storageBucket: "taxgpt-f688d.firebasestorage.app",
+      messagingSenderId: "443595897158",
+      appId: "1:443595897158:web:ff9ab1bdc19c915d4e0d47",
+      measurementId: "G-QLS0ZZC8PV"
+    };
 
-    // NOTE: This variable is ONLY for local testing in this specific Canvas environment.
-    // For Vercel, the app calls the /api/chat proxy endpoint.
-    const GEMINI_API_KEY = ""; 
-    const MAX_RETRIES = 5;
-
-    // --- APP LOGIC ---
-    let app, db, auth;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
     let userId = null;
     let imageBase64 = null;
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        // Initialize Firebase
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-        } catch (e) {
-            console.error("Firebase Initialization Error:", e);
-            document.getElementById("user-id").textContent = "Init Failed";
-            return;
-        }
+    signInAnonymously(auth).catch(e => console.error(e));
 
-        // Authentication Logic: Use custom token if available, otherwise sign in anonymously
-        try {
-            if (initialAuthToken) {
-                await signInWithCustomToken(auth, initialAuthToken);
-            } else {
-                await signInAnonymously(auth);
-            }
-        } catch (error) {
-            console.error("Auth Error:", error);
-            document.getElementById("user-id").textContent = "Auth Failed";
-            return; 
+    onAuthStateChanged(auth, (u) => {
+        if (u) {
+            userId = u.uid;
+            const q = query(collection(db, "artifacts", "default-app-id", "users", userId, "chats"), orderBy("timestamp", "asc"));
+            onSnapshot(q, (snap) => {
+                const history = snap.docs.map(d => d.data());
+                renderHistory(history);
+            });
         }
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                userId = user.uid;
-                document.getElementById("user-id").textContent = userId;
-                startListening();
-            } else {
-                document.getElementById("user-id").textContent = "Signed out";
-            }
-        });
-        
-        setupEventListeners();
     });
-
-    function startListening() {
-        if (!userId) return;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const chatsRef = collection(db, "artifacts", appId, "users", userId, "chats");
-        
-        const q = query(chatsRef); 
-        
-        onSnapshot(q, (snapshot) => {
-            const history = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            history.sort((a, b) => a.timestamp - b.timestamp); 
-            renderHistory(history);
-        }, (error) => {
-            console.error("Firestore Listener Error:", error);
-        });
-    }
 
     function renderHistory(history) {
         const historyBox = document.getElementById("history");
         const initialView = document.getElementById("initial-view");
-
-        if (history.length === 0) {
-            initialView.classList.remove("hidden");
-            historyBox.classList.add("hidden");
-            return;
-        } else {
+        if (history.length > 0) {
             initialView.classList.add("hidden");
             historyBox.classList.remove("hidden");
         }
-
         historyBox.innerHTML = "";
         history.forEach(msg => {
             const div = document.createElement("div");
-            const isModel = msg.role === "model";
-            const content = msg.text; 
-            div.className = "flex w-full " + (isModel ? "justify-start" : "justify-end");
-            const bubbleClass = isModel ? "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 ai-output" : "bg-indigo-600 text-white";
-            
-            div.innerHTML = "<div class=\"max-w-[85%] md:max-w-[75%] p-4 rounded-2xl shadow-sm " + bubbleClass + "\">" +
-                (isModel ? "<div class=\"text-xs font-bold text-indigo-500 mb-1\">TaxGPT</div>" : "") +
-                "<div class=\"text-sm md:text-base leading-relaxed whitespace-pre-wrap\">" + content + "</div>" +
-            "</div>";
+            div.className = `flex w-full ${msg.role === "model" ? "justify-start" : "justify-end"}`;
+            div.innerHTML = `<div class="max-w-[75%] p-4 rounded-2xl shadow-sm ${msg.role === "model" ? "bg-white dark:bg-gray-800" : "bg-indigo-600 text-white"}">${msg.text}</div>`;
             historyBox.appendChild(div);
         });
         historyBox.scrollTop = historyBox.scrollHeight;
     }
 
-    // Function that calls either the secure environment API (for testing here) or the Vercel proxy.
-    async function callGemini(prompt, image) {
-        // If GEMINI_API_KEY is empty (as it is here), we use the secure internal function 
-        // that relies on the Canvas environment's security mechanism.
-        if (GEMINI_API_KEY === "") {
-             return callGeminiSecurely(prompt, image);
-        }
-        
-        // --- PROXY CALL LOGIC (For Vercel/Netlify Deployment) ---
-        const payload = { prompt, image }; 
-        const url = "/api/chat"; // This is the new endpoint we are creating
-        
-        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    return data.response || "No response content (check proxy log).";
-                }
-                
-                // Use exponential backoff for retries
-                if (attempt < MAX_RETRIES - 1) {
-                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                } else {
-                    return "Error (" + response.status + "): " + (data.error || "Failed to connect to proxy after multiple retries.");
-                }
-
-            } catch (error) {
-                if (attempt < MAX_RETRIES - 1) {
-                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                } else {
-                    console.error("Proxy Error:", error);
-                    return "Error: Could not connect to the secure chat server.";
-                }
-            }
-        }
-        return "Unknown error occurred.";
+    window.setInput = (text) => {
+        document.getElementById("input").value = text;
+        document.getElementById("input").focus();
     }
 
-    // Function used ONLY for testing in this Canvas environment.
-    async function callGeminiSecurely(prompt, image) {
-        const MODEL = "gemini-2.5-flash-preview-09-2025"; 
-        const parts = [{ text: prompt }];
-        if (image) {
-            parts.push({ inlineData: { mimeType: "image/jpeg", data: image } });
-        }
-        
-        const url = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL + ":generateContent";
-        
-        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-            try {
-                const response = await fetch(url, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ role: "user", parts: parts }],
-                        systemInstruction: { parts: [{ text: "You are TaxGPT. Provide clear, structured tax analysis and answers based on up-to-date information. Use markdown for formatting." }] }
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response content (check safety filters).";
-                }
-                
-                if (attempt < MAX_RETRIES - 1) {
-                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                } else {
-                    const message = data.error?.message || "Failed to connect after multiple retries.";
-                    return "Error: " + message;
-                }
-
-            } catch (error) {
-                if (attempt < MAX_RETRIES - 1) {
-                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                } else {
-                    return "Error: " + error.message + ". Check your network connection.";
-                }
-            }
-        }
-        return "Unknown error occurred.";
-    }
-
-
-    // Save to Firestore
-    async function saveMessage(role, text) {
-        if (!userId) {
-            console.error("Cannot save message: User ID not set.");
-            return;
-        }
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        await addDoc(collection(db, "artifacts", appId, "users", userId, "chats"), {
-            role, text, timestamp: Date.now()
-        });
-    }
-
-    function setupEventListeners() {
-        // Form Submit
-        document.getElementById("form").onsubmit = async (e) => {
-            e.preventDefault();
-            const inputEl = document.getElementById("input");
-            const text = inputEl.value.trim();
-
-            if (!userId) { console.error("Please wait for authentication..."); return; }
-            if (!text && !imageBase64) return;
-
-            document.getElementById("loading").classList.remove("hidden");
-            inputEl.value = "";
-            document.getElementById("file-preview").classList.add("hidden");
-
-            try {
-                await saveMessage("user", text); 
-                const response = await callGemini(text, imageBase64);
-                await saveMessage("model", response);
-            } catch (err) {
-                console.error("Runtime Error:", err);
-            }
-
-            imageBase64 = null;
-            document.getElementById("file").value = "";
-            document.getElementById("loading").classList.add("hidden");
-            document.getElementById("input").focus();
-        };
-
-        // File Upload
-        document.getElementById("file").onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const mimeType = file.type;
-                    if (mimeType.startsWith('image/')) {
-                        const base64Data = e.target.result.split(",")[1];
-                        imageBase64 = base64Data; 
-                        document.getElementById("file-preview").classList.remove("hidden");
-                    } else {
-                        console.error("File is not a supported image type.");
-                        document.getElementById("file").value = ""; 
-                    }
-                };
-                reader.readAsDataURL(file);
-            } else {
-                 document.getElementById("file-preview").classList.add("hidden");
-                 imageBase64 = null;
-            }
-        };
-
-        // Global Functions
-        window.newChat = async () => {
-            if (!userId || !confirm("Clear history?")) return;
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-            const chatsRef = collection(db, "artifacts", appId, "users", userId, "chats");
-            const snap = await getDocs(chatsRef);
-            snap.forEach((doc) => deleteDoc(doc.ref));
-        };
-
-        document.querySelectorAll(".option").forEach(btn => {
-            btn.onclick = () => {
-                document.getElementById("input").value = btn.getAttribute("data-text");
-                document.getElementById("input").focus();
+    document.getElementById("file").onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imageBase64 = e.target.result.split(",")[1];
+                document.getElementById("file-preview").classList.remove("hidden");
             };
-        });
+            reader.readAsDataURL(file);
+        }
+    };
 
-        document.getElementById("theme-toggle").onclick = () => document.documentElement.classList.toggle("dark");
+    document.getElementById("form").onsubmit = async (e) => {
+        e.preventDefault();
+        const text = document.getElementById("input").value;
+        if (!text && !imageBase64) return;
+        if (!userId) return alert("Connecting... please wait.");
 
-        // Auto-resize textarea
-        const textarea = document.getElementById('input');
-        textarea.addEventListener('input', () => {
-            textarea.style.height = 'auto';
-            textarea.style.height = textarea.scrollHeight + 'px';
-        });
-    }
+        document.getElementById("loading").classList.remove("hidden");
+        document.getElementById("input").value = "";
+        document.getElementById("file-preview").classList.add("hidden");
+
+        // Save User Message
+        await addDoc(collection(db, "artifacts", "default-app-id", "users", userId, "chats"), { role: "user", text, timestamp: Date.now() });
+
+        // Call Vercel Proxy
+        try {
+            const res = await fetch("/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: text, image: imageBase64 })
+            });
+            const data = await res.json();
+            await addDoc(collection(db, "artifacts", "default-app-id", "users", userId, "chats"), { role: "model", text: data.response || "Error: No response", timestamp: Date.now() });
+        } catch (err) {
+            console.error(err);
+            await addDoc(collection(db, "artifacts", "default-app-id", "users", userId, "chats"), { role: "model", text: "Error connecting to AI.", timestamp: Date.now() });
+        }
+        
+        imageBase64 = null;
+        document.getElementById("loading").classList.add("hidden");
+    };
+
+    document.getElementById("theme-toggle").onclick = () => document.documentElement.classList.toggle("dark");
 </script>
 </body>
 </html>
