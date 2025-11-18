@@ -105,13 +105,14 @@ import { getFirestore, collection, doc, orderBy, onSnapshot, addDoc, getDocs, de
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
 
+// CORRECTED FIREBASE CONFIGURATION (Using the '...hSg' key from your app settings)
 const firebaseConfig = {
     apiKey: "AIzaSyC2yEjdOBRxrn4-GIM4Wyti9060vdnhhSg", 
     authDomain: "taxgpt-f688d.firebaseapp.com",
     projectId: "taxgpt-f688d",
     storageBucket: "taxgpt-f688d.appspot.com",
-    messagingSenderId: "367175296836",
-    appId: "1:367175296836:web:2f8645d9e51c14d93540b0"
+    messagingSenderId: "443595897158",
+    appId: "1:443595897158:web:c4592fc15b4c07654e0d47"
 };
 
 // MODULAR SYNTAX: initializeApp returns the app object
@@ -124,7 +125,11 @@ let lastModelMsg = null;
 let imageBase64 = null;
 
 /* ---------------------- 2. AUTHENTICATION (MODULAR) ---------------------- */
-signInAnonymously(auth).catch(console.error); // MODULAR: takes auth object
+// This should now succeed after fixing the API Key
+signInAnonymously(auth).catch((error) => {
+    console.error("Firebase Auth Error: ", error);
+    alert("Authentication failed. Please check the console for Firebase errors.");
+}); 
 
 onAuthStateChanged(auth, (u) => { // MODULAR: takes auth object
     if (!u) return;
@@ -200,7 +205,8 @@ async function save(role, text, display = null) {
 }
 
 /* ---------------------- 6. GEMINI API CALL (UNCHANGED) ---------------------- */
-const GEMINI_API_KEY = "AIzaSyAFSsr44RZ-MA5VCDhx4VTkBOl1CDHf-1s"; 
+// NOTE: Use your separate Gemini API Key here (the one restricted to Generative Language API)
+const GEMINI_API_KEY = "AIzaSyBWeCTjOJfavIoYQ-1hsKDMddVuP3O3x34"; 
 const MODEL = "gemini-1.5-flash";
 
 async function callGemini(prompt, image = null) {
@@ -241,7 +247,7 @@ document.getElementById("form").onsubmit = async (e) => {
     e.preventDefault();
 
     if (!userId) {
-        alert("Authentication failed. Please check the console for Firebase errors.");
+        alert("Authentication failed. Cannot send message.");
         return; 
     } 
 
@@ -259,6 +265,7 @@ document.getElementById("form").onsubmit = async (e) => {
 
     imageBase64 = null;
     document.getElementById("file").value = "";
+    document.getElementById("input").placeholder = "Ask anything...";
     inputElement.value = "";
 
     document.getElementById("loading").classList.add("hidden");
