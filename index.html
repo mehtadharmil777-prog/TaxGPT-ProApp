@@ -105,9 +105,9 @@ import { getFirestore, collection, doc, orderBy, onSnapshot, addDoc, getDocs, de
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
 
-// CORRECTED FIREBASE CONFIGURATION (Using the '...hSg' key from your app settings)
+// CORRECTED FIREBASE CONFIGURATION (Using the '...vdnhhSg' key from your app settings)
 const firebaseConfig = {
-    apiKey: "AIzaSyC2yEjdOBRxrn4-GIM4Wyti9060vdnhhSg", // Confirmed Key from your project
+    apiKey: "AIzaSyC2yEjdOBRxrn4-GIM4Wyti9060vdnhhSg", // Confirmed Firebase Key
     authDomain: "taxgpt-f688d.firebaseapp.com",
     projectId: "taxgpt-f688d",
     storageBucket: "taxgpt-f688d.appspot.com",
@@ -195,6 +195,7 @@ function renderHistory(history) {
 async function save(role, text, display = null) {
     if (!userId) return;
 
+    // NOTE: This addDoc call is the source of silent crashes if Firestore is not available/synced.
     await addDoc(collection(db, "users", userId, "chats"), { 
         role,
         text,
@@ -203,4 +204,125 @@ async function save(role, text, display = null) {
     });
 }
 
-/* ---------------------- 6. GEMINI API CALL (UNCHANGED) ----------------
+/* ---------------------- 6. GEMINI API CALL (UNCHANGED) ---------------------- */
+// NOTE: This key is restricted to Generative Language API
+const GEMINI_API_KEY = "AIzaSyBWeCTjOJfavIoYQ-1hsKDMddVuP3O3x34"; // Confirmed Gemini Key
+const MODEL = "gemini-1.5-flash";
+
+async function callGemini(prompt, image = null) {
+    const parts = [{ text: prompt }];
+    if (image) {
+        parts.push({
+            inlineData: {
+                mimeType: "image/jpeg",
+                data: image
+            }
+        });
+    }
+    
+    if (!GEMINI_API_KEY || GEMINI_API_KEY.length < 30) {
+        return "Error: Gemini API key is missing or invalid. Please check your code.";
+    }
+
+    const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{ role: "user", parts: parts }],
+                config: {
+                    systemInstruction: `[DISCLAIMER]This is not tax advice. Consult a professional.[/DISCLAIMER]\nProvide structured, clear analysis with headings.`
+                }
+            })
+        }
+    );
+
+    const json = await res.json();
+    
+    // Check for common API errors (403, 429) and provide a clean message
+    if (json.error) {
+        let errorMessage = json.error.message || "Unknown API Error.";
+        if (json.error.code === 403) {
+            errorMessage = "403 Forbidden: Gemini API access denied. Check your billing, API keys, and Generative Language API synchronization in Google Cloud Console.";
+        } else if (json.error.code === 429) {
+            errorMessage = "429 Quota Exceeded: You have temporarily exceeded the rate limit. Please wait and try again later.";
+        }
+        return `Gemini API Error: ${errorMessage}`;
+    }
+    
+    return json?.candidates?.[0]?.content?.parts?.[0]?.text || "No response. (Check API key, network, and console for 400/403 errors).";
+}
+
+/* ---------------------- 7. FORM SUBMISSION (FINAL CORRECTED VERSION) ---------------------- */
+document.getElementById("form").onsubmit = async (e) => {
+    e.preventDefault();
+
+    const inputElement = document.getElementById("input");
+    const input = inputElement.value.trim();
+
+    if (!userId) { 
+        alert("Authentication failed. Cannot send message. Please wait for User ID to populate.");
+        return; 
+    } 
+    
+    if (!input && !imageBase64) return; 
+
+    document.getElementById("loading").classList.remove("hidden");
+
+    // CRASH PREVENTION: The robust try/catch block ensures the app doesn't go blank.
+    try {
+        await save("user", input); // Attempt to save message to Firestore
+
+        const reply = await callGemini(input, imageBase64); // Call Gemini API
+        await save("model", reply); // Save the Gemini response
+
+    } catch (error) {
+        // If the save() or callGemini() function throws an unhandled error, it will be caught here.
+        console.error("CRITICAL RUNTIME ERROR:", error);
+        alert("An unexpected error occurred during message processing. Check the Console tab for the details.");
+    } finally {
+        // Clean up UI regardless of success or failure
+        imageBase64 = null;
+        document.getElementById("file").value = "";
+        inputElement.value = "";
+        document.getElementById("loading").classList.add("hidden");
+        document.getElementById("input").placeholder = "Ask anything...";
+    }
+};
+
+/* ---------------------- 8. FILE UPLOAD & THEME (UNCHANGED) ---------------------- */
+document.getElementById("file").onchange = e => {
+    const file = e.target.files[0];
+    const r = new FileReader();
+    r.onload = () => {
+        imageBase64 = r.result.split(",")[1];
+        document.getElementById("input").placeholder = "Ask anything... (Image attached)";
+    };
+    r.readAsDataURL(file);
+};
+
+document.getElementById("theme-toggle").onclick = () =>
+    document.documentElement.classList.toggle("dark");
+
+/* ---------------------- 9. NEW CHAT (MODULAR) ---------------------- */
+async function newChat() {
+    if (!userId) return;
+
+    document.getElementById("history").innerHTML = "";
+    document.getElementById("initial-view").classList.remove("hidden");
+
+    const snap = await getDocs(collection(db, "users", userId, "chats")); 
+
+    snap.forEach(doc => deleteDoc(doc.ref));
+}
+
+/* ---------------------- 10. INITIAL OPTION HANDLERS (UNCHANGED) ---------------------- */
+document.querySelectorAll(".option").forEach(btn => {
+    btn.onclick = () => {
+        document.getElementById("input").value = btn.getAttribute("data-text");
+    };
+});
+</script>
+</body>
+</html>
