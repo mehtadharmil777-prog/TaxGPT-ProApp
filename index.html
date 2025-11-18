@@ -104,7 +104,7 @@
 <script>
 
 /* ---------------------- 1. FIREBASE INITIALIZATION ---------------------- */
-// **CORRECTED KEY**: Using the key you identified: AIzaSyBh8epAN_XqXxjBoQRweMZdblJJRNyzlgU
+// **CORRECTED FIREBASE KEY**: AIzaSyBh8epAN_XqXxjBoQRweMZdblJJRNyzlgU
 const firebaseConfig = {
     apiKey: "AIzaSyBh8epAN_XqXxjBoQRweMZdblJJRNyzlgU", 
     authDomain: "taxgpt-f688d.firebaseapp.com",
@@ -114,7 +114,7 @@ const firebaseConfig = {
     appId: "1:367175296836:web:2f8645d9e51c14d93540b0"
 };
 
-// CORRECT: Uses the global 'firebase' object (which is now defined by firebase-app.js)
+// CORRECT: Uses the global 'firebase' object (defined by firebase-app.js)
 firebase.initializeApp(firebaseConfig); 
 const db = firebase.firestore(); 
 const auth = firebase.auth();
@@ -158,13 +158,12 @@ function renderHistory(history) {
     history.forEach(msg => {
         const div = document.createElement("div");
         const isModel = msg.role === "model";
-        const content = msg.display || msg.text; // Content for display
+        const content = msg.display || msg.text; 
         
         div.className = isModel 
             ? "bg-indigo-50 dark:bg-gray-700 p-4 rounded-xl shadow ai-output"
             : "bg-gray-100 dark:bg-gray-900 p-3 rounded-xl shadow user-input text-right";
         
-        // Using innerHTML for formatted text display
         div.innerHTML = `
             ${isModel ? '<h2>AI Tax Analysis</h2>' : ''}
             <p class="text-left">${content}</p>
@@ -185,7 +184,6 @@ function renderHistory(history) {
         features.classList.remove("hidden");
     }
     
-    // Scroll to bottom after rendering
     box.scrollTop = box.scrollHeight;
 }
 
@@ -220,7 +218,6 @@ async function callGemini(prompt, image = null) {
         });
     }
     
-    // Added a more robust key check
     if (!GEMINI_API_KEY || GEMINI_API_KEY.length < 30) {
         return "Error: Gemini API key is missing or invalid. Please check your code.";
     }
@@ -248,3 +245,63 @@ document.getElementById("form").onsubmit = async (e) => {
     e.preventDefault();
 
     if (!userId) {
+        alert("Authentication failed. Please check the console for Firebase errors.");
+        return; 
+    } 
+
+    const inputElement = document.getElementById("input");
+    const input = inputElement.value.trim();
+    
+    if (!input && !imageBase64) return;
+
+    document.getElementById("loading").classList.remove("hidden");
+
+    await save("user", input); 
+
+    const reply = await callGemini(input, imageBase64);
+    await save("model", reply);
+
+    imageBase64 = null;
+    document.getElementById("file").value = "";
+    inputElement.value = "";
+
+    document.getElementById("loading").classList.add("hidden");
+};
+
+/* ---------------------- 8. FILE UPLOAD & THEME ---------------------- */
+document.getElementById("file").onchange = e => {
+    const file = e.target.files[0];
+    const r = new FileReader();
+    r.onload = () => {
+        imageBase64 = r.result.split(",")[1];
+        document.getElementById("input").placeholder = "Ask anything... (Image attached)";
+    };
+    r.readAsDataURL(file);
+};
+
+document.getElementById("theme-toggle").onclick = () =>
+    document.documentElement.classList.toggle("dark");
+
+/* ---------------------- 9. NEW CHAT ---------------------- */
+function newChat() {
+    if (!userId) return;
+
+    document.getElementById("history").innerHTML = "";
+    document.getElementById("initial-view").classList.remove("hidden");
+
+    db.collection("users")
+        .doc(userId)
+        .collection("chats")
+        .get()
+        .then(snap => snap.forEach(doc => doc.ref.delete()));
+}
+
+/* ---------------------- 10. INITIAL OPTION HANDLERS ---------------------- */
+document.querySelectorAll(".option").forEach(btn => {
+    btn.onclick = () => {
+        document.getElementById("input").value = btn.getAttribute("data-text");
+    };
+});
+</script>
+</body>
+</html>
