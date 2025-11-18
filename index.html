@@ -150,7 +150,6 @@
     let app, db, auth;
     let userId = null;
     let imageBase64 = null;
-    let isInitialized = false; // New flag to control initialization
 
     // Use DOMContentLoaded to ensure elements exist before script tries to access them
     document.addEventListener('DOMContentLoaded', async () => {
@@ -159,10 +158,8 @@
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
-            isInitialized = true; // Set flag after successful init
         } catch (e) {
             console.error("Firebase Initialization Error:", e);
-            // Replace alert with logging/UI message
             document.getElementById("user-id").textContent = "Init Failed";
             return;
         }
@@ -177,10 +174,8 @@
         } catch (error) {
             console.error("Auth Error:", error);
             document.getElementById("user-id").textContent = "Auth Failed";
-            // Ensure we stop if auth fails and user ID cannot be retrieved
             return; 
         }
-
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -192,7 +187,7 @@
             }
         });
         
-        // Attach event listeners after the DOM is ready and initialization starts
+        // Attach event listeners after the DOM is ready
         setupEventListeners();
     });
 
@@ -237,11 +232,10 @@
             div.className = "flex w-full " + (isModel ? "justify-start" : "justify-end");
             const bubbleClass = isModel ? "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 ai-output" : "bg-indigo-600 text-white";
             
-            div.innerHTML = `
-                <div class="max-w-[85%] md:max-w-[75%] p-4 rounded-2xl shadow-sm ${bubbleClass}">
-                    ${isModel ? '<div class="text-xs font-bold text-indigo-500 mb-1">TaxGPT</div>' : ''}
-                    <div class="text-sm md:text-base leading-relaxed whitespace-pre-wrap">${content}</div>
-                </div>`;
+            div.innerHTML = "<div class=\"max-w-[85%] md:max-w-[75%] p-4 rounded-2xl shadow-sm " + bubbleClass + "\">" +
+                (isModel ? "<div class=\"text-xs font-bold text-indigo-500 mb-1\">TaxGPT</div>" : "") +
+                "<div class=\"text-sm md:text-base leading-relaxed whitespace-pre-wrap\">" + content + "</div>" +
+            "</div>";
             historyBox.appendChild(div);
         });
         historyBox.scrollTop = historyBox.scrollHeight;
@@ -251,8 +245,7 @@
     async function callGemini(prompt, image) {
         const parts = [{ text: prompt }];
         if (image) {
-            // Note: image.data and image.mimeType are expected here
-            parts.push({ inlineData: { mimeType: image.mimeType, data: image.data } }); 
+            parts.push({ inlineData: { mimeType: "image/jpeg", data: image } });
         }
         
         const url = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL + ":generateContent?key=" + GEMINI_API_KEY;
@@ -290,96 +283,67 @@
 
     function setupEventListeners() {
         // Form Submit
-        const formEl = document.getElementById("form");
-        if (formEl) {
-            formEl.onsubmit = async (e) => {
-                e.preventDefault();
-                const inputEl = document.getElementById("input");
-                const text = inputEl.value.trim();
+        document.getElementById("form").onsubmit = async (e) => {
+            e.preventDefault();
+            const inputEl = document.getElementById("input");
+            const text = inputEl.value.trim();
 
-                if (!userId) { 
-                    console.error("Please wait for authentication to complete before submitting."); 
-                    document.getElementById("user-id").textContent = "Pending Auth...";
-                    return; 
-                }
-                if (!text && !imageBase64) return;
+            if (!userId) { console.error("Please wait for authentication..."); return; }
+            if (!text && !imageBase64) return;
 
-                document.getElementById("loading").classList.remove("hidden");
-                inputEl.value = "";
-                document.getElementById("file-preview").classList.add("hidden");
+            document.getElementById("loading").classList.remove("hidden");
+            inputEl.value = "";
+            document.getElementById("file-preview").classList.add("hidden");
 
-                try {
-                    await saveMessage("user", text);
-                    const response = await callGemini(text, imageBase64);
-                    await saveMessage("model", response);
-                } catch (err) {
-                    console.error("Runtime Error:", err);
-                    await saveMessage("model", "An application error occurred. Please try again.");
-                }
+            try {
+                await saveMessage("user", text);
+                const response = await callGemini(text, imageBase64);
+                await saveMessage("model", response);
+            } catch (err) {
+                console.error("Runtime Error:", err);
+            }
 
-                imageBase64 = null;
-                document.getElementById("file").value = "";
-                document.getElementById("loading").classList.add("hidden");
-                document.getElementById("input").focus();
-            };
-        } else {
-            console.error("Error: Form element not found.");
-        }
-
+            imageBase64 = null;
+            document.getElementById("file").value = "";
+            document.getElementById("loading").classList.add("hidden");
+            document.getElementById("input").focus();
+        };
 
         // File Upload
-        const fileEl = document.getElementById("file");
-        if (fileEl) {
-             fileEl.onchange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const mimeType = file.type;
-                        if (mimeType.startsWith('image/')) {
-                            const base64Data = e.target.result.split(",")[1];
-                            imageBase64 = { data: base64Data, mimeType: mimeType };
-                            document.getElementById("file-preview").classList.remove("hidden");
-                        } else {
-                            console.error("File is not a supported image type.");
-                            document.getElementById("file").value = ""; // Clear file input
-                            imageBase64 = null;
-                        }
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                     document.getElementById("file-preview").classList.add("hidden");
-                     imageBase64 = null;
-                }
-            };
-        } else {
-            console.error("Error: File input element not found.");
-        }
-        
+        document.getElementById("file").onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // Check if file is image and get base64
+                    const mimeType = file.type;
+                    if (mimeType.startsWith('image/')) {
+                         // The API expects the MIME type in the inlineData object
+                        const base64Data = e.target.result.split(",")[1];
+                        // Use just the base64 string for now, simpler handling
+                        imageBase64 = base64Data; 
+                        document.getElementById("file-preview").classList.remove("hidden");
+                    } else {
+                        console.error("File is not a supported image type.");
+                        document.getElementById("file").value = ""; // Clear file input
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                 document.getElementById("file-preview").classList.add("hidden");
+                 imageBase64 = null;
+            }
+        };
 
         // Global Functions
         window.newChat = async () => {
-            if (!userId) {
-                console.error("Cannot clear chat: User ID not available.");
-                return;
-            }
-            // Use a custom UI element for confirmation instead of confirm()
-            if (!window.confirm("Are you sure you want to clear the entire chat history?")) return; 
-            
+            if (!userId || !confirm("Clear history?")) return;
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const chatsRef = collection(db, "artifacts", appId, "users", userId, "chats");
             const snap = await getDocs(chatsRef);
-            
-            document.getElementById("loading").classList.remove("hidden");
-            
-            // Batch delete is better, but simple loop works here
-            const deletePromises = snap.docs.map((doc) => deleteDoc(doc.ref));
-            await Promise.all(deletePromises);
-            
-            document.getElementById("loading").classList.add("hidden");
+            snap.forEach((doc) => deleteDoc(doc.ref));
         };
 
-        // Option Buttons
         document.querySelectorAll(".option").forEach(btn => {
             btn.onclick = () => {
                 document.getElementById("input").value = btn.getAttribute("data-text");
@@ -387,17 +351,14 @@
             };
         });
 
-        // Theme Toggle
         document.getElementById("theme-toggle").onclick = () => document.documentElement.classList.toggle("dark");
 
         // Auto-resize textarea
         const textarea = document.getElementById('input');
-        if (textarea) {
-            textarea.addEventListener('input', () => {
-                textarea.style.height = 'auto';
-                textarea.style.height = textarea.scrollHeight + 'px';
-            });
-        }
+        textarea.addEventListener('input', () => {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        });
     }
 </script>
 </body>
