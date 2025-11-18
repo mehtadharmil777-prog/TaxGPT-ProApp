@@ -138,20 +138,19 @@
     import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
     // --- CONFIGURATION ---
-    // Mandatory: Use the global config and token provided by the environment
     const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-    // Hardcoded API keys are replaced by the global environment variables 
-    const GEMINI_API_KEY = ""; // Environment handles this
-    const MODEL = "gemini-2.5-flash-preview-09-2025"; // Updated to current recommended model
+    // NOTE: This variable is ONLY for local testing in this specific Canvas environment.
+    // For Vercel, the app calls the /api/chat proxy endpoint.
+    const GEMINI_API_KEY = ""; 
+    const MAX_RETRIES = 5;
 
     // --- APP LOGIC ---
     let app, db, auth;
     let userId = null;
     let imageBase64 = null;
 
-    // Use DOMContentLoaded to ensure elements exist before script tries to access them
     document.addEventListener('DOMContentLoaded', async () => {
         // Initialize Firebase
         try {
@@ -187,22 +186,18 @@
             }
         });
         
-        // Attach event listeners after the DOM is ready
         setupEventListeners();
     });
 
     function startListening() {
         if (!userId) return;
-        // Correct path for private data: /artifacts/{appId}/users/{userId}/{your_collection_name}
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const chatsRef = collection(db, "artifacts", appId, "users", userId, "chats");
         
-        // Firestore best practice: Do not use orderBy for simple snapshot query
         const q = query(chatsRef); 
         
         onSnapshot(q, (snapshot) => {
             const history = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            // Sort in JavaScript instead of using Firestore orderBy to avoid index errors
             history.sort((a, b) => a.timestamp - b.timestamp); 
             renderHistory(history);
         }, (error) => {
@@ -227,7 +222,6 @@
         history.forEach(msg => {
             const div = document.createElement("div");
             const isModel = msg.role === "model";
-            // Use the text field, as display might not exist in older messages
             const content = msg.text; 
             div.className = "flex w-full " + (isModel ? "justify-start" : "justify-end");
             const bubbleClass = isModel ? "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 ai-output" : "bg-indigo-600 text-white";
@@ -241,33 +235,100 @@
         historyBox.scrollTop = historyBox.scrollHeight;
     }
 
-    // API Call (Fixed string concatenation)
+    // Function that calls either the secure environment API (for testing here) or the Vercel proxy.
     async function callGemini(prompt, image) {
+        // If GEMINI_API_KEY is empty (as it is here), we use the secure internal function 
+        // that relies on the Canvas environment's security mechanism.
+        if (GEMINI_API_KEY === "") {
+             return callGeminiSecurely(prompt, image);
+        }
+        
+        // --- PROXY CALL LOGIC (For Vercel/Netlify Deployment) ---
+        const payload = { prompt, image }; 
+        const url = "/api/chat"; // This is the new endpoint we are creating
+        
+        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    return data.response || "No response content (check proxy log).";
+                }
+                
+                // Use exponential backoff for retries
+                if (attempt < MAX_RETRIES - 1) {
+                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } else {
+                    return "Error (" + response.status + "): " + (data.error || "Failed to connect to proxy after multiple retries.");
+                }
+
+            } catch (error) {
+                if (attempt < MAX_RETRIES - 1) {
+                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } else {
+                    console.error("Proxy Error:", error);
+                    return "Error: Could not connect to the secure chat server.";
+                }
+            }
+        }
+        return "Unknown error occurred.";
+    }
+
+    // Function used ONLY for testing in this Canvas environment.
+    async function callGeminiSecurely(prompt, image) {
+        const MODEL = "gemini-2.5-flash-preview-09-2025"; 
         const parts = [{ text: prompt }];
         if (image) {
             parts.push({ inlineData: { mimeType: "image/jpeg", data: image } });
         }
         
-        const url = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL + ":generateContent?key=" + GEMINI_API_KEY;
+        const url = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL + ":generateContent";
+        
+        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: parts }],
+                        systemInstruction: { parts: [{ text: "You are TaxGPT. Provide clear, structured tax analysis and answers based on up-to-date information. Use markdown for formatting." }] }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response content (check safety filters).";
+                }
+                
+                if (attempt < MAX_RETRIES - 1) {
+                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } else {
+                    const message = data.error?.message || "Failed to connect after multiple retries.";
+                    return "Error: " + message;
+                }
 
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ role: "user", parts: parts }],
-                    systemInstruction: { parts: [{ text: "You are TaxGPT. Provide clear, structured tax analysis and answers based on up-to-date information. Use markdown for formatting." }] }
-                })
-            });
-            
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error?.message || "API Error");
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response content (check safety filters).";
-        } catch (error) {
-            console.error("Gemini Error:", error);
-            return "Error: " + error.message + ". Please ensure your API key is correct or provided by the environment.";
+            } catch (error) {
+                if (attempt < MAX_RETRIES - 1) {
+                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } else {
+                    return "Error: " + error.message + ". Check your network connection.";
+                }
+            }
         }
+        return "Unknown error occurred.";
     }
+
 
     // Save to Firestore
     async function saveMessage(role, text) {
@@ -296,7 +357,7 @@
             document.getElementById("file-preview").classList.add("hidden");
 
             try {
-                await saveMessage("user", text);
+                await saveMessage("user", text); 
                 const response = await callGemini(text, imageBase64);
                 await saveMessage("model", response);
             } catch (err) {
@@ -315,17 +376,14 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    // Check if file is image and get base64
                     const mimeType = file.type;
                     if (mimeType.startsWith('image/')) {
-                         // The API expects the MIME type in the inlineData object
                         const base64Data = e.target.result.split(",")[1];
-                        // Use just the base64 string for now, simpler handling
                         imageBase64 = base64Data; 
                         document.getElementById("file-preview").classList.remove("hidden");
                     } else {
                         console.error("File is not a supported image type.");
-                        document.getElementById("file").value = ""; // Clear file input
+                        document.getElementById("file").value = ""; 
                     }
                 };
                 reader.readAsDataURL(file);
