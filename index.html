@@ -7,10 +7,6 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-
     <style>
         html { transition: background 0.3s, color 0.3s; }
         .dark body { background-color: #0d0d0d; color: #e5e5e5; }
@@ -100,10 +96,15 @@
     </main>
 </div>
 
-<script>
+<script type="module">
 
-/* ---------------------- 1. FIREBASE INITIALIZATION ---------------------- */
-// **CORRECTED FIREBASE KEY**: AIzaSyBh8epAN_XqXxjBoQRweMZdblJJRNyzlgU
+/* ---------------------- 1. FIREBASE IMPORTS & INITIALIZATION ---------------------- */
+// Importing functions directly from modular CDN links
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getFirestore, collection, doc, orderBy, onSnapshot, addDoc, getDocs, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+
 const firebaseConfig = {
     apiKey: "AIzaSyBh8epAN_XqXxjBoQRweMZdblJJRNyzlgU", 
     authDomain: "taxgpt-f688d.firebaseapp.com",
@@ -113,40 +114,40 @@ const firebaseConfig = {
     appId: "1:367175296836:web:2f8645d9e51c14d93540b0"
 };
 
-// CORRECT: Uses the global 'firebase' object
-firebase.initializeApp(firebaseConfig); 
-const db = firebase.firestore(); 
-const auth = firebase.auth();
+// MODULAR SYNTAX: initializeApp returns the app object
+const app = initializeApp(firebaseConfig); 
+const db = getFirestore(app); // MODULAR SYNTAX: getFirestore takes the app object
+const auth = getAuth(app); // MODULAR SYNTAX: getAuth takes the app object
 
 let userId = null;
 let lastModelMsg = null;
 let imageBase64 = null;
 
-/* ---------------------- 2. AUTHENTICATION ---------------------- */
-auth.signInAnonymously().catch(console.error);
+/* ---------------------- 2. AUTHENTICATION (MODULAR) ---------------------- */
+signInAnonymously(auth).catch(console.error); // MODULAR: takes auth object
 
-auth.onAuthStateChanged(u => {
+onAuthStateChanged(auth, (u) => { // MODULAR: takes auth object
     if (!u) return;
     userId = u.uid;
     document.getElementById("user-id").textContent = userId;
     listenHistory(); 
 });
 
-/* ---------------------- 3. HISTORY LISTENER ---------------------- */
+/* ---------------------- 3. HISTORY LISTENER (MODULAR) ---------------------- */
 function listenHistory() {
     if (!userId) return;
 
-    db.collection("users")
-      .doc(userId)
-      .collection("chats")
-      .orderBy("timestamp", "asc")
-      .onSnapshot(snap => {
-          const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          renderHistory(history);
-      });
+    onSnapshot( // MODULAR SYNTAX
+        collection(db, "users", userId, "chats"), // MODULAR SYNTAX
+        orderBy("timestamp", "asc"), // MODULAR SYNTAX
+        (snap) => {
+            const history = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderHistory(history);
+        }
+    );
 }
 
-/* ---------------------- 4. RENDER HISTORY ---------------------- */
+/* ---------------------- 4. RENDER HISTORY (UNCHANGED) ---------------------- */
 function renderHistory(history) {
     const box = document.getElementById("history");
     const features = document.getElementById("features");
@@ -186,23 +187,19 @@ function renderHistory(history) {
     box.scrollTop = box.scrollHeight;
 }
 
-/* ---------------------- 5. SAVE MESSAGE ---------------------- */
-function save(role, text, display = null) {
+/* ---------------------- 5. SAVE MESSAGE (MODULAR) ---------------------- */
+async function save(role, text, display = null) {
     if (!userId) return;
 
-    return db.collection("users")
-        .doc(userId)
-        .collection("chats")
-        .add({
-            role,
-            text,
-            display: display || text,
-            timestamp: Date.now()
-        });
+    await addDoc(collection(db, "users", userId, "chats"), { // MODULAR SYNTAX
+        role,
+        text,
+        display: display || text,
+        timestamp: Date.now()
+    });
 }
 
-/* ---------------------- 6. GEMINI API CALL ---------------------- */
-// **GEMINI KEY INCLUDED**
+/* ---------------------- 6. GEMINI API CALL (UNCHANGED) ---------------------- */
 const GEMINI_API_KEY = "AIzaSyBWeCTjOJfavIoYQ-1hsKDMddVuP3O3x34"; 
 const MODEL = "gemini-1.5-flash";
 
@@ -239,7 +236,7 @@ async function callGemini(prompt, image = null) {
     return json?.candidates?.[0]?.content?.parts?.[0]?.text || "No response. (Check API key, network, and console for 400/403 errors).";
 }
 
-/* ---------------------- 7. FORM SUBMISSION ---------------------- */
+/* ---------------------- 7. FORM SUBMISSION (UNCHANGED) ---------------------- */
 document.getElementById("form").onsubmit = async (e) => {
     e.preventDefault();
 
@@ -267,7 +264,7 @@ document.getElementById("form").onsubmit = async (e) => {
     document.getElementById("loading").classList.add("hidden");
 };
 
-/* ---------------------- 8. FILE UPLOAD & THEME ---------------------- */
+/* ---------------------- 8. FILE UPLOAD & THEME (UNCHANGED) ---------------------- */
 document.getElementById("file").onchange = e => {
     const file = e.target.files[0];
     const r = new FileReader();
@@ -281,21 +278,19 @@ document.getElementById("file").onchange = e => {
 document.getElementById("theme-toggle").onclick = () =>
     document.documentElement.classList.toggle("dark");
 
-/* ---------------------- 9. NEW CHAT ---------------------- */
-function newChat() {
+/* ---------------------- 9. NEW CHAT (MODULAR) ---------------------- */
+async function newChat() {
     if (!userId) return;
 
     document.getElementById("history").innerHTML = "";
     document.getElementById("initial-view").classList.remove("hidden");
 
-    db.collection("users")
-        .doc(userId)
-        .collection("chats")
-        .get()
-        .then(snap => snap.forEach(doc => doc.ref.delete()));
+    const snap = await getDocs(collection(db, "users", userId, "chats")); // MODULAR SYNTAX
+
+    snap.forEach(doc => deleteDoc(doc.ref)); // MODULAR SYNTAX
 }
 
-/* ---------------------- 10. INITIAL OPTION HANDLERS ---------------------- */
+/* ---------------------- 10. INITIAL OPTION HANDLERS (UNCHANGED) ---------------------- */
 document.querySelectorAll(".option").forEach(btn => {
     btn.onclick = () => {
         document.getElementById("input").value = btn.getAttribute("data-text");
