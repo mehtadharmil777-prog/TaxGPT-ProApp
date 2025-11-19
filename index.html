@@ -3,153 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaxGPT Pro</title>
+    <title>TaxGPT Pro | Advanced AI Accountant</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        html { transition: background 0.3s, color 0.3s; }
-        .dark body { background-color: #0d0d0d; color: #e5e5e5; }
-        .ai-output h2 { font-size: 1.5rem; margin-top: 1rem; font-weight: 700; }
-        #chatHistory::-webkit-scrollbar { width: 8px; }
-        #chatHistory::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f9; }
+        
+        /* Gemini-like Gradient Text */
+        .gemini-text {
+            background: linear-gradient(90deg, #4b90ff, #ff5546);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Markdown Styles */
+        .prose h3 { font-weight: 700; font-size: 1.1em; margin-top: 1em; margin-bottom: 0.5em; color: #1e293b; }
+        .prose ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+        .prose ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
+        .prose strong { color: #0f172a; font-weight: 700; }
+        .prose table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.9em; }
+        .prose th { background: #f1f5f9; padding: 8px; text-align: left; border: 1px solid #e2e8f0; font-weight: 600; }
+        .prose td { padding: 8px; border: 1px solid #e2e8f0; }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-animate { animation: fadeIn 0.4s ease-out forwards; }
+        
+        .typing-dot { animation: bounce 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-black dark:text-white font-sans">
+<body class="h-screen flex overflow-hidden text-gray-800">
 
-<button id="theme-toggle" class="fixed top-4 right-4 z-50 bg-gray-200 dark:bg-gray-700 p-3 rounded-full shadow cursor-pointer">🌙</button>
+    <aside class="w-72 bg-gray-50 flex flex-col border-r border-gray-200 hidden md:flex">
+        <div class="p-6">
+            <div class="flex items-center gap-2 mb-6">
+                <i class="fa-solid fa-sparkles text-blue-600 text-xl"></i>
+                <h1 class="text-xl font-bold tracking-tight text-gray-700">TaxGPT <span class="text-blue-600">Pro</span></h1>
+            </div>
+            
+            <button onclick="switchMode('chat')" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-3 px-4 rounded-xl transition flex items-center gap-3 text-left mb-2">
+                <i class="fa-solid fa-message"></i> Consultation
+            </button>
+            <button onclick="switchMode('tools')" class="w-full bg-white hover:bg-gray-100 text-gray-700 font-medium py-3 px-4 rounded-xl transition flex items-center gap-3 text-left border border-gray-200 shadow-sm">
+                <i class="fa-solid fa-calculator"></i> Tax Tools <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full ml-auto">New</span>
+            </button>
+        </div>
 
-<div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl text-lg font-semibold">Processing...</div>
-</div>
-
-<div class="flex h-screen overflow-hidden">
-    <aside class="hidden md:flex flex-col w-72 bg-white dark:bg-gray-900 border-r dark:border-gray-800 p-6 shadow-lg z-20">
-        <div class="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-8">TaxGPT Pro</div>
-        <button onclick="window.location.reload()" class="bg-indigo-600 text-white py-3 px-4 rounded-xl mb-6 shadow-md">+ New Chat</button>
-    </aside>
-
-    <main class="flex-1 flex flex-col relative h-full">
-        <div id="initial-view" class="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-8">
-            <h2 class="text-3xl font-bold">How can I help you?</h2>
-            <div class="flex flex-wrap justify-center gap-4">
-                <button class="option bg-white dark:bg-gray-800 border p-6 rounded-2xl w-40 shadow-sm" onclick="setInput('I need quick tax advice regarding...')">⚡ Quick Query</button>
-                <button class="option bg-white dark:bg-gray-800 border p-6 rounded-2xl w-40 shadow-sm" onclick="setInput('Provide deep legal tax research on...')">🏛️ Deep Research</button>
+        <div class="flex-1 overflow-y-auto px-6">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Recent Context</h3>
+            <div class="text-sm text-gray-500 space-y-3">
+                <p class="hover:text-blue-600 cursor-pointer truncate"><i class="fa-regular fa-comment mr-2"></i> VAT Threshold 2025</p>
+                <p class="hover:text-blue-600 cursor-pointer truncate"><i class="fa-regular fa-comment mr-2"></i> Corp Tax Inquiry</p>
             </div>
         </div>
 
-        <div id="history" class="hidden flex-1 w-full p-8 overflow-y-auto space-y-6 pb-32"></div>
-
-        <div class="p-6 bg-white dark:bg-black fixed bottom-0 w-full max-w-4xl left-0 right-0 mx-auto">
-            <form id="form" class="flex items-center gap-2 bg-gray-100 dark:bg-gray-900 p-2 rounded-2xl border">
-                <input type="file" id="file" accept="image/*" class="hidden">
-                <label for="file" class="p-2 cursor-pointer text-gray-400 hover:text-indigo-600">📎</label>
-                <input id="input" class="flex-1 p-3 bg-transparent border-0 focus:ring-0 dark:text-white" placeholder="Ask anything about taxes...">
-                <button type="submit" class="p-3 bg-indigo-600 text-white rounded-xl">➤</button>
-            </form>
-            <div id="file-preview" class="hidden text-xs text-indigo-600 mt-2">Image attached</div>
+        <div class="p-4 border-t border-gray-200 bg-gray-100">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
+                    DM
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-gray-800">Dharmil Mehta</p>
+                    <p class="text-xs text-gray-500">Lead Developer</p>
+                </div>
+            </div>
         </div>
-    </main>
-</div>
+    </aside>
 
-<script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-    import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyC2yEjdOBRxrn4-GIM4Wyti9O6OvdnhhSg",
-      authDomain: "taxgpt-f688d.firebaseapp.com",
-      projectId: "taxgpt-f688d",
-      storageBucket: "taxgpt-f688d.firebasestorage.app",
-      messagingSenderId: "443595897158",
-      appId: "1:443595897158:web:ff9ab1bdc19c915d4e0d47",
-      measurementId: "G-QLS0ZZC8PV"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    let userId = null;
-    let imageBase64 = null;
-
-    signInAnonymously(auth).catch(e => console.error(e));
-
-    onAuthStateChanged(auth, (u) => {
-        if (u) {
-            userId = u.uid;
-            const q = query(collection(db, "artifacts", "default-app-id", "users", userId, "chats"), orderBy("timestamp", "asc"));
-            onSnapshot(q, (snap) => {
-                const history = snap.docs.map(d => d.data());
-                renderHistory(history);
-            });
-        }
-    });
-
-    function renderHistory(history) {
-        const historyBox = document.getElementById("history");
-        const initialView = document.getElementById("initial-view");
-        if (history.length > 0) {
-            initialView.classList.add("hidden");
-            historyBox.classList.remove("hidden");
-        }
-        historyBox.innerHTML = "";
-        history.forEach(msg => {
-            const div = document.createElement("div");
-            div.className = `flex w-full ${msg.role === "model" ? "justify-start" : "justify-end"}`;
-            div.innerHTML = `<div class="max-w-[75%] p-4 rounded-2xl shadow-sm ${msg.role === "model" ? "bg-white dark:bg-gray-800" : "bg-indigo-600 text-white"}">${msg.text}</div>`;
-            historyBox.appendChild(div);
-        });
-        historyBox.scrollTop = historyBox.scrollHeight;
-    }
-
-    window.setInput = (text) => {
-        document.getElementById("input").value = text;
-        document.getElementById("input").focus();
-    }
-
-    document.getElementById("file").onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imageBase64 = e.target.result.split(",")[1];
-                document.getElementById("file-preview").classList.remove("hidden");
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    document.getElementById("form").onsubmit = async (e) => {
-        e.preventDefault();
-        const text = document.getElementById("input").value;
-        if (!text && !imageBase64) return;
-        if (!userId) return alert("Connecting... please wait.");
-
-        document.getElementById("loading").classList.remove("hidden");
-        document.getElementById("input").value = "";
-        document.getElementById("file-preview").classList.add("hidden");
-
-        // Save User Message
-        await addDoc(collection(db, "artifacts", "default-app-id", "users", userId, "chats"), { role: "user", text, timestamp: Date.now() });
-
-        // Call Vercel Proxy
-        try {
-            const res = await fetch("/api/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt: text, image: imageBase64 })
-            });
-            const data = await res.json();
-            await addDoc(collection(db, "artifacts", "default-app-id", "users", userId, "chats"), { role: "model", text: data.response || "Error: No response", timestamp: Date.now() });
-        } catch (err) {
-            console.error(err);
-            await addDoc(collection(db, "artifacts", "default-app-id", "users", userId, "chats"), { role: "model", text: "Error connecting to AI.", timestamp: Date.now() });
-        }
+    <main class="flex-1 flex flex-col relative bg-white">
         
-        imageBase64 = null;
-        document.getElementById("loading").classList.add("hidden");
-    };
+        <div class="md:hidden bg-white border-b border-gray-200 p-4 flex justify-between items-center z-10">
+            <span class="font-bold text-lg text-gray-700">TaxGPT Pro</span>
+            <button onclick="switchMode('tools')" class="text-gray-600"><i class="fa-solid fa-calculator"></i></button>
+        </div>
 
-    document.getElementById("theme-toggle").onclick = () => document.documentElement.classList.toggle("dark");
-</script>
+        <div id="view-chat" class="flex-1 flex flex-col h-full relative">
+            
+            <div id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-12 space-y-8 pb-32">
+                
+                <div class="max-w-3xl mx-auto mt-10 text-center">
+                    <div class="inline-block p-3 rounded-full bg-blue-50 mb-4">
+                        <i class="fa-solid fa-robot text-3xl text-blue-600"></i>
+                    </div>
+                    <h2 class="text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                        Hello, Dharmil.
+                    </h2>
+                    <h3 class="text-xl text-gray-400 font-light mb-8">How can I help with your accounts today?</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+                        <button onclick="setInput('What is the current UK VAT threshold?')" class="p-4 rounded-2xl bg-gray-50 hover:bg-blue-50 border border-transparent hover:border-blue-200 transition group">
+                            <p class="font-semibold text-gray-700 group-hover:text-blue-700">VAT Inquiry</p>
+                            <p class="text-sm text-gray-400">Check 2025 registration limits</p>
+                        </button>
+                        <button onclick="setInput('Draft a professional letter to HMRC about late filing.')" class="p-4 rounded-2xl bg-gray-50 hover:bg-blue-50 border border-transparent hover:border-blue-200 transition group">
+                            <p class="font-semibold text-gray-700 group-hover:text-blue-700">Draft Letter</p>
+                            <p class="text-sm text-gray-400">Professional correspondence</p>
+                        </button>
+                        <button onclick="setInput('Explain Dividend Tax rates for a Ltd Company director.')" class="p-4 rounded-2xl bg-gray-50 hover:bg-blue-50 border border-transparent hover:border-blue-200 transition group">
+                            <p class="font-semibold text-gray-700 group-hover:text-blue-700">Tax Planning</p>
+                            <p class="text-sm text-gray-400">Director dividends guide</p>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="loading" class="hidden absolute bottom-24 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-lg border border-gray-100 flex items-center gap-2 z-20">
+                <i class="fa-solid fa-sparkles text-blue-500 animate-pulse"></i>
+                <span class="text-sm text-gray-600 font-medium">Deep Researching...</span>
+            </div>
+
+            <div class="absolute bottom-0 left-0 w-full bg-white p-4 md:p-6">
+                <div class="max-w-4xl mx-auto relative">
+                    <div class="bg-gray-100 rounded-3xl flex items-center p-2 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-100 focus-within:shadow-lg">
+                        <button onclick="clearChat()" class="p-3 text-gray-400 hover:text-red-500 transition tooltip" title="Clear Chat">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                        <input type="text" id="user-input" 
+                            class="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder-gray-500 px-4"
+                            placeholder="Ask anything about UK Tax..." autocomplete="off">
+                        <button id="send-btn" class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md transition transform hover:scale-105">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <p class="text-center text-xs text-gray-400 mt-3">
+                        TaxGPT Pro may display inaccurate info, including about people, so double-check its responses.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-tools" class="hidden flex-1 h-full overflow-y-auto bg-gray-50 p-6 md:p-12">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Accountant's Toolkit</h2>
+                <p class="text-gray-500 mb-8">Instant calculations based on 2025/2026 UK Tax Bands.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-percent"></i></div>
+                            <h3 class="font-bold text-lg">VAT Reverser</h3>
+                        </div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Total Amount (£)</label>
+                        <input type="number" id="vat-input" class="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4" placeholder="e.g. 120">
+                        <button onclick="calculateVAT()" class="w-full bg-gray-900 text-white py-2 rounded-lg font-medium hover:bg-black">Calculate</button>
+                        <div id="vat-result" class="mt-4 p-4 bg-orange-50 rounded-xl text-sm hidden"></div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-sterling-sign"></i></div>
+                            <h3 class="font-bold text-lg">Salary Take-Home</h3>
+                        </div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Annual Gross (£)</label>
+                        <input type="number" id="salary-input" class="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 mb-4" placeholder="e.g. 50000">
+                        <button onclick="calculateSalary()" class="w-full bg-gray-900 text-white py-2 rounded-lg font-medium hover:bg-black">Estimate</button>
+                        <div id="salary-result" class="mt-4 p-4 bg-green-50 rounded-xl text-sm hidden"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- CONFIGURATION ---
+        // The System Prompt makes it smart. We hardcode 2025 tax data here.
+        const SYSTEM_PROMPT = `
+        You are TaxGPT Pro, built by Dharmil Mehta. You are an expert UK Chartered Accountant (ACCA level).
+        
+        CORE KNOWLEDGE (2025/2026 UK TAX YEAR):
+        - Personal Allowance: £12,570
+        - Basic Rate (20%): £12,571 to £50,270
+        - Higher Rate (40%): £50,271 to £125,140
+        - Additional Rate (45%): Over £125,140
+        - Dividend Allowance: £500
+        - Corp Tax: 19% (profits <£50k), 25% (profits >£250k), marginal relief between.
+        - VAT Threshold: £90,000.
+        
+        STYLE GUIDE:
+        1. Use Markdown for everything. Use **Bold** for numbers.
+        2. Use Tables for comparisons.
+        3. Be concise but professional.
+        4. Always act as a high-end consultant.
+        `;
+
+        // --- DOM ELEMENTS ---
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const loading = document.getElementById('loading');
+
+        // --- NAVIGATION ---
+        function switchMode(mode) {
+            if(mode === 'chat') {
+                document.getElementById('view-chat').classList.remove('hidden');
+                document.getElementById('view-tools').classList.add('hidden');
+            } else {
+                document.getElementById('view-chat').classList.add('hidden');
+                document.getElementById('view-tools').classList.remove('hidden');
+            }
+        }
+
+        function setInput(text) {
+            userInput.value = text;
+            userInput.focus();
+        }
+
+        function clearChat() {
+            chatContainer.innerHTML = `
+                <div class="max-w-3xl mx-auto mt-10 text-center opacity-50">
+                    <p class="italic">Chat cleared. Start a new tax consultation.</p>
+                </div>
+            `;
+        }
+
+        // --- CHAT LOGIC ---
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // 1. Add User Message
+            appendMessage('user', text);
+            userInput.value = '';
+            loading.classList.remove('hidden');
+
+            // 2. Prepare the payload
+            const finalPayload = `${SYSTEM_PROMPT}\n\nUSER QUERY: ${text}`;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: finalPayload })
+                });
+
+                const data = await response.json();
+                loading.classList.add('hidden');
+
+                if (data.error) {
+                    appendMessage('bot', "⚠️ **Error:** " + data.error);
+                } else {
+                    appendMessage('bot', data.response);
+                }
+            } catch (err) {
+                loading.classList.add('hidden');
+                appendMessage('bot', "⚠️ **Connection Failed.** Please check your network.");
+            }
+        }
+
+        function appendMessage(role, text) {
+            const div = document.createElement('div');
+            div.className = "msg-animate max-w-3xl mx-auto flex gap-4 mb-6";
+            
+            // Convert Markdown to HTML using Marked.js
+            const htmlContent = marked.parse(text);
+
+            if (role === 'user') {
+                div.innerHTML = `
+                    <div class="flex-1 flex justify-end">
+                        <div class="bg-gray-100 text-gray-800 py-3 px-5 rounded-2xl rounded-tr-none max-w-[80%]">
+                            <p>${text}</p>
+                        </div>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">U</div>
+                `;
+            } else {
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-md">
+                        <i class="fa-solid fa-sparkles text-xs"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="bg-transparent text-gray-800 prose leading-relaxed">
+                            ${htmlContent}
+                        </div>
+                    </div>
+                `;
+            }
+            chatContainer.appendChild(div);
+            // Smooth scroll to bottom
+            chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+        }
+
+        // --- CALCULATOR LOGIC (HARDCODED JS) ---
+        function calculateVAT() {
+            const amount = parseFloat(document.getElementById('vat-input').value);
+            if(!amount) return;
+            
+            const net = (amount / 1.2).toFixed(2);
+            const vat = (amount - net).toFixed(2);
+            
+            const resultBox = document.getElementById('vat-result');
+            resultBox.classList.remove('hidden');
+            resultBox.innerHTML = `
+                <p><strong>Net:</strong> £${net}</p>
+                <p><strong>VAT (20%):</strong> £${vat}</p>
+                <p><strong>Gross:</strong> £${amount.toFixed(2)}</p>
+            `;
+        }
+
+        function calculateSalary() {
+            const gross = parseFloat(document.getElementById('salary-input').value);
+            if(!gross) return;
+            
+            // Simplified UK Tax Logic 2025
+            let tax = 0;
+            if (gross > 12570) tax += (Math.min(gross, 50270) - 12570) * 0.20;
+            if (gross > 50270) tax += (gross - 50270) * 0.40;
+            
+            const ni = (gross > 12570) ? (gross - 12570) * 0.08 : 0; // Approx NI
+            const net = gross - tax - ni;
+
+            const resultBox = document.getElementById('salary-result');
+            resultBox.classList.remove('hidden');
+            resultBox.innerHTML = `
+                <div class="flex justify-between border-b border-green-200 pb-2 mb-2">
+                    <span>Take Home:</span>
+                    <span class="font-bold text-lg">£${net.toFixed(2)}</span>
+                </div>
+                <div class="text-xs text-gray-600 space-y-1">
+                    <p>Tax: £${tax.toFixed(2)}</p>
+                    <p>NI (Est): £${ni.toFixed(2)}</p>
+                    <p>Monthly: £${(net/12).toFixed(2)}</p>
+                </div>
+            `;
+        }
+
+        // Listeners
+        document.getElementById('send-btn').addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    </script>
 </body>
 </html>
