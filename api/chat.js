@@ -1,6 +1,6 @@
 // api/chat.js
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const MODEL = "gemini-1.5-flash";
+const MODEL = "gemini-pro";
 
 export default async function handler(req, res) {
   // 1. THE DOORMAN (Security Headers)
