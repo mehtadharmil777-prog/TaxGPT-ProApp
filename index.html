@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaxGPT Pro | Intelligent Tax AI</title>
+    <title>TaxGPT Pro | Financial Command Center</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,10 +16,10 @@
                     colors: { brand: { 50: '#f0f9ff', 500: '#0ea5e9', 600: '#0284c7' } },
                     animation: {
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'shimmer': 'shimmer 1.5s infinite linear'
+                        'ticker': 'ticker 30s linear infinite',
                     },
                     keyframes: {
-                        shimmer: { '0%': { backgroundPosition: '-1000px 0' }, '100%': { backgroundPosition: '1000px 0' } }
+                        ticker: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(-100%)' } }
                     }
                 }
             }
@@ -30,6 +30,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         body, aside, div, span, button { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -37,9 +38,6 @@
         ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 10px; }
         .dark ::-webkit-scrollbar-thumb { background: #3f3f46; }
         
-        .prose h3 { font-weight: 600; font-size: 1.1em; margin-top: 1.2em; color: inherit; }
-        .prose ul { list-style-type: disc; padding-left: 1.4em; margin-bottom: 1em; }
-        .prose strong { font-weight: 600; color: inherit; }
         .prose table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 1em 0; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; font-size: 0.9em; }
         .dark .prose table { border-color: #27272a; }
         .prose th { background: #f8fafc; padding: 10px 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb; }
@@ -49,24 +47,34 @@
 
         .logo-gradient { background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); }
         .mic-active { color: #ef4444 !important; animation: pulse 1.5s infinite; }
-        
-        /* Skeleton Loader */
-        .skeleton { background: linear-gradient(to right, #f6f7f8 8%, #edeef1 18%, #f6f7f8 33%); background-size: 800px 104px; animation: shimmer 1.5s infinite linear forwards; }
-        .dark .skeleton { background: linear-gradient(to right, #1f1f23 8%, #2a2a2d 18%, #1f1f23 33%); }
+        .dot-flashing { position: relative; width: 6px; height: 6px; border-radius: 5px; background-color: #0ea5e9; animation: dot-flashing 1s infinite linear alternate; animation-delay: 0.5s; }
+        .dot-flashing::before, .dot-flashing::after { content: ''; display: inline-block; position: absolute; top: 0; width: 6px; height: 6px; border-radius: 5px; background-color: #0ea5e9; animation: dot-flashing 1s infinite alternate; }
+        .dot-flashing::before { left: -10px; animation-delay: 0s; }
+        .dot-flashing::after { left: 10px; animation-delay: 1s; }
+        @keyframes dot-flashing { 0% { background-color: #0ea5e9; } 50%, 100% { background-color: #e0f2fe; } }
     </style>
 </head>
 <body class="bg-white dark:bg-[#09090b] text-slate-900 dark:text-slate-50 h-screen flex overflow-hidden font-sans relative">
 
-    <div id="toast-container" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <div class="fixed top-0 left-0 w-full h-8 bg-slate-900 text-white z-50 flex items-center overflow-hidden whitespace-nowrap border-b border-slate-700">
+        <div class="px-4 bg-blue-600 h-full flex items-center text-xs font-bold z-10 shadow-lg">LIVE UPDATES</div>
+        <div class="animate-ticker inline-block pl-4 text-xs font-medium tracking-wide">
+            <span class="mx-4">🇬🇧 UK Spring Budget: Chancellor announces changes to Non-Dom status.</span> • 
+            <span class="mx-4">🇺🇸 IRS: Standard deduction increased for 2025 tax year.</span> • 
+            <span class="mx-4">🇦🇪 UAE: Corporate Tax registration deadline approaching.</span> • 
+            <span class="mx-4">🇪🇺 EU: New VAT rules for digital services effective next month.</span> • 
+            <span class="mx-4">🇮🇳 India: New TCS rates on foreign remittances.</span>
+        </div>
+    </div>
 
-    <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm hidden">
+    <div id="login-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm hidden">
         <div class="bg-white dark:bg-[#18181b] p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-gray-100 dark:border-gray-800 transform transition-all scale-100">
             <div class="text-center mb-8">
                 <div class="w-14 h-14 logo-gradient rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4 text-white text-2xl">
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
                 <h2 class="text-2xl font-bold tracking-tight">TaxGPT Pro</h2>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Professional Tax Intelligence</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Financial Command Center</p>
             </div>
             <div class="space-y-3">
                 <button onclick="mockLogin('Google')" class="w-full bg-white dark:bg-[#27272a] border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#3f3f46] text-gray-700 dark:text-white font-medium py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-3">
@@ -78,7 +86,7 @@
         </div>
     </div>
 
-    <aside id="sidebar" class="w-[260px] bg-[#f8fafc] dark:bg-[#101012] flex flex-col h-full hidden md:flex border-r border-gray-200 dark:border-gray-800 flex-shrink-0">
+    <aside id="sidebar" class="w-[260px] bg-[#f8fafc] dark:bg-[#101012] flex flex-col h-full hidden md:flex border-r border-gray-200 dark:border-gray-800 flex-shrink-0 pt-8">
         <div class="p-4 flex items-center justify-between mb-2">
             <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-200 dark:hover:bg-[#27272a] rounded-lg text-gray-500 transition"><i class="fa-solid fa-bars text-lg"></i></button>
             <div onclick="goToHome()" class="flex-1 ml-3 font-bold text-lg tracking-tight cursor-pointer hover:opacity-70 transition select-none">TaxGPT</div>
@@ -92,7 +100,9 @@
             </button>
         </div>
 
-        <div class="flex-1 overflow-y-auto px-2 py-2 scrollbar-hide" id="history-list"></div>
+        <div class="flex-1 overflow-y-auto px-2 py-2 scrollbar-hide" id="history-list">
+            <div class="sidebar-text px-4 py-2 text-[10px] font-bold text-gray-400 tracking-wider uppercase">Recent Activity</div>
+        </div>
 
         <div class="mt-auto p-3 space-y-1 border-t border-gray-200 dark:border-gray-800">
             <div class="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 text-xs cursor-default whitespace-nowrap overflow-hidden">
@@ -113,51 +123,51 @@
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col relative h-full w-full">
-        <div class="md:hidden h-14 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-black/80 backdrop-blur-md z-20 absolute top-0 w-full">
+    <main class="flex-1 flex flex-col relative h-full w-full pt-8">
+        
+        <div class="md:hidden h-14 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-black/80 backdrop-blur-md z-20 absolute top-8 w-full">
             <button onclick="toggleSidebarMobile()" class="text-gray-500"><i class="fa-solid fa-bars"></i></button>
             <div onclick="goToHome()" class="font-bold text-lg tracking-tight cursor-pointer">TaxGPT <span class="text-blue-500">Pro</span></div>
             <div class="w-6"></div>
         </div>
 
-        <button id="scroll-down-btn" onclick="scrollToBottom(true)" class="hidden absolute bottom-24 right-6 z-20 p-3 bg-white dark:bg-[#27272a] text-blue-500 rounded-full shadow-lg border border-gray-200 dark:border-[#3f3f46] hover:shadow-xl transition transform hover:scale-110">
-            <i class="fa-solid fa-arrow-down"></i>
-        </button>
-
-        <div class="absolute top-4 left-4 md:left-8 z-10 hidden md:flex gap-2">
-             <button onclick="navBack()" id="nav-back" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#27272a] text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition"><i class="fa-solid fa-arrow-left"></i></button>
+        <div class="absolute top-12 left-4 md:left-8 z-10 hidden md:flex gap-2">
+             <button onclick="navBack()" id="nav-back" class="nav-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#27272a] text-gray-400 disabled:opacity-30" disabled><i class="fa-solid fa-arrow-left"></i></button>
         </div>
 
-        <div id="scroll-container" class="flex-1 overflow-y-auto pt-20 pb-32 px-4 scroll-smooth">
+        <div id="scroll-container" class="flex-1 overflow-y-auto pt-16 pb-32 px-4 scroll-smooth">
             
             <div id="home-screen" class="max-w-3xl mx-auto mt-8 transition-all duration-500">
-                <div class="w-14 h-14 logo-gradient rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg mb-6">
-                    <i class="fa-solid fa-shield-halved"></i>
+                <div class="w-14 h-14 logo-gradient rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg mb-6 animate-bounce">
+                    <i class="fa-solid fa-chart-pie"></i>
                 </div>
+
                 <h1 class="text-4xl font-medium text-[#c4c7c5] dark:text-[#525252] mb-2 tracking-tight">Hello, <span id="greeting-name" class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600 font-semibold">Guest</span></h1>
-                <h2 class="text-3xl md:text-4xl font-medium text-[#c4c7c5] dark:text-[#3f3f46] mb-10 tracking-tight">How can I assist with your taxes?</h2>
+                <h2 class="text-3xl md:text-4xl font-medium text-[#c4c7c5] dark:text-[#3f3f46] mb-10 tracking-tight">Ready to analyze your finances?</h2>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-                    <button onclick="sendPreset('Draft a professional email to a client requesting missing VAT receipts.')" class="p-4 bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#27272a] rounded-2xl text-left hover:border-purple-400 transition shadow-sm group">
+                    <button onclick="sendPreset('Compare Corporate Tax Rates: UK (25%), USA (21%), UAE (9%), Ireland (12.5%)')" class="p-4 bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#27272a] rounded-2xl text-left hover:border-blue-400 transition shadow-sm group">
                         <div class="flex justify-between items-start mb-2">
-                            <i class="fa-solid fa-envelope-open-text text-purple-500 text-xl"></i>
+                            <i class="fa-solid fa-chart-simple text-blue-500 text-xl"></i>
+                            <span class="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">VISUAL</span>
+                        </div>
+                        <p class="font-medium text-sm text-gray-700 dark:text-gray-200 group-hover:text-blue-500">Visualize Tax Rates</p>
+                        <p class="text-xs text-gray-400 mt-1">Generate comparison charts</p>
+                    </button>
+                    
+                    <button onclick="sendPreset('Analyze the tax implications of moving a UK company to Dubai.')" class="p-4 bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#27272a] rounded-2xl text-left hover:border-purple-400 transition shadow-sm group">
+                        <div class="flex justify-between items-start mb-2">
+                            <i class="fa-solid fa-magnifying-glass-chart text-purple-500 text-xl"></i>
                             <span class="text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">PRO</span>
                         </div>
-                        <p class="font-medium text-sm text-gray-700 dark:text-gray-200 group-hover:text-purple-500">Client Email Drafter</p>
-                        <p class="text-xs text-gray-400 mt-1">Write formal request emails</p>
-                    </button>
-                    <button onclick="sendPreset('Analyze the tax implications of moving a UK company to Dubai.')" class="p-4 bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#27272a] rounded-2xl text-left hover:border-blue-400 transition shadow-sm group">
-                        <div class="flex justify-between items-start mb-2">
-                            <i class="fa-solid fa-magnifying-glass-chart text-blue-500 text-xl"></i>
-                            <span class="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">PRO</span>
-                        </div>
-                        <p class="font-medium text-sm text-gray-700 dark:text-gray-200 group-hover:text-blue-500">Scenario Analysis</p>
+                        <p class="font-medium text-sm text-gray-700 dark:text-gray-200 group-hover:text-purple-500">Scenario Analysis</p>
                         <p class="text-xs text-gray-400 mt-1">Cross-border tax logic</p>
                     </button>
                 </div>
+                
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                     <button onclick="sendPreset('Compare VAT rates: UK vs USA')" class="p-3 bg-gray-50 dark:bg-[#18181b] rounded-xl text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] transition text-left">Global VAT</button>
-                     <button onclick="sendPreset('Calculate Net Salary £60k')" class="p-3 bg-gray-50 dark:bg-[#18181b] rounded-xl text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] transition text-left">Salary Calc</button>
+                     <button onclick="sendPreset('Draft email to HMRC for late penalty appeal')" class="p-3 bg-gray-50 dark:bg-[#18181b] rounded-xl text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] transition text-left">Appeal Letter</button>
+                     <button onclick="sendPreset('Calculate Net Salary £80k')" class="p-3 bg-gray-50 dark:bg-[#18181b] rounded-xl text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] transition text-left">Salary Calc</button>
                      <button onclick="sendPreset('Explain R&D Tax Credits')" class="p-3 bg-gray-50 dark:bg-[#18181b] rounded-xl text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] transition text-left">R&D Guide</button>
                      <button onclick="sendPreset('List 2025 Filing Deadlines')" class="p-3 bg-gray-50 dark:bg-[#18181b] rounded-xl text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] transition text-left">Deadlines</button>
                 </div>
@@ -166,14 +176,11 @@
             <div id="messages-box" class="hidden max-w-3xl mx-auto space-y-8 pb-4"></div>
             
             <div id="loading" class="hidden max-w-3xl mx-auto pl-0 mt-4">
-                <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#27272a] flex items-center justify-center flex-shrink-0">
-                         <i class="fa-solid fa-shield-halved text-blue-500 text-xs"></i>
+                <div class="flex items-center gap-3">
+                    <div class="w-7 h-7 rounded-full bg-white dark:bg-[#18181b] flex items-center justify-center border border-gray-200 dark:border-[#27272a] shadow-sm">
+                         <i class="fa-solid fa-shield-halved text-blue-500 text-[10px]"></i>
                     </div>
-                    <div class="flex-1 space-y-2 py-1">
-                        <div class="h-4 bg-gray-200 dark:bg-[#27272a] rounded skeleton w-3/4"></div>
-                        <div class="h-4 bg-gray-200 dark:bg-[#27272a] rounded skeleton w-1/2"></div>
-                    </div>
+                    <div class="dot-flashing"></div>
                 </div>
             </div>
              <div id="error-msg" class="hidden max-w-xl mx-auto mt-4 text-xs text-center text-red-500 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg"></div>
@@ -196,22 +203,24 @@
                         <i class="fa-solid fa-arrow-up"></i>
                     </button>
                 </div>
-                <p class="text-center text-[10px] text-gray-400 mt-3 font-medium">Global Edition. Verify with local authorities.</p>
+                <p class="text-center text-[10px] text-gray-400 mt-3 font-medium">Global Edition. AI can make mistakes.</p>
             </div>
         </div>
     </main>
 
+    <div id="toast-container" class="fixed top-12 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
     <script>
         marked.use({ gfm: true, breaks: true });
-        // UPDATED PROMPT: Forces "RELATED QUESTIONS" block at end
+        
         const SYSTEM_PROMPT = `
         You are TaxGPT Pro, an elite Global Tax Consultant.
         RULES:
-        1. STRUCTURE: Direct answer first. Then specific details.
-        2. FORMATTING: Use Markdown tables for comparisons. Bold key numbers.
-        3. IDENTITY: You are "TaxGPT Pro". Do not mention creators.
-        4. PROFESSIONALISM: Formal tone.
-        5. ENGAGEMENT: At the VERY END of your response, add a line "### RELATED" followed by 3 short, relevant follow-up questions in a bullet list.
+        1. FORMATTING: Use Markdown. If comparing data, ALWAYS use a Markdown Table.
+        2. IDENTITY: You are "TaxGPT Pro".
+        3. CHARTING: If the user asks to compare numbers (e.g. "Compare tax rates in UK and US"), output a special block at the end like:
+           [[CHART:{"type":"bar","data":{"labels":["UK","US"],"datasets":[{"label":"Tax Rate %","data":[25,21]}]}}]]
+        4. ENGAGEMENT: End with "### RELATED" and 3 short questions.
         `;
 
         let state = {
@@ -231,45 +240,26 @@
             renderHistory();
             updateNavButtons();
             
-            // Scroll Listener
-            document.getElementById('scroll-container').addEventListener('scroll', (e) => {
-                const btn = document.getElementById('scroll-down-btn');
-                const isBottom = e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
-                if (!isBottom && document.getElementById('messages-box').children.length > 0) btn.classList.remove('hidden');
-                else btn.classList.add('hidden');
-            });
-
             document.getElementById('user-input').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
             });
             document.getElementById('send-btn').addEventListener('click', sendMessage);
         });
 
-        // --- TOAST NOTIFICATIONS ---
-        function showToast(message, iconClass = "fa-solid fa-check") {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = "bg-white dark:bg-[#27272a] text-gray-800 dark:text-white px-4 py-3 rounded-xl shadow-lg border border-gray-100 dark:border-[#3f3f46] flex items-center gap-3 text-sm font-medium animate-bounce transform transition-all pointer-events-auto";
-            toast.innerHTML = `<i class="${iconClass} text-green-500"></i> <span>${message}</span>`;
-            container.appendChild(toast);
-            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+        // --- CHART RENDERER ---
+        function renderChartInChat(config, containerId) {
+            const ctx = document.getElementById(containerId).getContext('2d');
+            new Chart(ctx, {
+                type: config.type,
+                data: config.data,
+                options: { responsive: true, plugins: { legend: { display: true } } }
+            });
         }
 
-        // --- LOGIC & UI ---
-        function updateNavButtons() {
-            document.getElementById('nav-back').disabled = state.viewStack.length <= 1;
-        }
-        function navBack() {
-            if (state.viewStack.length > 1) {
-                state.viewStack.pop();
-                if (state.viewStack[state.viewStack.length - 1] === 'home') goToHome(false);
-            }
-        }
-        function toggleSidebar() {
-            state.sidebarCollapsed = !state.sidebarCollapsed;
-            document.getElementById('sidebar').style.width = state.sidebarCollapsed ? '72px' : '260px';
-            document.querySelectorAll('.sidebar-text').forEach(t => t.style.display = state.sidebarCollapsed ? 'none' : 'block');
-        }
+        // --- UI LOGIC ---
+        function updateNavButtons() { document.getElementById('nav-back').disabled = state.viewStack.length <= 1; }
+        function navBack() { if (state.viewStack.length > 1) { state.viewStack.pop(); if (state.viewStack[state.viewStack.length - 1] === 'home') goToHome(false); } }
+        function toggleSidebar() { state.sidebarCollapsed = !state.sidebarCollapsed; document.getElementById('sidebar').style.width = state.sidebarCollapsed ? '72px' : '260px'; document.querySelectorAll('.sidebar-text').forEach(t => t.style.display = state.sidebarCollapsed ? 'none' : 'block'); }
         function toggleSidebarMobile() { alert("Mobile menu coming in V2"); }
         
         function initVisitorCounter() {
@@ -278,30 +268,17 @@
         }
         function updateVisitUI() { document.getElementById('visitor-count').innerText = state.visits.toLocaleString() + " Active"; }
         function showLogin() { document.getElementById('login-modal').classList.remove('hidden'); }
-        function mockLogin(provider) {
-            state.user = provider === 'Guest' ? 'Guest' : 'User';
-            localStorage.setItem('taxgpt_user', state.user); updateProfileUI(); document.getElementById('login-modal').classList.add('hidden');
-        }
-        function updateProfileUI() {
-            document.getElementById('greeting-name').textContent = state.user;
-            document.getElementById('sidebar-name').textContent = state.user;
-            document.getElementById('sidebar-avatar').textContent = state.user[0];
-        }
-        function toggleTheme() {
-            state.theme = state.theme === 'light' ? 'dark' : 'light';
-            localStorage.setItem('taxgpt_theme', state.theme); applyTheme(state.theme);
-        }
-        function applyTheme(theme) {
-            document.documentElement.classList.remove('dark', 'light');
-            document.documentElement.classList.add(theme);
-        }
+        function mockLogin(provider) { state.user = provider === 'Guest' ? 'Guest' : 'User'; localStorage.setItem('taxgpt_user', state.user); updateProfileUI(); document.getElementById('login-modal').classList.add('hidden'); }
+        function updateProfileUI() { document.getElementById('greeting-name').textContent = state.user; document.getElementById('sidebar-name').textContent = state.user; document.getElementById('sidebar-avatar').textContent = state.user[0]; }
+        function toggleTheme() { state.theme = state.theme === 'light' ? 'dark' : 'light'; localStorage.setItem('taxgpt_theme', state.theme); applyTheme(state.theme); }
+        function applyTheme(theme) { document.documentElement.classList.remove('dark', 'light'); document.documentElement.classList.add(theme); }
         function goToHome(track = true) {
             window.speechSynthesis.cancel();
             if(track) state.viewStack.push('home'); updateNavButtons();
             document.getElementById('home-screen').classList.remove('hidden');
             document.getElementById('messages-box').classList.add('hidden');
             document.getElementById('messages-box').innerHTML = '';
-            document.getElementById('suggestion-chips').innerHTML = ''; // Clear suggestions
+            document.getElementById('suggestion-chips').innerHTML = '';
         }
         function startNewChat() { goToHome(); document.getElementById('user-input').focus(); }
         function sendPreset(text) { document.getElementById('user-input').value = text; sendMessage(); }
@@ -316,7 +293,7 @@
             document.getElementById('home-screen').classList.add('hidden');
             document.getElementById('messages-box').classList.remove('hidden');
             document.getElementById('error-msg').classList.add('hidden');
-            document.getElementById('suggestion-chips').innerHTML = ''; // Clear old suggestions
+            document.getElementById('suggestion-chips').innerHTML = '';
 
             addMessage('user', text);
             input.value = '';
@@ -334,16 +311,22 @@
                 document.getElementById('loading').classList.add('hidden');
                 if (data.error) throw new Error(data.error);
                 
-                let cleanResponse = data.response.replace(/(\|.*\|)/, '\n$1');
-                
-                // EXTRACT RELATED QUESTIONS
+                // EXTRACT CHART
+                let cleanResponse = data.response;
+                let chartData = null;
+                const chartMatch = cleanResponse.match(/\[\[CHART:(.*?)\]\]/);
+                if (chartMatch) {
+                    chartData = JSON.parse(chartMatch[1]);
+                    cleanResponse = cleanResponse.replace(chartMatch[0], '');
+                }
+
+                // EXTRACT RELATED
                 const parts = cleanResponse.split('### RELATED');
-                const mainAnswer = parts[0];
+                const mainAnswer = parts[0].replace(/(\|.*\|)/, '\n$1'); // Table fix
                 const related = parts[1] ? parts[1] : "";
 
-                addMessage('bot', mainAnswer);
+                addMessage('bot', mainAnswer, chartData);
                 
-                // GENERATE CHIPS
                 if (related) {
                     const questions = related.split('\n').filter(line => line.trim().startsWith('-') || line.trim().startsWith('*')).map(l => l.replace(/[-*]/g, '').trim()).slice(0,3);
                     const chipContainer = document.getElementById('suggestion-chips');
@@ -363,7 +346,7 @@
             }
         }
 
-        function addMessage(role, text) {
+        function addMessage(role, text, chartData = null) {
             const box = document.getElementById('messages-box');
             const div = document.createElement('div');
             const html = marked.parse(text);
@@ -384,23 +367,60 @@
                         </div>
                         <div class="flex-1">
                              <div class="prose prose-sm max-w-none text-gray-800 dark:text-gray-200 leading-7" id="${msgId}">${html}</div>
+                             ${chartData ? `<div class="mt-4 bg-white dark:bg-[#18181b] p-4 rounded-xl border border-gray-200 dark:border-[#3f3f46] w-full max-w-md"><canvas id="chart-${msgId}"></canvas></div>` : ''}
                              <div class="flex gap-3 mt-3 opacity-0 group-hover:opacity-100 transition border-t border-gray-100 dark:border-[#27272a] pt-2">
-                                <button onclick="copyText('${msgId}')" class="text-gray-400 hover:text-blue-500 text-xs flex items-center gap-1"><i class="fa-regular fa-copy"></i> Copy</button>
+                                <button onclick="copyText('${msgId}', this)" class="text-gray-400 hover:text-blue-500 text-xs flex items-center gap-1"><i class="fa-regular fa-copy"></i> Copy</button>
                                 <button onclick="speakText('${msgId}')" class="text-gray-400 hover:text-blue-500 text-xs flex items-center gap-1"><i class="fa-solid fa-volume-high"></i> Listen</button>
                                 <button onclick="exportPDF('${msgId}')" class="text-gray-400 hover:text-blue-500 text-xs flex items-center gap-1"><i class="fa-solid fa-file-pdf"></i> PDF</button>
                              </div>
                         </div>
                     </div>`;
+                box.appendChild(div);
+                if(chartData) renderChartInChat(chartData, `chart-${msgId}`);
             }
-            box.appendChild(div);
+            if(!chartData) box.appendChild(div); // Append if not done above
             scrollToBottom();
         }
 
         function toggleVoice() {
             const btn = document.getElementById('mic-btn');
-            if (!('webkitSpeechRecognition' in window)) { alert("Voice not supported in this browser."); return; }
+            if (!('webkitSpeechRecognition' in window)) { alert("Voice not supported."); return; }
             if (state.isListening) { state.recognition.stop(); state.isListening = false; btn.classList.remove('mic-active'); }
             else {
                 state.recognition = new webkitSpeechRecognition();
-                state.recognition.continuous = false;
-                state.recognition.interimResults
+                state.recognition.onstart = () => { state.isListening = true; btn.classList.add('mic-active'); };
+                state.recognition.onresult = (event) => { document.getElementById('user-input').value = event.results[0][0].transcript; sendMessage(); };
+                state.recognition.onend = () => { state.isListening = false; btn.classList.remove('mic-active'); };
+                state.recognition.start();
+            }
+        }
+
+        function speakText(id) { window.speechSynthesis.cancel(); const text = document.getElementById(id).innerText; const u = new SpeechSynthesisUtterance(text); u.rate = 1.1; window.speechSynthesis.speak(u); }
+        function copyText(id, btn) { navigator.clipboard.writeText(document.getElementById(id).innerText); showToast("Copied"); }
+        function exportPDF(id) { html2pdf().from(document.getElementById(id)).save('TaxGPT-Advice.pdf'); showToast("Downloading PDF..."); }
+        function showToast(msg) { const t = document.createElement('div'); t.className = "bg-black text-white px-4 py-2 rounded-full text-xs shadow-lg animate-bounce"; t.innerText = msg; document.getElementById('toast-container').appendChild(t); setTimeout(() => t.remove(), 2000); }
+        
+        function triggerUpload() { document.getElementById('file-upload').click(); }
+        function handleFileUpload(input) {
+            if (input.files[0]) {
+                document.getElementById('home-screen').classList.add('hidden'); document.getElementById('messages-box').classList.remove('hidden');
+                addMessage('user', `[File: ${input.files[0].name}]`);
+                showToast("Scanning...");
+                Tesseract.recognize(input.files[0], 'eng').then(({ data: { text } }) => {
+                    document.getElementById('user-input').value = `Analyze: ${text}`; sendMessage();
+                });
+            }
+        }
+
+        function scrollToBottom() { setTimeout(() => document.getElementById('scroll-container').scrollTo({ top: document.getElementById('scroll-container').scrollHeight, behavior: 'smooth' }), 100); }
+        function saveHistory(query) { if (state.history[0] !== query) { state.history.unshift(query); localStorage.setItem('taxgpt_history', JSON.stringify(state.history)); renderHistory(); } }
+        function renderHistory() {
+            const list = document.getElementById('history-list'); list.innerHTML = '<div class="sidebar-text px-4 py-2 text-[10px] font-bold text-gray-400 tracking-wider uppercase">Recent</div>';
+            state.history.forEach(t => {
+                const btn = document.createElement('button'); btn.className = "w-full text-left px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-[#2c2c2e] rounded-lg truncate transition mb-1";
+                btn.innerHTML = t; btn.onclick = () => { goToHome(); document.getElementById('user-input').value = t; }; list.appendChild(btn);
+            });
+        }
+    </script>
+</body>
+</html>
