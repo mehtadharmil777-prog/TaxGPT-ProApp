@@ -1,297 +1,326 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaxGPT Pro | Global Tax AI</title>
+    <title>TaxGPT Pro | Global Edition</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'San Francisco', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'sans-serif'],
+                    },
+                    colors: {
+                        apple: {
+                            50: '#fbfbfd',
+                            100: '#f5f5f7',
+                            200: '#e8e8ed',
+                            500: '#86868b',
+                            600: '#6e6e73',
+                            900: '#1d1d1f',
+                            blue: '#0066cc',
+                            dark: '#161617'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
-        body { font-family: 'Outfit', sans-serif; background-color: #f0f4f9; color: #1f1f1f; }
-        
-        /* Gemini Gradient Text */
-        .brand-text {
-            background: linear-gradient(74deg, #4285f4 0%, #9b72cb 29%, #d96570 56%, #d96570 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 500;
-        }
-        
-        /* Pill Button Styling */
-        .pill-btn {
-            background: #ffffff;
-            border: 1px solid #e5e7eb;
-            border-radius: 9999px;
-            padding: 8px 16px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: #374151;
-            transition: all 0.2s;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .pill-btn:hover { background: #f3f4f6; border-color: #d1d5db; }
-        
-        /* Animations */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .msg-animate { animation: fadeIn 0.4s ease-out forwards; }
-        
-        .typing-dot { animation: bounce 1.4s infinite ease-in-out both; background-color: #4285f4; }
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        /* Apple-like Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d1d6; border-radius: 10px; border: 3px solid transparent; background-clip: content-box; }
+        .dark ::-webkit-scrollbar-thumb { background: #424245; }
 
-        /* Markdown Styling */
-        .prose h3 { font-weight: 700; margin-top: 1em; }
-        .prose ul { list-style-type: disc; padding-left: 1.5em; }
-        .prose strong { color: #000; font-weight: 700; }
-        .prose table { width: 100%; border-collapse: collapse; margin: 1em 0; border: 1px solid #e5e7eb; }
-        .prose th, .prose td { padding: 8px; border: 1px solid #e5e7eb; }
-        .prose th { background: #f8fafc; }
+        /* Glassmorphism & Animations */
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .dark .glass { background: rgba(30, 30, 30, 0.8); }
+        
+        .msg-enter { animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Markdown Styles (Apple Notes style) */
+        .prose h3 { font-weight: 600; margin-top: 1.5em; margin-bottom: 0.5em; font-size: 1.1rem; }
+        .prose ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 1em; color: inherit; }
+        .prose strong { font-weight: 600; color: inherit; }
+        .prose table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 1em 0; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+        .dark .prose table { border-color: #424245; }
+        .prose th { background: #f5f5f7; padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb; }
+        .dark .prose th { background: #2c2c2e; border-color: #424245; }
+        .prose td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+        .dark .prose td { border-color: #424245; }
+        .prose tr:last-child td { border-bottom: none; }
+
+        /* Typing Indicator */
+        .dot-flashing {
+            position: relative; width: 6px; height: 6px; border-radius: 5px; background-color: #86868b; color: #86868b;
+            animation: dot-flashing 1s infinite linear alternate; animation-delay: 0.5s;
+        }
+        .dot-flashing::before, .dot-flashing::after {
+            content: ''; display: inline-block; position: absolute; top: 0; width: 6px; height: 6px; border-radius: 5px; background-color: #86868b; color: #86868b;
+            animation: dot-flashing 1s infinite alternate;
+        }
+        .dot-flashing::before { left: -10px; animation-delay: 0s; }
+        .dot-flashing::after { left: 10px; animation-delay: 1s; }
+        @keyframes dot-flashing { 0% { background-color: #86868b; } 50%, 100% { background-color: #e8e8ed; } }
     </style>
 </head>
-<body class="h-screen flex overflow-hidden">
+<body class="bg-apple-100 dark:bg-black text-apple-900 dark:text-apple-100 h-screen flex overflow-hidden transition-colors duration-300">
 
-    <aside id="sidebar" class="w-[280px] bg-[#f0f4f9] flex flex-col h-full hidden md:flex p-4 border-r border-gray-200">
-        
-        <div class="flex items-center justify-between mb-6 px-2">
-            <button class="text-gray-500 hover:bg-gray-200 p-2 rounded-full"><i class="fa-solid fa-bars text-lg"></i></button>
-            <div class="text-xs text-gray-400 font-medium">HISTORY</div>
-        </div>
-
-        <button onclick="startNewChat()" class="flex items-center gap-3 bg-[#dde3ea] hover:bg-white text-gray-700 py-3 px-4 rounded-full mb-6 transition shadow-sm font-medium">
-            <i class="fa-solid fa-plus text-gray-500"></i>
-            <span>New chat</span>
-        </button>
-
-        <div class="flex-1 overflow-y-auto space-y-1" id="history-list">
-            <div class="text-center text-gray-400 text-sm mt-10">Recent queries appear here</div>
-        </div>
-
-        <div class="mt-auto pt-4 border-t border-gray-200 text-xs text-gray-500 px-2">
-            <div class="flex items-center gap-2 mb-2">
-                <i class="fa-solid fa-globe"></i>
-                <span>Global Edition</span>
+    <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm hidden">
+        <div class="bg-white dark:bg-[#1c1c1e] p-8 rounded-[24px] shadow-2xl w-full max-w-md transform transition-all scale-100 border border-white/20">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg">
+                    <i class="fa-solid fa-robot text-2xl text-white"></i>
+                </div>
+                <h2 class="text-2xl font-semibold tracking-tight">Sign in to TaxGPT</h2>
+                <p class="text-gray-500 dark:text-gray-400 mt-2 text-sm">Sync your tax history across devices.</p>
             </div>
-            <p class="opacity-70">TaxGPT Pro &copy; 2025</p>
+
+            <div class="space-y-3">
+                <button onclick="mockLogin('Google')" class="w-full bg-white dark:bg-[#2c2c2e] border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#3a3a3c] text-gray-800 dark:text-white font-medium py-3 px-4 rounded-xl transition flex items-center justify-center gap-3 relative">
+                    <i class="fa-brands fa-google text-lg"></i>
+                    <span>Continue with Google</span>
+                </button>
+                <button onclick="mockLogin('Apple')" class="w-full bg-black text-white dark:bg-white dark:text-black hover:opacity-90 font-medium py-3 px-4 rounded-xl transition flex items-center justify-center gap-3 relative">
+                    <i class="fa-brands fa-apple text-xl"></i>
+                    <span>Continue with Apple</span>
+                </button>
+                <button onclick="mockLogin('Guest')" class="w-full text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white text-sm font-medium py-2 transition">
+                    Continue as Guest
+                </button>
+            </div>
+            <p class="text-center text-xs text-gray-400 mt-6">By continuing, you agree to our Terms & Privacy Policy.</p>
+        </div>
+    </div>
+
+    <aside id="sidebar" class="w-[260px] bg-apple-50 dark:bg-[#161617] flex flex-col h-full hidden md:flex border-r border-gray-200 dark:border-gray-800 transition-colors">
+        
+        <div class="p-4">
+            <button onclick="startNewChat()" class="w-full flex items-center gap-3 bg-gray-200/50 dark:bg-[#2c2c2e] hover:bg-gray-200 dark:hover:bg-[#3a3a3c] text-gray-700 dark:text-gray-200 py-3 px-4 rounded-full transition-all duration-200 group">
+                <i class="fa-solid fa-plus text-gray-500 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-white"></i>
+                <span class="text-sm font-medium">New Chat</span>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-2 py-2" id="history-list">
+            <div class="px-4 py-2 text-xs font-semibold text-gray-400 dark:text-gray-500 tracking-wider">RECENT</div>
+            </div>
+
+        <div class="mt-auto p-4 border-t border-gray-200 dark:border-gray-800 space-y-1">
+            
+            <button onclick="toggleTheme()" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-[#2c2c2e] text-sm text-gray-600 dark:text-gray-300 transition">
+                <div class="w-5 flex justify-center"><i class="fa-solid fa-circle-half-stroke"></i></div>
+                <span>Appearance</span>
+            </button>
+
+            <div class="flex items-center gap-3 p-2 text-xs text-gray-400 dark:text-gray-600 cursor-default">
+                <div class="w-5 flex justify-center"><i class="fa-solid fa-eye"></i></div>
+                <span id="visitor-count">1,240 Visitors</span>
+            </div>
+
+            <div class="flex items-center gap-3 p-2 mt-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-[#2c2c2e] cursor-pointer" onclick="showLogin()">
+                <div id="sidebar-avatar" class="w-8 h-8 bg-gradient-to-tr from-blue-500 to-cyan-400 rounded-full flex items-center justify-center text-white text-xs font-bold">G</div>
+                <div class="flex-1 overflow-hidden">
+                    <p id="sidebar-name" class="text-sm font-medium truncate text-gray-800 dark:text-gray-200">Guest</p>
+                    <p class="text-[10px] text-gray-500">Free Plan</p>
+                </div>
+            </div>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col bg-white h-full relative rounded-l-3xl shadow-2xl">
+    <main class="flex-1 flex flex-col relative h-full">
         
-        <div class="h-16 flex items-center justify-between px-6 border-b border-transparent z-10">
-            <div onclick="goToHome()" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition">
-                <span class="text-xl font-medium tracking-tight text-gray-600">TaxGPT <span class="brand-text">Pro</span></span>
-                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded">GLOBAL</span>
+        <div class="absolute top-0 left-0 w-full h-16 flex items-center justify-between px-4 md:px-6 z-10">
+            <div class="md:hidden">
+                <button class="text-gray-500 dark:text-gray-400"><i class="fa-solid fa-bars"></i></button>
             </div>
+            <div class="flex items-center gap-2 mx-auto md:mx-0 cursor-pointer" onclick="goToHome()">
+                <span class="text-lg font-semibold tracking-tight text-gray-800 dark:text-white">TaxGPT <span class="text-blue-500">Pro</span></span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-100 dark:bg-[#2c2c2e] text-gray-500">BETA</span>
+            </div>
+            <div class="md:hidden w-6"></div> </div>
+
+        <div id="scroll-container" class="flex-1 overflow-y-auto pt-20 pb-32 px-4 scroll-smooth">
             
-            <div class="flex items-center gap-4">
-                <button class="p-2 hover:bg-gray-100 rounded-full text-gray-500" title="Global Tax Calculators" onclick="toggleTools()"><i class="fa-solid fa-calculator"></i></button>
-                <div id="user-profile" class="flex items-center gap-2 cursor-pointer" onclick="loginUser()">
-                    <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-bold">?</div>
+            <div id="home-screen" class="max-w-2xl mx-auto mt-10 md:mt-20 transition-all duration-500">
+                <div class="mb-8">
+                    <h1 class="text-4xl md:text-5xl font-semibold text-[#c6c6c6] dark:text-[#424245] tracking-tight mb-2">Hello, <span id="greeting-name" class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">Guest</span>.</h1>
+                    <h2 class="text-4xl md:text-5xl font-semibold text-[#d1d1d6] dark:text-[#3a3a3c] tracking-tight">How can I help with your Tax query today?</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onclick="sendPreset('Compare UK Corp Tax vs US Corporate Tax.')" class="p-4 text-left rounded-2xl bg-white dark:bg-[#1c1c1e] border border-gray-200 dark:border-[#2c2c2e] hover:bg-gray-50 dark:hover:bg-[#2c2c2e] transition group shadow-sm">
+                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-1 group-hover:text-blue-500">Global Comparison</p>
+                        <p class="text-xs text-gray-400">Compare UK & US rates</p>
+                    </button>
+                    <button onclick="sendPreset('Draft a professional letter to HMRC regarding a refund.')" class="p-4 text-left rounded-2xl bg-white dark:bg-[#1c1c1e] border border-gray-200 dark:border-[#2c2c2e] hover:bg-gray-50 dark:hover:bg-[#2c2c2e] transition group shadow-sm">
+                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-1 group-hover:text-blue-500">Draft Letter</p>
+                        <p class="text-xs text-gray-400">Write to HMRC</p>
+                    </button>
+                    <button onclick="sendPreset('Explain VAT registration thresholds for 2025.')" class="p-4 text-left rounded-2xl bg-white dark:bg-[#1c1c1e] border border-gray-200 dark:border-[#2c2c2e] hover:bg-gray-50 dark:hover:bg-[#2c2c2e] transition group shadow-sm">
+                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-1 group-hover:text-blue-500">VAT Guide</p>
+                        <p class="text-xs text-gray-400">Registration limits</p>
+                    </button>
+                    <button onclick="sendPreset('Create an Excel formula to calculate Net Salary from Gross.')" class="p-4 text-left rounded-2xl bg-white dark:bg-[#1c1c1e] border border-gray-200 dark:border-[#2c2c2e] hover:bg-gray-50 dark:hover:bg-[#2c2c2e] transition group shadow-sm">
+                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200 mb-1 group-hover:text-blue-500">Excel Builder</p>
+                        <p class="text-xs text-gray-400">Tax formulas</p>
+                    </button>
                 </div>
             </div>
+
+            <div id="messages-box" class="hidden max-w-2xl mx-auto space-y-10 pb-10"></div>
+            
+            <div id="loading" class="hidden max-w-2xl mx-auto pl-0 mt-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-white dark:bg-[#1c1c1e] flex items-center justify-center shadow-sm border border-gray-100 dark:border-[#2c2c2e]">
+                        <i class="fa-solid fa-robot text-blue-500 text-xs"></i>
+                    </div>
+                    <div class="dot-flashing"></div>
+                </div>
+            </div>
+             <div id="error-msg" class="hidden max-w-2xl mx-auto mt-2 text-xs text-red-500 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg text-center"></div>
         </div>
 
-        <div id="chat-area" class="flex-1 overflow-y-auto p-4 md:p-20 pb-40 scroll-smooth">
-            
-            <div id="home-screen" class="max-w-3xl mx-auto mt-10 fade-in">
-                <h1 class="text-5xl md:text-6xl font-medium text-[#c4c7c5] mb-2">Hello, <span id="greeting-name" class="brand-text">Guest</span></h1>
-                <h2 class="text-4xl md:text-5xl font-medium text-[#c4c7c5] mb-12">Where in the world is your tax query?</h2>
-
-                <div class="flex flex-wrap gap-3 mb-12">
-                    <button onclick="setMode('Draft Letter')" class="pill-btn group">
-                        <i class="fa-solid fa-pen-nib text-purple-500"></i> Write
+        <div class="absolute bottom-0 w-full p-4 md:p-6 bg-gradient-to-t from-white via-white to-transparent dark:from-black dark:via-black pointer-events-none">
+            <div class="max-w-3xl mx-auto pointer-events-auto relative">
+                <div class="glass dark:glass rounded-[26px] border border-gray-200 dark:border-[#3a3a3c] shadow-lg flex items-center p-2 transition-all focus-within:ring-2 focus-within:ring-blue-500/20">
+                    
+                    <button class="p-3 text-gray-400 hover:text-blue-500 transition rounded-full hover:bg-gray-100 dark:hover:bg-[#2c2c2e] tooltip" title="Upload Receipt">
+                        <i class="fa-solid fa-paperclip text-lg"></i>
                     </button>
-                    <button onclick="setMode('Deep Research')" class="pill-btn group">
-                        <i class="fa-solid fa-magnifying-glass text-blue-500"></i> Research
-                    </button>
-                    <button onclick="setMode('Comparison')" class="pill-btn group">
-                        <i class="fa-solid fa-scale-balanced text-orange-500"></i> Compare
-                    </button>
-                    <button onclick="setMode('Excel Formula')" class="pill-btn group">
-                        <i class="fa-solid fa-table text-green-600"></i> Excel
+                    
+                    <input type="text" id="user-input" 
+                        class="flex-1 bg-transparent border-none focus:ring-0 text-gray-800 dark:text-gray-100 placeholder-gray-500 px-3 text-[16px]"
+                        placeholder="Ask anything about taxes..." autocomplete="off">
+                    
+                    <button id="send-btn" class="p-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-all transform hover:scale-105 shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-arrow-up"></i>
                     </button>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div onclick="sendPreset('What is the standard VAT/Sales Tax rate in Dubai vs UK?')" class="bg-gray-50 p-4 rounded-2xl hover:bg-gray-100 cursor-pointer transition h-40 flex flex-col justify-between">
-                        <p class="text-gray-700 font-medium">International VAT</p>
-                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-earth-americas text-gray-400"></i></div>
-                    </div>
-                    <div onclick="sendPreset('Explain the IRS deadlines for US tax filing in 2025.')" class="bg-gray-50 p-4 rounded-2xl hover:bg-gray-100 cursor-pointer transition h-40 flex flex-col justify-between">
-                        <p class="text-gray-700 font-medium">US Tax Deadlines</p>
-                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-flag-usa text-gray-400"></i></div>
-                    </div>
-                    <div onclick="sendPreset('How is GST calculated in India for freelance income?')" class="bg-gray-50 p-4 rounded-2xl hover:bg-gray-100 cursor-pointer transition h-40 flex flex-col justify-between">
-                        <p class="text-gray-700 font-medium">Indian GST</p>
-                        <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm"><i class="fa-solid fa-rupee-sign text-gray-400"></i></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="messages-box" class="hidden max-w-3xl mx-auto space-y-8"></div>
-            
-            <div id="loading" class="hidden max-w-3xl mx-auto mt-4">
-                <div class="flex items-center gap-4">
-                    <div class="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center shadow-sm">
-                        <i class="fa-solid fa-globe text-blue-500 text-xs animate-spin"></i>
-                    </div>
-                    <div class="flex gap-1">
-                        <div class="w-2 h-2 rounded-full typing-dot"></div>
-                        <div class="w-2 h-2 rounded-full typing-dot"></div>
-                        <div class="w-2 h-2 rounded-full typing-dot"></div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="absolute bottom-0 left-0 w-full bg-white p-4">
-            <div class="max-w-3xl mx-auto">
-                <div class="bg-[#f0f4f9] rounded-3xl flex items-center px-4 py-3 transition-all focus-within:bg-white focus-within:shadow-md focus-within:ring-1 focus-within:ring-gray-200">
-                    <button class="p-2 text-gray-400 hover:text-gray-600 transition tooltip" title="Coming Soon: Upload Documents"><i class="fa-solid fa-paperclip"></i></button>
-                    <input type="text" id="user-input" class="flex-1 bg-transparent border-none focus:ring-0 text-gray-800 placeholder-gray-500 px-4 outline-none" placeholder="Ask anything about global taxes..." autocomplete="off">
-                    <button id="send-btn" class="p-2 text-gray-500 hover:text-blue-600 transition transform hover:scale-110"><i class="fa-solid fa-paper-plane"></i></button>
-                </div>
-                <p class="text-center text-[10px] text-gray-400 mt-2">
-                    TaxGPT Pro Global Edition. Verify all info with local tax authorities (IRS, HMRC, etc). Built by Dharmil Mehta.
+                <p class="text-center text-[11px] text-gray-400 dark:text-gray-600 mt-3 font-medium">
+                    TaxGPT Pro can make mistakes. Verify sensitive info.
                 </p>
-            </div>
-        </div>
-
-        <div id="view-tools" class="hidden absolute inset-0 bg-white z-20 flex flex-col">
-            <div class="p-4 border-b flex justify-between items-center">
-                <h2 class="font-bold text-xl">Global Tax Tools</h2>
-                <button onclick="toggleTools()" class="p-2 hover:bg-gray-100 rounded-full"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 flex-1">
-                
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-tag"></i></div>
-                        <h3 class="font-bold text-lg">Universal Sales Tax / VAT</h3>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="text-xs font-bold text-gray-500">Amount</label>
-                            <input type="number" id="calc-amount" class="w-full p-2 bg-gray-50 rounded border mt-1">
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-500">Tax Rate (%)</label>
-                            <input type="number" id="calc-rate" class="w-full p-2 bg-gray-50 rounded border mt-1" placeholder="20">
-                        </div>
-                    </div>
-                    <button onclick="calcUniversalTax()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Calculate</button>
-                    <div id="calc-result" class="mt-4 p-3 bg-blue-50 rounded text-sm hidden"></div>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-percent"></i></div>
-                        <h3 class="font-bold text-lg">Effective Tax Rate</h3>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="text-xs font-bold text-gray-500">Gross Income</label>
-                            <input type="number" id="eff-gross" class="w-full p-2 bg-gray-50 rounded border mt-1">
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-500">Total Tax Paid</label>
-                            <input type="number" id="eff-tax" class="w-full p-2 bg-gray-50 rounded border mt-1">
-                        </div>
-                    </div>
-                    <button onclick="calcEffectiveRate()" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700">Calculate</button>
-                    <div id="eff-result" class="mt-4 p-3 bg-green-50 rounded text-sm hidden"></div>
-                </div>
-
             </div>
         </div>
 
     </main>
 
     <script>
-        // --- CONFIGURATION ---
+        // --- CONFIGURATION & STATE ---
+        marked.use({ gfm: true, breaks: true });
+        
         const SYSTEM_PROMPT = `
-        You are TaxGPT Pro, the world's leading AI Tax Consultant, built by Dharmil Mehta.
+        You are TaxGPT Pro, an elite Global Tax Consultant.
         
-        MANDATE:
-        1. GLOBAL SCOPE: You answer tax questions for ANY country (USA, UK, India, Canada, UAE, etc.).
-        2. EXCLUSIVE FOCUS: You ONLY answer questions about Tax, Accounting, Finance, and Business Law.
-        3. REFUSAL POLICY: If a user asks about non-tax topics (e.g. "Write a poem", "Code a game"), you MUST refuse: "I am TaxGPT Pro. I only assist with tax and financial matters."
-        
-        BEHAVIOR:
-        - Identify the user's country from context (e.g. "$" -> USA/Canada, "£" -> UK, "GST" -> India/Australia).
-        - If the country is unclear, ASK the user to specify.
-        - Use Markdown (Tables, Bold) for clarity.
-        - Be professional, precise, and cautious (disclaimers).
+        RULES:
+        1. TONE: Professional, concise, and empathetic. Use clear formatting.
+        2. FORMAT: Use Markdown tables for rates/comparisons. Use Bold for key figures.
+        3. ANONYMITY: Do NOT mention "Dharmil Mehta" or your creator in the output responses.
+        4. SCOPE: Only answer Tax, Accounting, and Finance questions.
+        5. GLOBAL: Detect country from context ($, £, €). If unsure, provide general principles.
         `;
 
-        // --- STATE ---
-        let currentUser = localStorage.getItem('taxgpt_user') || 'Guest';
-        let chatHistory = JSON.parse(localStorage.getItem('taxgpt_history')) || [];
-        let currentMode = 'General';
+        let state = {
+            user: localStorage.getItem('taxgpt_user') || null,
+            theme: localStorage.getItem('taxgpt_theme') || 'light',
+            history: JSON.parse(localStorage.getItem('taxgpt_history')) || [],
+            visitors: parseInt(localStorage.getItem('taxgpt_visits')) || 1240
+        };
 
-        // --- INITIALIZATION ---
+        // --- INIT ---
         document.addEventListener('DOMContentLoaded', () => {
-            updateGreeting();
+            applyTheme(state.theme);
+            
+            // Increment fake visitor counter
+            state.visitors += Math.floor(Math.random() * 3);
+            localStorage.setItem('taxgpt_visits', state.visitors);
+            document.getElementById('visitor-count').innerText = state.visitors.toLocaleString() + " Visitors";
+
+            if (!state.user) {
+                showLogin();
+            } else {
+                updateProfileUI();
+            }
+
             renderHistory();
             
-            document.getElementById('user-input').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') sendMessage();
+            document.getElementById('user-input').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
             });
             document.getElementById('send-btn').addEventListener('click', sendMessage);
         });
 
-        function updateGreeting() {
-            document.getElementById('greeting-name').textContent = currentUser;
-            const initial = currentUser === 'Guest' ? '?' : currentUser[0].toUpperCase();
-            document.getElementById('user-profile').innerHTML = `
-                <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm" title="Signed in as ${currentUser}">
-                    ${initial}
-                </div>
-            `;
+        // --- LOGIN SYSTEM (MOCK) ---
+        function showLogin() {
+            document.getElementById('login-modal').classList.remove('hidden');
         }
 
-        function loginUser() {
-            const name = prompt("Sign in to sync your tax history:", currentUser);
-            if (name && name.trim() !== "") {
-                currentUser = name;
+        function mockLogin(provider) {
+            const modal = document.getElementById('login-modal');
+            
+            // Add loading effect to button
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+            
+            setTimeout(() => {
+                let name = provider === 'Guest' ? 'Guest' : 'Dharmil Mehta'; // Simulated name
+                state.user = name;
                 localStorage.setItem('taxgpt_user', name);
-                updateGreeting();
-                // In a real app, this is where Google Auth would happen
-                alert(`Signed in as ${currentUser}. History synced locally.`);
+                updateProfileUI();
+                modal.classList.add('hidden');
+                btn.innerHTML = originalText;
+            }, 800);
+        }
+
+        function updateProfileUI() {
+            const name = state.user;
+            document.getElementById('greeting-name').textContent = name;
+            document.getElementById('sidebar-name').textContent = name;
+            document.getElementById('sidebar-avatar').textContent = name[0];
+            document.getElementById('sidebar-avatar').className = "w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold";
+        }
+
+        // --- THEME ENGINE ---
+        function toggleTheme() {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
+            localStorage.setItem('taxgpt_theme', state.theme);
+            applyTheme(state.theme);
+        }
+
+        function applyTheme(theme) {
+            const html = document.documentElement;
+            if (theme === 'dark') {
+                html.classList.add('dark');
+            } else {
+                html.classList.remove('dark');
             }
         }
 
+        // --- NAVIGATION ---
         function goToHome() {
             document.getElementById('home-screen').classList.remove('hidden');
             document.getElementById('messages-box').classList.add('hidden');
-            document.getElementById('messages-box').innerHTML = ''; 
-            document.getElementById('view-tools').classList.add('hidden');
+            document.getElementById('messages-box').innerHTML = '';
         }
 
         function startNewChat() {
             goToHome();
-        }
-
-        function toggleTools() {
-            const tools = document.getElementById('view-tools');
-            tools.classList.toggle('hidden');
-        }
-
-        function setMode(mode) {
-            currentMode = mode;
-            const input = document.getElementById('user-input');
-            input.value = `[Mode: ${mode}] `;
-            input.focus();
+            document.getElementById('user-input').focus();
         }
 
         function sendPreset(text) {
@@ -301,135 +330,139 @@
 
         // --- CHAT ENGINE ---
         async function sendMessage() {
-            const inputField = document.getElementById('user-input');
-            const text = inputField.value.trim();
+            const input = document.getElementById('user-input');
+            const text = input.value.trim();
             if (!text) return;
 
-            // UI Transitions
+            // UI Transition
             document.getElementById('home-screen').classList.add('hidden');
             document.getElementById('messages-box').classList.remove('hidden');
-            document.getElementById('view-tools').classList.add('hidden');
+            document.getElementById('error-msg').classList.add('hidden');
 
             // Add User Message
-            addMessageToUI('user', text);
-            inputField.value = '';
-            document.getElementById('loading').classList.remove('hidden');
+            addMessage('user', text);
+            input.value = '';
+            scrollToBottom();
 
-            // History
-            saveToHistory(text);
+            // Show Loading
+            const loading = document.getElementById('loading');
+            loading.classList.remove('hidden');
 
-            // Context Construction
-            const finalPayload = `${SYSTEM_PROMPT}\n\nCONTEXT: User=${currentUser}, Mode=${currentMode}, Date=${new Date().toLocaleDateString()}\n\nUSER QUERY: ${text}`;
+            // Save History
+            saveHistory(text);
 
             try {
-                const response = await fetch('/api/chat', {
+                const response = await fetchWithRetry('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: finalPayload })
+                    body: JSON.stringify({ 
+                        prompt: `${SYSTEM_PROMPT}\n\nUser: ${text}` 
+                    })
                 });
 
                 const data = await response.json();
-                document.getElementById('loading').classList.add('hidden');
+                loading.classList.add('hidden');
 
                 if (data.error) {
-                    addMessageToUI('bot', "⚠️ **System Error:** " + data.error);
+                    showError("Server Error: " + data.error);
                 } else {
-                    addMessageToUI('bot', data.response);
+                    addMessage('bot', data.response);
                 }
 
             } catch (err) {
-                document.getElementById('loading').classList.add('hidden');
-                addMessageToUI('bot', "⚠️ **Network Error:** Unable to reach TaxGPT servers.");
+                loading.classList.add('hidden');
+                showError("Connection failed. Please try again.");
             }
-            
-            currentMode = 'General';
         }
 
-        function addMessageToUI(role, text) {
+        // --- RETRY LOGIC (For Overloaded Model) ---
+        async function fetchWithRetry(url, options, retries = 1) {
+            try {
+                const response = await fetch(url, options);
+                if (response.status === 503) throw new Error("Overloaded");
+                return response;
+            } catch (err) {
+                if (retries > 0 && err.message === "Overloaded") {
+                    document.getElementById('error-msg').innerText = "High traffic. Retrying automatically...";
+                    document.getElementById('error-msg').classList.remove('hidden');
+                    await new Promise(resolve => setTimeout(resolve, 2500)); // Wait 2.5s
+                    return fetchWithRetry(url, options, retries - 1);
+                }
+                throw err;
+            }
+        }
+
+        function addMessage(role, text) {
             const box = document.getElementById('messages-box');
             const div = document.createElement('div');
+            div.className = "msg-enter";
             
-            const htmlContent = marked.parse(text);
+            const html = marked.parse(text);
 
             if (role === 'user') {
                 div.innerHTML = `
-                    <div class="flex justify-end gap-4">
-                        <div class="bg-[#f0f4f9] text-gray-800 py-3 px-5 rounded-2xl rounded-tr-sm max-w-[85%]">
-                            <p>${text}</p>
-                        </div>
-                        <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold mt-1">
-                            ${currentUser === 'Guest' ? 'G' : currentUser[0]}
+                    <div class="flex justify-end mb-6">
+                        <div class="bg-[#f2f2f7] dark:bg-[#2c2c2e] text-gray-900 dark:text-gray-100 py-3 px-5 rounded-[20px] rounded-tr-sm max-w-[85%] shadow-sm text-[15px] leading-relaxed">
+                            ${text}
                         </div>
                     </div>
                 `;
             } else {
                 div.innerHTML = `
-                    <div class="flex gap-4">
-                        <div class="w-8 h-8 bg-white border border-gray-200 rounded-full flex items-center justify-center mt-1 shadow-sm shrink-0">
-                            <i class="fa-solid fa-globe text-blue-600 text-sm"></i>
+                    <div class="flex gap-4 mb-8">
+                        <div class="w-8 h-8 rounded-full bg-white dark:bg-[#1c1c1e] border border-gray-200 dark:border-[#3a3a3c] flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <i class="fa-solid fa-sparkles text-blue-500 text-sm"></i>
                         </div>
-                        <div class="flex-1 prose prose-sm max-w-none text-gray-800 leading-relaxed">
-                            ${htmlContent}
+                        <div class="flex-1 prose prose-sm max-w-none text-gray-800 dark:text-gray-200 leading-7">
+                            ${html}
                         </div>
-                    </div>
-                    <div class="pl-12 flex gap-3 mt-2">
-                        <button class="text-gray-400 hover:text-gray-600 text-sm" title="Copy"><i class="fa-regular fa-copy"></i></button>
-                        <button class="text-gray-400 hover:text-gray-600 text-sm" title="Regenerate"><i class="fa-solid fa-rotate-right"></i></button>
                     </div>
                 `;
             }
             box.appendChild(div);
-            window.scrollTo(0, document.body.scrollHeight);
+            scrollToBottom();
         }
 
-        // --- HISTORY SYSTEM ---
-        function saveToHistory(query) {
-            if (chatHistory.length > 0 && chatHistory[0].title === query) return;
-            chatHistory.unshift({ title: query, date: new Date().toISOString() });
-            if (chatHistory.length > 20) chatHistory.pop(); 
-            localStorage.setItem('taxgpt_history', JSON.stringify(chatHistory));
+        function showError(msg) {
+            const el = document.getElementById('error-msg');
+            el.innerText = msg;
+            el.classList.remove('hidden');
+        }
+
+        function scrollToBottom() {
+            const container = document.getElementById('scroll-container');
+            setTimeout(() => {
+                container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+            }, 100);
+        }
+
+        // --- HISTORY ---
+        function saveHistory(query) {
+            if (state.history.length > 0 && state.history[0] === query) return;
+            state.history.unshift(query);
+            if (state.history.length > 15) state.history.pop();
+            localStorage.setItem('taxgpt_history', JSON.stringify(state.history));
             renderHistory();
         }
 
         function renderHistory() {
             const list = document.getElementById('history-list');
-            list.innerHTML = '';
-            chatHistory.forEach(chat => {
-                const div = document.createElement('div');
-                div.className = "sidebar-item p-3 text-sm text-gray-600 cursor-pointer truncate flex items-center gap-3 rounded-full hover:bg-gray-200";
-                div.innerHTML = `<i class="fa-regular fa-message text-xs"></i> ${chat.title}`;
-                div.onclick = () => { alert("Load chat: " + chat.title); };
-                list.appendChild(div);
+            const container = list.querySelector('div') || list; // Handle first load structure
+            
+            // Clear existing items (keep label)
+            const items = list.querySelectorAll('.history-item');
+            items.forEach(i => i.remove());
+
+            if (state.history.length === 0) return;
+
+            state.history.forEach(title => {
+                const btn = document.createElement('button');
+                btn.className = "history-item w-full text-left px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-[#2c2c2e] rounded-lg truncate transition mb-1";
+                btn.innerHTML = `<i class="fa-regular fa-message mr-2 text-xs opacity-50"></i> ${title}`;
+                btn.onclick = () => { goToHome(); document.getElementById('user-input').value = title; };
+                list.appendChild(btn);
             });
         }
-
-        // --- CALCULATORS ---
-        function calcUniversalTax() {
-            const amt = parseFloat(document.getElementById('calc-amount').value);
-            const rate = parseFloat(document.getElementById('calc-rate').value);
-            if(!amt || !rate) return;
-            
-            const tax = amt * (rate / 100);
-            const total = amt + tax;
-            
-            const res = document.getElementById('calc-result');
-            res.classList.remove('hidden');
-            res.innerHTML = `Tax (${rate}%): <strong>${tax.toFixed(2)}</strong> | Total: <strong>${total.toFixed(2)}</strong>`;
-        }
-
-        function calcEffectiveRate() {
-            const gross = parseFloat(document.getElementById('eff-gross').value);
-            const tax = parseFloat(document.getElementById('eff-tax').value);
-            if(!gross || !tax) return;
-            
-            const rate = (tax / gross) * 100;
-            const net = gross - tax;
-            
-            const res = document.getElementById('eff-result');
-            res.classList.remove('hidden');
-            res.innerHTML = `Effective Rate: <strong>${rate.toFixed(1)}%</strong> | Net Income: <strong>${net.toFixed(2)}</strong>`;
-        }
-
     </script>
 </body>
 </html>
