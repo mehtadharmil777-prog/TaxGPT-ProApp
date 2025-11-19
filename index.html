@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaxGPT Pro | Global Edition</title>
+    <title>TaxGPT Pro | Global Ultimate</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,20 +13,13 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        sans: ['SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
                     },
                     colors: {
-                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7' }
+                        brand: { 50: '#f0f9ff', 500: '#0ea5e9', 600: '#0284c7' }
                     },
                     animation: {
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'wave': 'wave 1.5s infinite linear',
-                    },
-                    keyframes: {
-                        wave: {
-                            '0%, 100%': { transform: 'scale(1)' },
-                            '50%': { transform: 'scale(1.2)' },
-                        }
                     }
                 }
             }
@@ -35,86 +28,23 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
+        /* Aesthetics */
         body, aside, div, span, button { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 10px; }
         .dark ::-webkit-scrollbar-thumb { background: #3f3f46; }
-
-        /* Markdown Styling */
+        
+        /* Markdown Tables */
         .prose table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 1em 0; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
         .dark .prose table { border-color: #27272a; }
         .prose th { background: #f8fafc; padding: 12px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb; }
         .dark .prose th { background: #18181b; border-color: #27272a; }
         .prose td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
         .dark .prose td { border-color: #27272a; }
-        
-        /* Mic Wave Animation */
-        .mic-active { color: #ef4444; animation: wave 1.5s infinite; }
 
-        .logo-gradient { background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); }
-        
-        /* Copy Button Success State */
-        .copy-success { color: #22c55e !important; }
-    </style>
-</head>
-<body class="bg-[#ffffff] dark:bg-[#09090b] text-slate-900 dark:text-slate-50 h-screen flex overflow-hidden font-sans selection:bg-blue-100 dark:selection:bg-blue-900">
-
-    <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm hidden">
-        <div class="bg-white dark:bg-[#18181b] p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-gray-100 dark:border-gray-800 transform transition-all scale-100">
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 logo-gradient rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4 text-white text-2xl">
-                    <i class="fa-solid fa-shield-halved"></i>
-                </div>
-                <h2 class="text-2xl font-bold tracking-tight">Welcome back</h2>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Sign in to sync your tax history.</p>
-            </div>
-            <div class="space-y-3">
-                <button onclick="mockLogin('Google')" class="w-full bg-white dark:bg-[#27272a] border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#3f3f46] text-gray-700 dark:text-white font-medium py-3 px-4 rounded-xl transition flex items-center justify-center gap-3">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5">
-                    <span>Sign in with Google</span>
-                </button>
-                <button onclick="mockLogin('Guest')" class="w-full text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 mt-4">Continue as Guest</button>
-            </div>
-        </div>
-    </div>
-
-    <aside id="sidebar" class="w-[280px] bg-[#f8fafc] dark:bg-[#101012] flex flex-col h-full hidden md:flex border-r border-gray-200 dark:border-gray-800 flex-shrink-0 overflow-hidden">
-        <div class="p-4 flex items-center justify-between">
-            <div onclick="toggleSidebar()" class="p-2 hover:bg-gray-200 dark:hover:bg-[#27272a] rounded-lg cursor-pointer text-gray-500 transition"><i class="fa-solid fa-bars text-lg"></i></div>
-            <div class="sidebar-text flex-1 ml-3 font-bold text-lg tracking-tight">TaxGPT</div>
-            <div class="sidebar-text p-2 hover:bg-gray-200 dark:hover:bg-[#27272a] rounded-lg cursor-pointer text-gray-500" onclick="startNewChat()"><i class="fa-regular fa-pen-to-square"></i></div>
-        </div>
-
-        <div class="px-4 mb-4">
-            <button onclick="startNewChat()" class="w-full flex items-center gap-3 bg-gray-200/50 dark:bg-[#27272a] hover:bg-gray-300 dark:hover:bg-[#3f3f46] text-gray-700 dark:text-gray-200 py-3 px-4 rounded-full transition-all group whitespace-nowrap overflow-hidden">
-                <i class="fa-solid fa-plus text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white min-w-[20px]"></i>
-                <span class="sidebar-text text-sm font-medium">New Chat</span>
-            </button>
-        </div>
-
-        <div class="flex-1 overflow-y-auto px-2 py-2 scrollbar-hide" id="history-list">
-            <div class="sidebar-text px-4 py-2 text-xs font-semibold text-gray-400 tracking-wider">RECENT</div>
-        </div>
-
-        <div class="mt-auto p-3 space-y-1 border-t border-gray-200 dark:border-gray-800">
-            <div class="flex items-center gap-3 p-3 rounded-lg text-gray-500 dark:text-gray-400 text-xs cursor-default whitespace-nowrap overflow-hidden">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse-slow min-w-[8px]"></div>
-                <span class="sidebar-text" id="visitor-count">Loading...</span>
-            </div>
-            <button onclick="toggleTheme()" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-200/50 dark:hover:bg-[#27272a] text-sm text-gray-600 dark:text-gray-300 transition whitespace-nowrap overflow-hidden">
-                <i class="fa-solid fa-circle-half-stroke min-w-[20px]"></i>
-                <span class="sidebar-text">Appearance</span>
-            </button>
-            <div class="flex items-center gap-3 p-2 mt-1 rounded-lg hover:bg-gray-200/50 dark:hover:bg-[#27272a] cursor-pointer whitespace-nowrap overflow-hidden" onclick="showLogin()">
-                <div id="sidebar-avatar" class="w-8 h-8 logo-gradient rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md min-w-[32px]">G</div>
-                <div class="sidebar-text flex-1 overflow-hidden">
-                    <p id="sidebar-name" class="text-sm font-medium truncate text-gray-800 dark:text-gray-200">Guest</p>
-                    <p class="text-[10px] text-gray-500">Free Plan</p>
-                </div>
-            </div>
-        </div>
-    </aside>
+        /* Loaders */
+        .dot-flashing { position: relative; width: 6px; height: 6px; border-radius: 5px; background-color: #0ea5e9; animation: dot-flashing 1s infinite linear alternate; animation-
