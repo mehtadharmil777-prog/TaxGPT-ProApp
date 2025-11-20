@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaxLLM | Your AI Tax Expert</title>
+    <title>TaxLLM | Professional Tax Intelligence</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     
     <script src="https://cdn.tailwindcss.com"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -18,181 +18,168 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        appleGray: '#F5F5F7',
-                        appleDark: '#1D1D1F',
-                        appleBlue: '#0066CC',
-                    },
-                    boxShadow: {
-                        'soft': '0 10px 30px -10px rgba(0, 0, 0, 0.08)',
-                        'card': '0 4px 20px rgba(0, 0, 0, 0.06)',
-                    }
+                    colors: { appleGray: '#F5F5F7', appleDark: '#1D1D1F', appleBlue: '#0066CC' },
+                    animation: { 'fade-in': 'fadeIn 0.5s ease-out' },
+                    keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
                 }
             }
         }
     </script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
-        
-        /* Glassmorphism */
-        .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        
-        /* Smooth Transitions */
-        .fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; transform: translateY(20px); }
-        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
         
         /* Markdown Styling */
-        .prose h3 { font-weight: 600; font-size: 1.1em; margin-top: 1.5em; margin-bottom: 0.5em; color: #111; }
-        .prose ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 1em; color: #374151; }
-        .prose p { margin-bottom: 0.8em; color: #374151; line-height: 1.6; }
+        .prose h3 { font-weight: 600; font-size: 1.1em; margin-top: 1em; margin-bottom: 0.5em; color: #111; }
+        .prose ul { list-style-type: disc; padding-left: 1.4em; margin-bottom: 1em; color: #374151; }
         .prose strong { color: #000; font-weight: 600; }
-        .prose a { color: #0066CC; text-decoration: none; }
+        .prose a { color: #0066CC; text-decoration: none; font-weight: 500; }
         .prose a:hover { text-decoration: underline; }
-        
-        /* Feature Tiles */
-        .feature-tile { transition: all 0.3s ease; }
-        .feature-tile:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
+
+        /* Loading Dots */
+        .dot-flashing { position: relative; width: 6px; height: 6px; border-radius: 5px; background-color: #888; animation: dot-flashing 1s infinite linear alternate; animation-delay: 0.5s; }
+        .dot-flashing::before, .dot-flashing::after { content: ''; display: inline-block; position: absolute; top: 0; width: 6px; height: 6px; border-radius: 5px; background-color: #888; animation: dot-flashing 1s infinite alternate; }
+        .dot-flashing::before { left: -10px; animation-delay: 0s; }
+        .dot-flashing::after { left: 10px; animation-delay: 1s; }
+        @keyframes dot-flashing { 0% { background-color: #888; } 50%, 100% { background-color: #ccc; } }
     </style>
 </head>
 <body class="bg-white text-appleDark">
 
+    <div id="modal-library" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm hidden" onclick="closeModals(event)">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-2xl m-4 animate-fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">Official Tax Library</h3>
+                <button onclick="closeModals(null, true)" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <a href="https://www.gov.uk/government/organisations/hm-revenue-customs" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 hover:border-blue-500 transition group">
+                    <div class="font-bold group-hover:text-blue-600">🇬🇧 HMRC</div>
+                    <div class="text-xs text-gray-500">United Kingdom</div>
+                </a>
+                <a href="https://www.irs.gov/" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 hover:border-blue-500 transition group">
+                    <div class="font-bold group-hover:text-blue-600">🇺🇸 IRS</div>
+                    <div class="text-xs text-gray-500">United States</div>
+                </a>
+                <a href="https://tax.gov.ae/en" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 hover:border-blue-500 transition group">
+                    <div class="font-bold group-hover:text-blue-600">🇦🇪 FTA</div>
+                    <div class="text-xs text-gray-500">UAE</div>
+                </a>
+                <a href="https://incometaxindia.gov.in/" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 hover:border-blue-500 transition group">
+                    <div class="font-bold group-hover:text-blue-600">🇮🇳 ITD</div>
+                    <div class="text-xs text-gray-500">India</div>
+                </a>
+                <a href="https://www.canada.ca/en/revenue-agency.html" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 hover:border-blue-500 transition group">
+                    <div class="font-bold group-hover:text-blue-600">🇨🇦 CRA</div>
+                    <div class="text-xs text-gray-500">Canada</div>
+                </a>
+                <a href="https://taxation-customs.ec.europa.eu/index_en" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 hover:border-blue-500 transition group">
+                    <div class="font-bold group-hover:text-blue-600">🇪🇺 Europa</div>
+                    <div class="text-xs text-gray-500">European Union</div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-info" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm hidden" onclick="closeModals(event)">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-lg m-4 animate-fade-in relative">
+            <button onclick="closeModals(null, true)" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="modal-title" class="text-2xl font-bold mb-4">Title</h3>
+            <div id="modal-content" class="prose text-sm text-gray-600 leading-relaxed max-h-[60vh] overflow-y-auto"></div>
+        </div>
+    </div>
+
     <div id="landing-view">
         
-        <nav class="fixed w-full z-50 glass-nav">
+        <nav class="fixed w-full z-50 glass-nav transition-all duration-300">
             <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                <div class="font-bold text-xl tracking-tight">Tax<span class="font-light text-gray-500">LLM</span></div>
-                <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-500">
-                    <a href="#" class="hover:text-black transition">Product</a>
-                    <a href="#" class="hover:text-black transition">Features</a>
-                    <a href="#pricing" class="hover:text-black transition">Pricing</a>
-                    <a href="#" class="hover:text-black transition">Library</a>
+                <div class="flex items-center gap-2 font-bold text-xl tracking-tight text-gray-900 cursor-pointer" onclick="location.reload()">
+                    <i class="fa-solid fa-scale-balanced text-black"></i> TaxLLM
                 </div>
-                <div class="flex gap-4 text-sm">
-                    <button class="text-gray-600 hover:text-black font-medium">Sign In</button>
-                    <button onclick="switchView('app')" class="bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition transform hover:scale-105">Get Started</button>
+
+                <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-600">
+                    <a href="#" onclick="scrollToSection('features')" class="hover:text-black transition">Features</a>
+                    <a href="#" onclick="scrollToSection('pricing')" class="hover:text-black transition">Pricing</a>
+                    <button onclick="openModal('library')" class="hover:text-black transition">Library</button>
+                    <button onclick="openContentModal('about')" class="hover:text-black transition">About</button>
+                </div>
+                <div class="flex gap-3 text-sm">
+                    <button class="text-gray-600 hover:text-black font-medium px-3 py-2">Log In</button>
+                    <button onclick="switchView('app')" class="bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition transform hover:scale-105">Launch App</button>
                 </div>
             </div>
         </nav>
 
-        <section class="pt-40 pb-20 px-6 text-center max-w-4xl mx-auto fade-in" style="animation-delay: 0.1s;">
-            <h1 class="text-5xl md:text-7xl font-semibold tracking-tight mb-6 leading-tight text-black">Your AI Tax Expert.</h1>
-            <p class="text-xl md:text-2xl text-gray-500 font-light mb-10">Accurate. Cited. Country-specific. Trusted by professionals.</p>
+        <section class="pt-40 pb-20 px-6 text-center max-w-5xl mx-auto animate-fade-in">
+            <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight text-gray-900">Your AI Tax Expert.</h1>
+            <p class="text-xl md:text-2xl text-gray-500 font-light mb-10 max-w-3xl mx-auto">Accurate. Cited. Country-specific. Trusted by professionals.</p>
             
-            <div class="relative max-w-2xl mx-auto mb-16 group">
+            <div class="relative max-w-2xl mx-auto mb-20 group">
                 <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                     <i class="fa-solid fa-magnifying-glass text-gray-400 text-lg"></i>
                 </div>
-                <input type="text" onclick="switchView('app')" class="w-full pl-14 pr-4 py-5 rounded-full border border-gray-200 shadow-soft text-lg focus:outline-none focus:ring-4 focus:ring-gray-100 transition cursor-pointer" placeholder="Ask anything about tax..." readonly>
-                <div class="absolute right-2 top-2">
-                    <button onclick="switchView('app')" class="bg-blue-600 text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-blue-700 transition shadow-lg">
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </div>
+                <input type="text" id="landing-search" 
+                    class="w-full pl-14 pr-14 py-5 rounded-full border border-gray-200 shadow-lg text-lg focus:outline-none focus:ring-4 focus:ring-gray-100 transition" 
+                    placeholder="Ask anything about tax..." 
+                    onkeydown="if(event.key === 'Enter') handleLandingSearch()">
+                <button onclick="handleLandingSearch()" class="absolute right-2 top-2 bg-black text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-800 transition shadow-md">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
             </div>
         </section>
 
-        <section class="px-6 pb-24 max-w-7xl mx-auto fade-in" style="animation-delay: 0.3s;">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div onclick="switchView('app')" class="feature-tile bg-appleGray p-8 rounded-3xl cursor-pointer h-full flex flex-col items-center text-center">
-                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6 text-xl text-gray-700"><i class="fa-solid fa-magnifying-glass"></i></div>
-                    <h3 class="text-xl font-semibold mb-2">Tax Search</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Search tax laws with real citations and direct government links.</p>
-                </div>
-                <div onclick="switchView('app')" class="feature-tile bg-appleGray p-8 rounded-3xl cursor-pointer h-full flex flex-col items-center text-center">
-                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6 text-xl text-gray-700"><i class="fa-solid fa-globe"></i></div>
-                    <h3 class="text-xl font-semibold mb-4">Tax Summaries</h3>
-                    <div class="flex gap-2 w-full mb-3 opacity-50 pointer-events-none">
-                        <div class="bg-white px-3 py-2 rounded-lg text-xs border w-1/2">USA</div>
-                        <div class="bg-white px-3 py-2 rounded-lg text-xs border w-1/2">Corp Tax</div>
-                    </div>
-                    <p class="text-gray-500 text-sm leading-relaxed">Summaries for any country and tax category.</p>
-                </div>
-                <div onclick="switchView('app')" class="feature-tile bg-appleGray p-8 rounded-3xl cursor-pointer h-full flex flex-col items-center text-center">
-                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6 text-xl text-gray-700"><i class="fa-solid fa-envelope-open-text"></i></div>
-                    <h3 class="text-xl font-semibold mb-4">Email Generator</h3>
-                    <div class="w-full bg-black text-white py-2 rounded-lg text-xs font-medium mb-3 opacity-80">Generate Email</div>
-                    <p class="text-gray-500 text-sm leading-relaxed">Create professional tax emails instantly.</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="bg-white py-24 px-6 border-t border-gray-100">
+        <section id="features" class="bg-white py-20 px-6 border-t border-gray-100">
             <div class="max-w-6xl mx-auto">
-                <h2 class="text-3xl md:text-4xl font-semibold text-center mb-16">Everything You Need for Tax</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 transition flex items-center gap-4 group cursor-default">
-                        <i class="fa-solid fa-file-pdf text-gray-400 group-hover:text-black text-xl transition"></i> <span class="font-medium text-gray-700">Document Helper</span>
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold">Everything You Need for Tax</h2>
+                    <p class="text-gray-500 mt-2">Powerful tools integrated into one workspace.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 hover:shadow-lg transition flex items-center gap-4 cursor-default">
+                        <i class="fa-solid fa-magnifying-glass text-gray-600 text-xl"></i> <span class="font-medium">Tax Search</span>
                     </div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 transition flex items-center gap-4 group cursor-default">
-                        <i class="fa-solid fa-gavel text-gray-400 group-hover:text-black text-xl transition"></i> <span class="font-medium text-gray-700">Case Law Explorer</span>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 hover:shadow-lg transition flex items-center gap-4 cursor-default">
+                        <i class="fa-solid fa-globe text-gray-600 text-xl"></i> <span class="font-medium">Country Summaries</span>
                     </div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 transition flex items-center gap-4 group cursor-default">
-                        <i class="fa-solid fa-scale-balanced text-gray-400 group-hover:text-black text-xl transition"></i> <span class="font-medium text-gray-700">Tax Comparisons</span>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 hover:shadow-lg transition flex items-center gap-4 cursor-default">
+                        <i class="fa-solid fa-envelope-open-text text-gray-600 text-xl"></i> <span class="font-medium">Email Generator</span>
                     </div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 transition flex items-center gap-4 group cursor-default">
-                        <i class="fa-solid fa-list-check text-gray-400 group-hover:text-black text-xl transition"></i> <span class="font-medium text-gray-700">Checklists</span>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 hover:shadow-lg transition flex items-center gap-4 cursor-default">
+                        <i class="fa-solid fa-file-pdf text-gray-600 text-xl"></i> <span class="font-medium">Document Helper</span>
                     </div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 transition flex items-center gap-4 group cursor-default">
-                        <i class="fa-regular fa-calendar text-gray-400 group-hover:text-black text-xl transition"></i> <span class="font-medium text-gray-700">Tax Calendar</span>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 hover:shadow-lg transition flex items-center gap-4 cursor-default">
+                        <i class="fa-solid fa-gavel text-gray-600 text-xl"></i> <span class="font-medium">Case Law Explorer</span>
                     </div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 transition flex items-center gap-4 group cursor-default">
-                        <i class="fa-solid fa-clipboard-question text-gray-400 group-hover:text-black text-xl transition"></i> <span class="font-medium text-gray-700">Form Helper</span>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 hover:shadow-lg transition flex items-center gap-4 cursor-default">
+                        <i class="fa-solid fa-scale-balanced text-gray-600 text-xl"></i> <span class="font-medium">Comparisons</span>
                     </div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 transition flex items-center gap-4 group cursor-default">
-                        <i class="fa-solid fa-copy text-gray-400 group-hover:text-black text-xl transition"></i> <span class="font-medium text-gray-700">Templates Library</span>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 hover:shadow-lg transition flex items-center gap-4 cursor-default">
+                        <i class="fa-regular fa-calendar text-gray-600 text-xl"></i> <span class="font-medium">Tax Calendar</span>
                     </div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 transition flex items-center gap-4 group cursor-default">
-                        <i class="fa-solid fa-diagram-project text-gray-400 group-hover:text-black text-xl transition"></i> <span class="font-medium text-gray-700">Saved Workflows</span>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 hover:shadow-lg transition flex items-center gap-4 cursor-default">
+                        <i class="fa-solid fa-list-check text-gray-600 text-xl"></i> <span class="font-medium">Checklists</span>
                     </div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 transition flex items-center gap-4 group cursor-default">
-                        <i class="fa-solid fa-sliders text-gray-400 group-hover:text-black text-xl transition"></i> <span class="font-medium text-gray-700">Tone & Detail Control</span>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:border-gray-300 hover:shadow-lg transition flex items-center gap-4 cursor-default">
+                        <i class="fa-solid fa-sliders text-gray-600 text-xl"></i> <span class="font-medium">Expert/Simple Mode</span>
                     </div>
                 </div>
             </div>
         </section>
 
         <section class="py-20 bg-appleGray px-6 text-center">
-            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-10">Verified by Official Sources</p>
-            <div class="flex flex-wrap justify-center gap-8 md:gap-16 text-xl md:text-2xl text-gray-400 font-bold grayscale opacity-60 select-none">
-                <span>HMRC</span><span>IRS</span><span>ITD India</span><span>ATO</span><span>CRA</span><span>EU Commission</span>
+            <div class="flex flex-wrap justify-center gap-12 text-2xl text-gray-400 font-bold grayscale opacity-60 select-none">
+                <span>HMRC</span><span>IRS</span><span>ATO</span><span>CRA</span><span>EU Commission</span>
             </div>
-            <p class="mt-10 text-sm text-gray-500">Every answer includes citations to real legislation.</p>
+            <p class="mt-8 text-sm text-gray-500 font-medium">Answers are verified by official sources.</p>
         </section>
 
-        <section id="pricing" class="py-24 px-6 max-w-6xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
-                <div class="p-8 rounded-3xl border border-gray-200 text-center bg-white">
-                    <h3 class="text-lg font-semibold mb-2">Free</h3>
-                    <div class="text-4xl font-bold mb-4">$0</div>
-                    <p class="text-gray-500 mb-8 text-sm">For individuals.</p>
-                    <button onclick="switchView('app')" class="w-full border border-gray-200 py-3 rounded-xl font-medium hover:bg-gray-50 transition text-sm">Get Started</button>
-                </div>
-                <div class="p-8 rounded-3xl bg-black text-white text-center shadow-xl transform scale-105 relative z-10">
-                    <h3 class="text-lg font-semibold mb-2">Pro</h3>
-                    <div class="text-4xl font-bold mb-4">$29</div>
-                    <p class="text-gray-400 mb-8 text-sm">For tax professionals.</p>
-                    <button onclick="switchView('app')" class="w-full bg-white text-black py-3 rounded-xl font-medium hover:bg-gray-100 transition text-sm">Start Trial</button>
-                </div>
-                <div class="p-8 rounded-3xl border border-gray-200 text-center bg-white">
-                    <h3 class="text-lg font-semibold mb-2">Enterprise</h3>
-                    <div class="text-4xl font-bold mb-4">Custom</div>
-                    <p class="text-gray-500 mb-8 text-sm">For firms & teams.</p>
-                    <button class="w-full border border-gray-200 py-3 rounded-xl font-medium hover:bg-gray-50 transition text-sm">Contact Sales</button>
-                </div>
-            </div>
-        </section>
-
-        <footer class="py-10 border-t border-gray-100 text-center text-xs text-gray-400">
-            <div class="flex justify-center gap-6 mb-4">
-                <a href="#" class="hover:text-black">About</a>
-                <a href="#" class="hover:text-black">Security</a>
-                <a href="#" class="hover:text-black">Terms</a>
-                <a href="#" class="hover:text-black">Contact</a>
+        <footer class="py-12 border-t border-gray-100 text-center text-sm text-gray-500 bg-white">
+            <div class="flex justify-center gap-8 mb-6">
+                <button onclick="openContentModal('about')" class="hover:text-black">About</button>
+                <button onclick="openContentModal('security')" class="hover:text-black">Security</button>
+                <button onclick="openContentModal('terms')" class="hover:text-black">Terms</button>
+                <button onclick="openContentModal('contact')" class="hover:text-black">Contact</button>
             </div>
             <p>&copy; 2025 TaxLLM. Built for professionals.</p>
         </footer>
@@ -209,84 +196,91 @@
             
             <div class="flex-1 overflow-y-auto px-3 py-2 space-y-1 custom-scroll">
                 <div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-2 mt-4 mb-1">Tools</div>
-                
-                <button class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-magnifying-glass w-4"></i> Tax Search</button>
                 <button class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-globe w-4"></i> Tax Summaries</button>
                 <button class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-envelope-open-text w-4"></i> Email Generator</button>
                 <button class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-file-pdf w-4"></i> Document Helper</button>
-                <button class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-gavel w-4"></i> Case Law</button>
                 
                 <div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-2 mt-6 mb-1">History</div>
-                <button class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left text-gray-400 truncate"><i class="fa-regular fa-message w-4"></i> VAT Threshold UK</button>
-                <button class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left text-gray-400 truncate"><i class="fa-regular fa-message w-4"></i> Section 199A Deduction</button>
+                <div id="history-list" class="space-y-1"></div>
             </div>
 
             <div class="p-3 border-t border-gray-700">
+                <button onclick="openModal('library')" class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left mb-1">
+                    <i class="fa-solid fa-book-atlas w-4"></i> Official Library
+                </button>
                 <button onclick="switchView('landing')" class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left">
-                    <div class="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-[10px] text-white font-bold">U</div>
-                    User
+                    <i class="fa-solid fa-right-from-bracket w-4"></i> Exit App
                 </button>
             </div>
         </aside>
 
         <main class="flex-1 flex flex-col h-full relative bg-white">
             
-            <header class="h-14 border-b border-gray-100 flex items-center justify-between px-6 bg-white/90 backdrop-blur z-10">
-                <div class="font-semibold text-gray-700">TaxLLM <span class="bg-gray-100 text-gray-500 text-[10px] px-1.5 py-0.5 rounded ml-2">PRO</span></div>
+            <header class="h-14 border-b border-gray-100 flex items-center justify-between px-6 bg-white/95 backdrop-blur z-10">
+                <div class="flex items-center gap-2 font-bold text-lg text-gray-800 cursor-pointer" onclick="resetChat()">
+                    <i class="fa-solid fa-scale-balanced"></i> TaxLLM
+                </div>
                 <div class="flex items-center gap-4 text-sm">
-                    <div class="flex items-center gap-2 text-gray-500 text-xs bg-gray-50 px-2 py-1 rounded-md">
-                        <i class="fa-solid fa-location-dot"></i> Auto: Global
-                    </div>
-                    <div class="flex items-center gap-2 cursor-pointer">
-                        <span class="text-gray-400 text-xs">Simple</span>
-                        <i class="fa-solid fa-toggle-on text-black text-xl"></i>
-                        <span class="font-medium text-xs">Expert</span>
-                    </div>
+                    <button id="mode-toggle" onclick="toggleMode()" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition text-xs font-medium text-gray-600">
+                        <span id="mode-label">Expert Mode</span>
+                        <i class="fa-solid fa-toggle-on text-lg text-black" id="mode-icon"></i>
+                    </button>
                 </div>
             </header>
 
             <div id="chat-container" class="flex-1 overflow-y-auto p-6 pb-40 scroll-smooth">
                 
-                <div id="welcome-screen" class="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto">
-                    <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center text-3xl mb-6 text-gray-400">
+                <div id="welcome-screen" class="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto animate-fade-in">
+                    <div class="w-16 h-16 bg-black text-white rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-lg">
                         <i class="fa-solid fa-scale-balanced"></i>
                     </div>
-                    <h2 class="text-2xl font-semibold mb-2 text-gray-800">How can I help with your taxes?</h2>
+                    <h2 class="text-3xl font-bold mb-2 text-gray-900">How can I help you today?</h2>
+                    <p class="text-gray-500 mb-10">Research laws, draft emails, or compare tax rates.</p>
                     
-                    <div class="grid grid-cols-2 gap-4 w-full mt-8">
-                        <button onclick="sendPreset('Summarize Corporate Tax rates for 2025')" class="p-4 border border-gray-200 rounded-xl text-left hover:bg-gray-50 transition group">
-                            <div class="font-medium text-sm mb-1 text-gray-700">Summarize Tax Rates</div>
-                            <div class="text-xs text-gray-400">Corporate rates for 2025</div>
+                    <div class="grid grid-cols-2 gap-4 w-full">
+                        <button onclick="sendPreset('Summarize 2025 Corporate Tax rates for UK and USA')" class="p-5 border border-gray-200 rounded-xl text-left hover:bg-gray-50 hover:border-gray-300 transition">
+                            <div class="font-bold text-sm mb-1 text-gray-800">Summarize Tax Rates</div>
+                            <div class="text-xs text-gray-500">Corporate rates for 2025</div>
                         </button>
-                        <button onclick="sendPreset('Draft a penalty appeal letter to HMRC')" class="p-4 border border-gray-200 rounded-xl text-left hover:bg-gray-50 transition group">
-                            <div class="font-medium text-sm mb-1 text-gray-700">Draft Appeal Letter</div>
-                            <div class="text-xs text-gray-400">Professional correspondence</div>
+                        <button onclick="sendPreset('Draft a polite email to a client chasing a late VAT payment')" class="p-5 border border-gray-200 rounded-xl text-left hover:bg-gray-50 hover:border-gray-300 transition">
+                            <div class="font-bold text-sm mb-1 text-gray-800">Draft Client Email</div>
+                            <div class="text-xs text-gray-500">Professional correspondence</div>
                         </button>
-                        <button onclick="sendPreset('Search case law regarding Home Office expenses')" class="p-4 border border-gray-200 rounded-xl text-left hover:bg-gray-50 transition group">
-                            <div class="font-medium text-sm mb-1 text-gray-700">Search Case Law</div>
-                            <div class="text-xs text-gray-400">Find legal precedents</div>
+                        <button onclick="sendPreset('What are the rules for R&D Tax Credits for SMEs?')" class="p-5 border border-gray-200 rounded-xl text-left hover:bg-gray-50 hover:border-gray-300 transition">
+                            <div class="font-bold text-sm mb-1 text-gray-800">Explain R&D Rules</div>
+                            <div class="text-xs text-gray-500">Simplify complex legislation</div>
                         </button>
-                        <button onclick="sendPreset('Compare VAT thresholds: UK vs UAE')" class="p-4 border border-gray-200 rounded-xl text-left hover:bg-gray-50 transition group">
-                            <div class="font-medium text-sm mb-1 text-gray-700">Compare VAT</div>
-                            <div class="text-xs text-gray-400">Global registration limits</div>
+                        <button onclick="sendPreset('Compare VAT registration thresholds: UK vs UAE vs Ireland')" class="p-5 border border-gray-200 rounded-xl text-left hover:bg-gray-50 hover:border-gray-300 transition">
+                            <div class="font-bold text-sm mb-1 text-gray-800">Compare Global VAT</div>
+                            <div class="text-xs text-gray-500">International thresholds</div>
                         </button>
                     </div>
                 </div>
 
                 <div id="chat-output" class="max-w-3xl mx-auto space-y-8 hidden pt-4"></div>
-                <div id="loading" class="hidden max-w-3xl mx-auto pt-4 flex gap-4"><div class="w-8 h-8 bg-green-600 rounded-md"></div><div class="text-sm text-gray-500 animate-pulse">Analyzing legislation...</div></div>
+                
+                <div id="loading" class="hidden max-w-3xl mx-auto pt-4 flex gap-4 items-center">
+                    <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white"><i class="fa-solid fa-bolt text-xs"></i></div>
+                    <div class="text-sm text-gray-500 font-medium" id="loading-text">Thinking...</div>
+                </div>
             </div>
 
             <div class="absolute bottom-0 w-full bg-gradient-to-t from-white via-white to-transparent pt-10 pb-8 px-6">
                 <div class="max-w-3xl mx-auto relative">
-                    <div class="relative shadow-card rounded-xl border border-gray-200 bg-white overflow-hidden focus-within:border-gray-400 focus-within:shadow-md transition">
-                        <textarea id="user-input" rows="1" class="w-full p-4 pr-12 resize-none focus:outline-none text-sm max-h-40" placeholder="Ask TaxLLM..." onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"></textarea>
-                        <button onclick="sendMessage()" class="absolute right-2 bottom-2 bg-black text-white w-8 h-8 rounded-lg hover:bg-gray-800 transition flex items-center justify-center">
-                            <i class="fa-solid fa-paper-plane text-xs"></i>
-                        </button>
+                    <div class="relative shadow-lg rounded-2xl border border-gray-200 bg-white focus-within:border-black focus-within:ring-1 focus-within:ring-black transition">
+                        <textarea id="user-input" rows="1" class="w-full p-4 pr-24 resize-none focus:outline-none text-base max-h-40 rounded-2xl" placeholder="Ask anything about tax..." onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"></textarea>
+                        
+                        <div class="absolute right-2 bottom-2 flex gap-1">
+                            <button id="stop-btn" onclick="stopGeneration()" class="hidden bg-gray-200 text-black w-10 h-10 rounded-xl hover:bg-gray-300 transition flex items-center justify-center" title="Stop Generating">
+                                <i class="fa-solid fa-stop"></i>
+                            </button>
+                            <button id="send-btn" onclick="sendMessage()" class="bg-black text-white w-10 h-10 rounded-xl hover:bg-gray-800 transition flex items-center justify-center">
+                                <i class="fa-solid fa-arrow-up"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="text-center mt-2 text-[10px] text-gray-400">
-                        TaxLLM can make mistakes. Verify with official sources.
+                        Answers are verified by official sources. Check important info.
                     </div>
                 </div>
             </div>
@@ -296,21 +290,48 @@
 
     <script>
         // --- STATE ---
-        let currentView = 'landing';
+        let state = {
+            mode: 'Expert', // Expert or Simple
+            controller: null, // For aborting requests
+            history: []
+        };
 
-        // --- VIEW SWITCHING ---
+        // --- VIEW MANAGEMENT ---
         function switchView(viewName) {
-            document.getElementById('landing-view').classList.add('hidden');
-            document.getElementById('app-view').classList.add('hidden');
-            
             if (viewName === 'app') {
+                document.getElementById('landing-view').classList.add('hidden');
                 document.getElementById('app-view').classList.remove('hidden');
+                // Browser History Push
+                history.pushState({page: 'app'}, "App", "#app");
             } else {
+                document.getElementById('app-view').classList.add('hidden');
                 document.getElementById('landing-view').classList.remove('hidden');
+                history.pushState({page: 'landing'}, "Home", "/");
+            }
+        }
+        
+        // Handle Browser Back Button
+        window.onpopstate = function(event) {
+            if(event.state && event.state.page === 'landing') switchView('landing');
+            else if(event.state && event.state.page === 'app') switchView('app');
+        };
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({behavior: 'smooth'});
+        }
+
+        function handleLandingSearch() {
+            const input = document.getElementById('landing-search');
+            if(input.value.trim()) {
+                const query = input.value;
+                switchView('app');
+                document.getElementById('user-input').value = query;
+                sendMessage();
+                input.value = '';
             }
         }
 
-        // --- CHAT LOGIC ---
+        // --- APP LOGIC ---
         function resetChat() {
             document.getElementById('welcome-screen').classList.remove('hidden');
             document.getElementById('chat-output').classList.add('hidden');
@@ -318,9 +339,32 @@
             document.getElementById('user-input').value = '';
         }
 
+        function toggleMode() {
+            state.mode = state.mode === 'Expert' ? 'Simple' : 'Expert';
+            document.getElementById('mode-label').innerText = state.mode + ' Mode';
+            const icon = document.getElementById('mode-icon');
+            if(state.mode === 'Expert') {
+                icon.classList.replace('fa-toggle-off', 'fa-toggle-on');
+                icon.classList.remove('text-gray-400'); icon.classList.add('text-black');
+            } else {
+                icon.classList.replace('fa-toggle-on', 'fa-toggle-off');
+                icon.classList.remove('text-black'); icon.classList.add('text-gray-400');
+            }
+        }
+
         function sendPreset(text) {
             document.getElementById('user-input').value = text;
             sendMessage();
+        }
+
+        function stopGeneration() {
+            if(state.controller) {
+                state.controller.abort();
+                state.controller = null;
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('send-btn').classList.remove('hidden');
+                document.getElementById('stop-btn').classList.add('hidden');
+            }
         }
 
         async function sendMessage() {
@@ -328,72 +372,135 @@
             const text = input.value.trim();
             if (!text) return;
 
-            // UI Updates
+            // UI Transition
             document.getElementById('welcome-screen').classList.add('hidden');
             const output = document.getElementById('chat-output');
             output.classList.remove('hidden');
-            
-            // User Message
-            const userDiv = document.createElement('div');
-            userDiv.className = "flex justify-end";
-            userDiv.innerHTML = `<div class="bg-[#F7F7F8] text-gray-800 px-5 py-3 rounded-2xl max-w-xl text-sm leading-relaxed">${text}</div>`;
-            output.appendChild(userDiv);
+
+            // User Bubble
+            const userHTML = `<div class="flex justify-end"><div class="bg-gray-100 text-gray-900 px-5 py-3 rounded-2xl max-w-2xl text-sm leading-relaxed font-medium">${text}</div></div>`;
+            output.insertAdjacentHTML('beforeend', userHTML);
             
             input.value = '';
-            document.getElementById('loading').classList.remove('hidden');
             window.scrollTo(0, document.body.scrollHeight);
 
-            // --- API CALL TO YOUR BACKEND ---
-            // This connects to the /api/chat.js file we built earlier
+            // Loading State
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('loading-text').innerText = "Working on your response...";
+            
+            // Swap Send for Stop Button
+            document.getElementById('send-btn').classList.add('hidden');
+            document.getElementById('stop-btn').classList.remove('hidden');
+
+            // Setup Abort
+            state.controller = new AbortController();
+
             try {
-                const SYSTEM_PROMPT = `
-                You are TaxLLM. FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
-                
-                ### Executive Summary
-                (3 sentences max)
-                
-                ### Explanation
-                (Detailed explanation)
-                
-                ### Legislative References
-                (List specific laws/sections)
-                
-                ### Risk Level
-                (Low/Medium/High)
-                
-                ### Key Takeaways
-                (Bullet points)
-                `;
+                // System Prompt Construction
+                let promptContext = `You are TaxLLM. 
+                MODE: ${state.mode} (If Simple: Use plain English, no jargon. If Expert: Cite laws, use technical terms).
+                FORMAT: Use Markdown. Use bold for key figures. 
+                REQUIREMENT: Include citations [Link] where possible.
+                User Query: ${text}`;
 
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: `${SYSTEM_PROMPT}\n\nUser Query: ${text}` })
+                    body: JSON.stringify({ prompt: promptContext }),
+                    signal: state.controller.signal
                 });
 
                 const data = await response.json();
                 document.getElementById('loading').classList.add('hidden');
-
-                // AI Message
-                const aiDiv = document.createElement('div');
-                aiDiv.className = "flex gap-4 group fade-in";
-                aiDiv.innerHTML = `
-                    <div class="w-8 h-8 bg-green-600 text-white rounded-sm flex items-center justify-center flex-shrink-0 text-xs font-bold">T</div>
-                    <div class="prose prose-sm max-w-none text-gray-800 leading-7">
-                        ${marked.parse(data.response || "Error connecting to AI.")}
+                
+                // Unique ID for this message actions
+                const msgId = Date.now();
+                
+                // AI Bubble with Action Bar
+                const aiHTML = `
+                    <div class="flex gap-4 fade-in group mb-8">
+                        <div class="w-8 h-8 bg-black text-white rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold">AI</div>
+                        <div class="flex-1 max-w-3xl">
+                            <div class="prose prose-sm text-gray-800 leading-7 mb-3">
+                                ${marked.parse(data.response)}
+                            </div>
+                            
+                            <div class="flex gap-2 items-center">
+                                <button onclick="copyToClipboard(this, '${msgId}')" class="px-3 py-1.5 rounded-full bg-gray-50 hover:bg-gray-100 text-xs font-medium text-gray-600 transition flex items-center gap-1 border border-gray-100">
+                                    <i class="fa-regular fa-copy"></i> Copy
+                                </button>
+                                <button onclick="postResponseAction('Simplify', '${text}')" class="px-3 py-1.5 rounded-full bg-gray-50 hover:bg-gray-100 text-xs font-medium text-gray-600 transition flex items-center gap-1 border border-gray-100">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-purple-500"></i> Simplify
+                                </button>
+                                <button onclick="postResponseAction('Takeaways', '${text}')" class="px-3 py-1.5 rounded-full bg-gray-50 hover:bg-gray-100 text-xs font-medium text-gray-600 transition flex items-center gap-1 border border-gray-100">
+                                    <i class="fa-solid fa-list-check text-blue-500"></i> Key Takeaways
+                                </button>
+                                <button class="px-2 py-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-green-600 transition"><i class="fa-regular fa-thumbs-up"></i></button>
+                                <button class="px-2 py-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-red-600 transition"><i class="fa-regular fa-thumbs-down"></i></button>
+                            </div>
+                            
+                            <div id="raw-${msgId}" class="hidden">${data.response}</div>
+                        </div>
                     </div>
                 `;
-                output.appendChild(aiDiv);
+                output.insertAdjacentHTML('beforeend', aiHTML);
 
             } catch (err) {
-                document.getElementById('loading').classList.add('hidden');
-                const errDiv = document.createElement('div');
-                errDiv.className = "text-red-500 text-sm text-center";
-                errDiv.innerText = "Error: Could not connect to backend. (Make sure you are on Vercel)";
-                output.appendChild(errDiv);
+                if (err.name !== 'AbortError') {
+                    document.getElementById('loading').classList.add('hidden');
+                    output.insertAdjacentHTML('beforeend', `<div class="text-red-500 text-sm text-center py-2">Error: ${err.message}</div>`);
+                }
+            } finally {
+                document.getElementById('send-btn').classList.remove('hidden');
+                document.getElementById('stop-btn').classList.add('hidden');
+                state.controller = null;
             }
-            
             window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        // --- POST RESPONSE ACTIONS ---
+        function postResponseAction(type, originalQuery) {
+            const input = document.getElementById('user-input');
+            if (type === 'Simplify') {
+                input.value = `Explain this simply: "${originalQuery}"`;
+            } else if (type === 'Takeaways') {
+                input.value = `Give me the Key Takeaways for: "${originalQuery}"`;
+            }
+            sendMessage();
+        }
+
+        function copyToClipboard(btn, id) {
+            const text = document.getElementById(`raw-${id}`).innerText;
+            navigator.clipboard.writeText(text);
+            const icon = btn.querySelector('i');
+            icon.classList.replace('fa-copy', 'fa-check');
+            setTimeout(() => icon.classList.replace('fa-check', 'fa-copy'), 2000);
+        }
+
+        // --- MODALS ---
+        function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); }
+        function openContentModal(type) {
+            const titles = {
+                'about': 'About TaxLLM',
+                'security': 'Data Security',
+                'terms': 'Terms & Conditions',
+                'contact': 'Contact Us'
+            };
+            const content = {
+                'about': 'TaxLLM is an advanced AI-powered tax assistant designed to help professionals navigate complex legislation efficiently. We leverage the latest large language models grounded in official tax codes.',
+                'security': 'We use enterprise-grade encryption. Your queries are processed via secure APIs and are not used to train public models. We do not store personally identifiable financial data.',
+                'terms': 'Disclaimer: TaxLLM provides information, not legal advice. Always verify outputs with a qualified accountant or tax advisor. By using this tool, you agree to our terms of service.',
+                'contact': 'For support or enterprise inquiries, please email: support@taxllm.pro'
+            };
+            document.getElementById('modal-title').innerText = titles[type];
+            document.getElementById('modal-content').innerText = content[type];
+            document.getElementById('modal-info').classList.remove('hidden');
+        }
+        
+        function closeModals(e, force = false) {
+            if (force || e.target.id.startsWith('modal-')) {
+                document.querySelectorAll('[id^="modal-"]').forEach(m => m.classList.add('hidden'));
+            }
         }
     </script>
 </body>
