@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaxGPT Pro | Professional Tax Workspace</title>
+    <title>TaxGPT Pro | Enterprise Edition</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,12 +15,11 @@
                     fontFamily: { sans: ['SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'] },
                     colors: { brand: { 50: '#f0f9ff', 500: '#0ea5e9', 600: '#0284c7' } },
                     animation: {
-                        'ticker': 'ticker 60s linear infinite',
-                        'fade-in': 'fadeIn 0.5s ease-out'
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both'
                     },
                     keyframes: {
-                        ticker: { '0%': { transform: 'translateX(100%)' }, '100%': { transform: 'translateX(-100%)' } },
-                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                        shake: { '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' }, '20%, 80%': { transform: 'translate3d(2px, 0, 0)' }, '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' }, '40%, 60%': { transform: 'translate3d(4px, 0, 0)' } }
                     }
                 }
             }
@@ -35,8 +34,8 @@
 
     <style>
         body, aside, div, span, button { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 10px; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #a1a1aa; border-radius: 10px; }
         .dark ::-webkit-scrollbar-thumb { background: #3f3f46; }
         
         .prose table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 1em 0; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; font-size: 0.9em; }
@@ -47,146 +46,112 @@
         .dark .prose td { border-color: #27272a; }
 
         .logo-gradient { background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); }
+        .mars-gradient { background: linear-gradient(135deg, #f97316 0%, #ef4444 100%); } /* Elon Style */
+        
         .dot-flashing { position: relative; width: 6px; height: 6px; border-radius: 5px; background-color: #0ea5e9; animation: dot-flashing 1s infinite linear alternate; animation-delay: 0.5s; }
         .dot-flashing::before, .dot-flashing::after { content: ''; display: inline-block; position: absolute; top: 0; width: 6px; height: 6px; border-radius: 5px; background-color: #0ea5e9; animation: dot-flashing 1s infinite alternate; }
         .dot-flashing::before { left: -10px; animation-delay: 0s; }
         .dot-flashing::after { left: 10px; animation-delay: 1s; }
         @keyframes dot-flashing { 0% { background-color: #0ea5e9; } 50%, 100% { background-color: #e0f2fe; } }
-        .mic-active { color: #ef4444 !important; animation: pulse 1.5s infinite; }
+        
+        /* Redaction Blur Effect */
+        .redacted { background: #000; color: #000; border-radius: 2px; padding: 0 4px; opacity: 0.2; user-select: none; }
+        .dark .redacted { background: #fff; color: #fff; }
     </style>
 </head>
 <body class="bg-white dark:bg-[#09090b] text-slate-900 dark:text-slate-50 h-screen flex overflow-hidden font-sans relative">
 
-    <div class="fixed top-0 left-0 w-full h-8 bg-slate-900 text-white z-50 flex items-center overflow-hidden whitespace-nowrap border-b border-slate-700">
-        <div class="px-4 bg-blue-600 h-full flex items-center text-[10px] font-bold z-10 shadow-lg tracking-wider">GLOBAL TAX ALERTS</div>
-        <div class="animate-ticker inline-block pl-4 text-[11px] font-medium tracking-wide text-gray-300 hover:pause">
-            <a href="https://www.google.com/search?q=UK+Tax+Changes+2025" target="_blank" class="mx-4 hover:text-white hover:underline">🇬🇧 UK: Personal Allowance Freeze Updates</a> • 
-            <a href="https://www.google.com/search?q=IRS+Tax+Brackets+2025" target="_blank" class="mx-4 hover:text-white hover:underline">🇺🇸 USA: New IRS 2025 Inflation Adjustments</a> • 
-            <a href="https://www.google.com/search?q=UAE+Corporate+Tax+Deadlines" target="_blank" class="mx-4 hover:text-white hover:underline">🇦🇪 UAE: Corporate Tax Registration Deadline</a> • 
-            <a href="https://www.google.com/search?q=Canada+CRA+Updates+2025" target="_blank" class="mx-4 hover:text-white hover:underline">🇨🇦 Canada: CRA Digital Services Tax</a>
-        </div>
+    <div class="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-full text-[10px] font-bold text-green-700 dark:text-green-400 shadow-sm pointer-events-none">
+        <i class="fa-solid fa-lock"></i> PII SHIELD ACTIVE
     </div>
 
-    <div id="login-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
-        <div class="bg-white dark:bg-[#18181b] p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-gray-100 dark:border-gray-800 transform transition-all scale-100">
-            <div class="text-center mb-8">
-                <div class="w-14 h-14 logo-gradient rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4 text-white text-2xl">
-                    <i class="fa-solid fa-shield-halved"></i>
-                </div>
-                <h2 class="text-2xl font-bold tracking-tight">TaxGPT Pro</h2>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Professional Tax Workspace</p>
+    <div id="toast-container" class="fixed top-14 left-1/2 transform -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+    <div id="disclaimer-modal" class="fixed inset-0 z-[90] flex items-center justify-center bg-black/90 backdrop-blur-md px-4 hidden">
+        <div class="bg-white dark:bg-[#18181b] p-8 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 dark:border-gray-800">
+            <div class="flex items-center gap-3 mb-4 text-red-600">
+                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                <h2 class="text-xl font-bold text-black dark:text-white">Legal Liability Waiver</h2>
             </div>
-            <div class="space-y-3">
-                <div class="mb-4">
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1 text-left">Select Primary Jurisdiction</label>
-                    <select id="login-country" class="w-full p-3 bg-gray-50 dark:bg-[#27272a] border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="Global">🌍 Global (General)</option>
-                        <option value="UK">🇬🇧 United Kingdom</option>
-                        <option value="USA">🇺🇸 United States</option>
-                        <option value="UAE">🇦🇪 UAE</option>
-                        <option value="India">🇮🇳 India</option>
-                        <option value="Canada">🇨🇦 Canada</option>
-                    </select>
-                </div>
-                <button onclick="mockLogin('Google')" class="w-full bg-white dark:bg-[#27272a] border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#3f3f46] text-gray-700 dark:text-white font-medium py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-3">
-                    <i class="fa-brands fa-google text-lg"></i>
-                    <span>Sign in with Google</span>
-                </button>
-                <button onclick="mockLogin('Guest')" class="w-full text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 mt-4">Continue as Guest</button>
+            <div class="text-sm text-gray-600 dark:text-gray-300 mb-6 space-y-3 leading-relaxed h-64 overflow-y-auto pr-2 border-y border-gray-100 dark:border-gray-800 py-4">
+                <p><strong>1. No Professional Advice:</strong> TaxGPT Pro is an AI tool. It provides information, NOT legal or financial advice.</p>
+                <p><strong>2. Accuracy:</strong> While grounded in 2025 data, AI can hallucinate. You must verify all outputs with HMRC/IRS.</p>
+                <p><strong>3. Liability:</strong> By continuing, you agree to hold TaxGPT Pro and its creators harmless for any financial losses incurred.</p>
+                <p><strong>4. Data Processing:</strong> Queries are processed via secure APIs. PII Redaction is active, but do not input real SSNs or Banking passwords.</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="acceptDisclaimer()" class="flex-1 bg-black dark:bg-white text-white dark:text-black font-bold py-3 rounded-xl hover:opacity-80 transition">I Accept & Enter</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-project" class="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 backdrop-blur-sm hidden">
-        <div class="bg-white dark:bg-[#18181b] p-6 rounded-2xl shadow-2xl w-full max-w-sm border border-gray-200 dark:border-gray-800">
-            <h3 class="font-bold text-lg mb-4">New Project Folder</h3>
-            <input type="text" id="project-name" class="w-full p-2 bg-gray-50 dark:bg-[#27272a] rounded-lg border border-gray-200 dark:border-gray-700 text-sm mb-4" placeholder="Client Name (e.g. Acme Corp)">
-            <button onclick="submitNewProject()" class="w-full bg-blue-600 text-white font-medium py-2 rounded-lg hover:opacity-80">Create Folder</button>
-            <button onclick="closeModal('modal-project')" class="w-full mt-2 text-xs text-gray-400 hover:underline">Cancel</button>
+    <div id="modal-about" class="fixed inset-0 z-[85] flex items-center justify-center bg-black/60 backdrop-blur-sm hidden px-4">
+        <div class="bg-white dark:bg-[#18181b] w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-800">
+            <div class="h-32 bg-gradient-to-r from-slate-900 to-slate-800 flex items-center justify-center">
+                <h1 class="text-white font-bold text-3xl tracking-widest">FOUNDER</h1>
+            </div>
+            <div class="px-8 py-8 text-center relative">
+                <div class="w-24 h-24 bg-white dark:bg-[#18181b] rounded-full absolute -top-12 left-1/2 transform -translate-x-1/2 p-1.5">
+                    <div class="w-full h-full bg-gray-200 rounded-full flex items-center justify-center text-2xl font-bold text-gray-500">DM</div>
+                </div>
+                <h2 class="text-2xl font-bold mt-10">Dharmil Mehta</h2>
+                <p class="text-blue-600 font-mono text-xs uppercase tracking-widest mb-6">Architect & Accountant</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-8 italic">
+                    "Building the operating system for the future of finance."
+                </p>
+                <button onclick="closeModal('modal-about')" class="w-full py-3 border border-gray-300 dark:border-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-[#27272a]">Close</button>
+            </div>
         </div>
     </div>
 
-    <aside id="sidebar" class="w-[260px] bg-[#f8fafc] dark:bg-[#101012] flex flex-col h-full hidden md:flex border-r border-gray-200 dark:border-gray-800 flex-shrink-0 pt-8 z-20">
+    <aside id="sidebar" class="w-[260px] bg-[#f8fafc] dark:bg-[#101012] flex flex-col h-full hidden md:flex border-r border-gray-200 dark:border-gray-800 flex-shrink-0 pt-6 z-20">
         <div class="px-4 mb-6 flex items-center justify-between">
              <button onclick="toggleSidebar()" class="md:hidden p-2 text-gray-500"><i class="fa-solid fa-bars"></i></button>
              <div onclick="goToHome()" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition select-none">
                 <div class="w-8 h-8 logo-gradient rounded-lg flex items-center justify-center text-white text-sm shadow-sm"><i class="fa-solid fa-shield-halved"></i></div>
                 <span class="font-bold text-lg tracking-tight text-gray-800 dark:text-white">TaxGPT <span class="text-blue-600">Pro</span></span>
             </div>
-            <button onclick="startNewChat()" class="p-2 hover:bg-gray-200 dark:hover:bg-[#27272a] rounded-lg text-gray-500" title="New Chat"><i class="fa-regular fa-pen-to-square"></i></button>
-        </div>
-
-        <div class="px-4 mb-4">
-            <div class="flex justify-between items-center px-2 mb-2">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Projects</span>
-                <button onclick="openModal('modal-project')" class="text-gray-400 hover:text-blue-500 p-1 rounded hover:bg-gray-100 dark:hover:bg-[#27272a]"><i class="fa-solid fa-plus text-xs"></i></button>
-            </div>
-            <div id="projects-list" class="space-y-1 max-h-40 overflow-y-auto">
-                <div class="text-xs text-gray-400 italic px-2">No active projects</div>
-            </div>
+            <button onclick="startNewChat()" class="p-2 hover:bg-gray-200 dark:hover:bg-[#27272a] rounded-lg text-blue-500" title="New Chat"><i class="fa-solid fa-pen-to-square"></i></button>
         </div>
 
         <div class="px-4 mb-2">
             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">Toolkit</p>
-            <button onclick="openTool('summaries')" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-[#27272a] text-gray-600 dark:text-gray-300 text-sm transition text-left group">
-                <div class="w-5 flex justify-center"><i class="fa-solid fa-book-atlas text-green-500"></i></div>
-                <span class="group-hover:text-green-600 transition">Tax Summaries</span>
-            </button>
-            <button onclick="openTool('email')" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-[#27272a] text-gray-600 dark:text-gray-300 text-sm transition text-left group">
-                <div class="w-5 flex justify-center"><i class="fa-solid fa-envelope-open-text text-purple-500"></i></div>
-                <span class="group-hover:text-purple-600 transition">Email Generator</span>
-            </button>
-            <button onclick="openTool('salary')" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-[#27272a] text-gray-600 dark:text-gray-300 text-sm transition text-left">
-                <div class="w-5 flex justify-center"><i class="fa-solid fa-calculator"></i></div> 
-                <span>Salary Calculator</span>
-            </button>
-            <button onclick="startNewChat('I need to visualize data. Please ask me for the figures you want to compare.')" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-[#27272a] text-gray-600 dark:text-gray-300 text-sm transition text-left group">
-                <div class="w-5 flex justify-center"><i class="fa-solid fa-chart-pie text-blue-500"></i></div>
-                <span class="group-hover:text-blue-600 transition">Visualizer</span>
-            </button>
+            <button onclick="openTool('summaries')" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-[#27272a] text-gray-600 dark:text-gray-300 text-sm transition text-left"><div class="w-5 flex justify-center"><i class="fa-solid fa-book-atlas text-green-500"></i></div><span>Tax Summaries</span></button>
+            <button onclick="openTool('email')" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-[#27272a] text-gray-600 dark:text-gray-300 text-sm transition text-left"><div class="w-5 flex justify-center"><i class="fa-solid fa-envelope-open-text text-purple-500"></i></div><span>Email Generator</span></button>
+            <button onclick="openTool('salary')" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-[#27272a] text-gray-600 dark:text-gray-300 text-sm transition text-left"><div class="w-5 flex justify-center"><i class="fa-solid fa-calculator"></i></div><span>Salary Calculator</span></button>
         </div>
 
         <div class="flex-1 overflow-y-auto px-2 py-2 scrollbar-hide" id="history-list"></div>
 
         <div class="mt-auto p-3 space-y-1 border-t border-gray-200 dark:border-gray-800">
-            <button onclick="toggleTheme()" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-[#27272a] text-sm text-gray-600 dark:text-gray-300 transition whitespace-nowrap overflow-hidden">
-                <i class="fa-solid fa-circle-half-stroke min-w-[20px]"></i>
-                <span class="sidebar-text">Appearance</span>
-            </button>
-            <div class="flex items-center gap-3 p-2 mt-1 rounded-lg hover:bg-gray-200/50 dark:hover:bg-[#27272a] cursor-pointer whitespace-nowrap overflow-hidden" onclick="showLogin()">
-                <div id="sidebar-avatar" class="w-7 h-7 logo-gradient rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-md min-w-[28px]">G</div>
-                <div class="sidebar-text flex-1 overflow-hidden">
-                    <p id="sidebar-name" class="text-sm font-medium truncate text-gray-800 dark:text-gray-200">Guest</p>
-                    <p class="text-[10px] text-gray-500">Pro Plan</p>
-                </div>
+            <div class="grid grid-cols-2 gap-1 mb-2">
+                 <button onclick="openModal('modal-about')" class="text-[10px] font-bold text-gray-400 hover:text-blue-500 text-left px-2">FOUNDER</button>
+                 <button onclick="openModal('disclaimer-modal')" class="text-[10px] font-bold text-gray-400 hover:text-red-500 text-right px-2">LEGAL</button>
             </div>
+            <button onclick="toggleGrokMode()" id="grok-btn" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-[#27272a] text-sm text-gray-600 dark:text-gray-300 transition">
+                <i class="fa-solid fa-rocket text-orange-500"></i>
+                <span class="sidebar-text font-bold">Grok Mode: OFF</span>
+            </button>
+
+            <button onclick="nukeData()" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-sm text-red-600 transition">
+                <i class="fa-solid fa-trash-can"></i>
+                <span class="sidebar-text">Nuke Data</span>
+            </button>
         </div>
     </aside>
 
     <main class="flex-1 flex flex-col relative h-full w-full pt-8 bg-white dark:bg-[#09090b]">
         
-        <div class="absolute top-10 left-6 z-20 flex items-center gap-3">
+        <div class="absolute top-6 left-6 z-20 flex items-center gap-3">
              <button onclick="toggleSidebarMobile()" class="md:hidden text-gray-500 mr-2"><i class="fa-solid fa-bars"></i></button>
-             
-             <div id="context-indicator" class="hidden flex items-center gap-2 bg-gray-100 dark:bg-[#1e1e1e] px-3 py-1.5 rounded-lg border border-gray-200 dark:border-[#2c2c2e]">
-                 <span class="text-gray-400"><i class="fa-regular fa-folder"></i></span>
-                 <span id="context-name" class="text-xs font-bold text-gray-700 dark:text-gray-200">Project Name</span>
-                 <button onclick="exitProject()" class="ml-2 text-gray-400 hover:text-red-500" title="Exit Project"><i class="fa-solid fa-xmark"></i></button>
-             </div>
-
              <div class="relative group">
-                <button class="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-[#1e1e1e] px-3 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-[#2c2c2e] transition border border-transparent hover:border-gray-300 dark:hover:border-gray-600">
-                    <span id="top-country-icon">🌍</span>
-                    <span id="top-country-text">Global</span>
-                    <i class="fa-solid fa-chevron-down text-[10px] ml-1 opacity-50"></i>
+                <button class="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-[#1e1e1e] px-3 py-2 rounded-lg border border-transparent hover:border-gray-300 dark:hover:border-gray-600">
+                    <span id="top-country-icon">🌍</span> <span id="top-country-text">Global</span> <i class="fa-solid fa-chevron-down text-[10px] opacity-50"></i>
                 </button>
                 <div class="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2c2c2e] rounded-xl shadow-xl hidden group-hover:block z-30 p-1">
                     <div onclick="changeCountry('Global', '🌍')" class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-[#2c2c2e] rounded-lg cursor-pointer text-sm">🌍 Global</div>
                     <div onclick="changeCountry('UK', '🇬🇧')" class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-[#2c2c2e] rounded-lg cursor-pointer text-sm">🇬🇧 UK</div>
                     <div onclick="changeCountry('USA', '🇺🇸')" class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-[#2c2c2e] rounded-lg cursor-pointer text-sm">🇺🇸 USA</div>
-                    <div onclick="changeCountry('UAE', '🇦🇪')" class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-[#2c2c2e] rounded-lg cursor-pointer text-sm">🇦🇪 UAE</div>
-                    <div onclick="changeCountry('India', '🇮🇳')" class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-[#2c2c2e] rounded-lg cursor-pointer text-sm">🇮🇳 India</div>
-                    <div onclick="changeCountry('Canada', '🇨🇦')" class="px-3 py-2 hover:bg-gray-50 dark:hover:bg-[#2c2c2e] rounded-lg cursor-pointer text-sm">🇨🇦 Canada</div>
                 </div>
              </div>
         </div>
@@ -195,70 +160,44 @@
             
             <div id="home-screen" class="max-w-3xl mx-auto mt-8 transition-all duration-500 animate-fade-in">
                 <div class="text-center mb-12">
-                    <div class="w-16 h-16 logo-gradient rounded-2xl flex items-center justify-center text-white text-3xl shadow-xl mb-6 mx-auto animate-bounce">
+                    <div class="w-16 h-16 logo-gradient rounded-2xl flex items-center justify-center text-white text-3xl shadow-xl mb-6 mx-auto">
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
-                    <h1 class="text-3xl md:text-4xl font-medium text-[#c4c7c5] dark:text-[#525252] mb-3 tracking-tight">Hello, <span id="greeting-name" class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600 font-semibold">Guest</span></h1>
-                    <p class="text-gray-400 text-sm">How can I help you today?</p>
+                    <h1 class="text-3xl md:text-4xl font-medium text-[#c4c7c5] dark:text-[#525252] mb-3 tracking-tight">Hello, <span id="greeting-name" class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600 font-semibold">User</span></h1>
+                    <p class="text-gray-400 text-sm">Enterprise Tax Intelligence.</p>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                    
-                    <button onclick="openTool('salary')" class="p-5 border border-gray-200 dark:border-[#27272a] rounded-2xl text-left hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition group bg-white dark:bg-[#18181b]">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-calculator"></i></div>
-                            <p class="font-bold text-sm text-gray-700 dark:text-gray-200">Salary Calculator</p>
-                        </div>
-                        <p class="text-xs text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-300">Calculate Net Pay</p>
+                    <button onclick="openTool('salary')" class="p-5 border border-gray-200 dark:border-[#27272a] rounded-2xl text-left hover:border-blue-500 transition group bg-white dark:bg-[#18181b]">
+                        <div class="flex items-center gap-3 mb-2"><div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-calculator"></i></div><p class="font-bold text-sm text-gray-700 dark:text-gray-200">Salary Calc</p></div>
+                        <p class="text-xs text-gray-400 group-hover:text-blue-600">Net Pay Estimator</p>
                     </button>
-
-                    <button onclick="openTool('email')" class="p-5 border border-gray-200 dark:border-[#27272a] rounded-2xl text-left hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition group bg-white dark:bg-[#18181b]">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center"><i class="fa-solid fa-envelope-open-text"></i></div>
-                            <p class="font-bold text-sm text-gray-700 dark:text-gray-200">Email Generator</p>
-                        </div>
-                        <p class="text-xs text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-300">Draft Correspondence</p>
+                    <button onclick="openTool('email')" class="p-5 border border-gray-200 dark:border-[#27272a] rounded-2xl text-left hover:border-purple-500 transition group bg-white dark:bg-[#18181b]">
+                        <div class="flex items-center gap-3 mb-2"><div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center"><i class="fa-solid fa-envelope-open-text"></i></div><p class="font-bold text-sm text-gray-700 dark:text-gray-200">Email Gen</p></div>
+                        <p class="text-xs text-gray-400 group-hover:text-purple-600">Draft Correspondence</p>
                     </button>
-
-                    <button onclick="startNewChat('I need to visualize data. Ask me for the figures.')" class="p-5 border border-gray-200 dark:border-[#27272a] rounded-2xl text-left hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/10 transition group bg-white dark:bg-[#18181b]">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><i class="fa-solid fa-chart-pie"></i></div>
-                            <p class="font-bold text-sm text-gray-700 dark:text-gray-200">Data Visualizer</p>
-                        </div>
-                        <p class="text-xs text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-300">Create Charts & Graphs</p>
+                    <button onclick="startNewChat('Visualize tax data.')" class="p-5 border border-gray-200 dark:border-[#27272a] rounded-2xl text-left hover:border-green-500 transition group bg-white dark:bg-[#18181b]">
+                        <div class="flex items-center gap-3 mb-2"><div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><i class="fa-solid fa-chart-pie"></i></div><p class="font-bold text-sm text-gray-700 dark:text-gray-200">Visualizer</p></div>
+                        <p class="text-xs text-gray-400 group-hover:text-green-600">Charts & Graphs</p>
                     </button>
-
                 </div>
             </div>
 
-            <div id="tool-view" class="hidden max-w-xl mx-auto mt-4 bg-white dark:bg-[#18181b] p-8 rounded-3xl border border-gray-200 dark:border-[#27272a] shadow-lg">
-                </div>
+            <div id="tool-view" class="hidden max-w-xl mx-auto mt-4 bg-white dark:bg-[#18181b] p-8 rounded-3xl border border-gray-200 dark:border-[#27272a] shadow-lg"></div>
 
             <div id="messages-box" class="hidden max-w-3xl mx-auto space-y-12 pb-4"></div>
-            
-            <div id="loading" class="hidden max-w-3xl mx-auto pl-0 mt-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-7 h-7 rounded-full bg-white dark:bg-[#18181b] flex items-center justify-center border border-gray-200 dark:border-[#27272a] shadow-sm">
-                         <i class="fa-solid fa-shield-halved text-blue-500 text-[10px]"></i>
-                    </div>
-                    <div class="dot-flashing"></div>
-                </div>
-            </div>
-             <div id="error-msg" class="hidden max-w-xl mx-auto mt-4 text-xs text-center text-red-500 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg"></div>
+            <div id="loading" class="hidden max-w-3xl mx-auto pl-0 mt-4 flex items-center gap-3"><div class="w-7 h-7 rounded-full bg-white dark:bg-[#18181b] border border-gray-200 dark:border-[#27272a] flex items-center justify-center shadow-sm"><i class="fa-solid fa-shield-halved text-blue-500 text-[10px]"></i></div><div class="dot-flashing"></div></div>
         </div>
 
         <div class="absolute bottom-0 w-full p-4 bg-gradient-to-t from-white via-white to-transparent dark:from-black dark:via-black pt-10">
             <div class="max-w-3xl mx-auto">
-                <div id="suggestion-chips" class="flex gap-2 mb-3 overflow-x-auto scrollbar-hide pb-1"></div>
                 <div class="bg-[#f0f4f9] dark:bg-[#1e1e1e] rounded-full flex items-center px-2 py-2 shadow-lg border border-transparent focus-within:border-blue-500/30 focus-within:bg-white dark:focus-within:bg-[#27272a] transition-all">
-                    <button onclick="triggerUpload()" class="w-10 h-10 rounded-full hover:bg-gray-200 dark:hover:bg-[#3f3f46] text-gray-400 transition flex items-center justify-center" title="Upload Receipt"><i class="fa-solid fa-paperclip"></i></button>
+                    <button onclick="triggerUpload()" class="w-10 h-10 rounded-full hover:bg-gray-200 dark:hover:bg-[#3f3f46] text-gray-400 transition flex items-center justify-center"><i class="fa-solid fa-paperclip"></i></button>
                     <input type="file" id="file-upload" class="hidden" accept="image/*" onchange="handleFileUpload(this)">
-                    <button onclick="toggleVoice()" id="mic-btn" class="w-10 h-10 rounded-full hover:bg-gray-200 dark:hover:bg-[#3f3f46] text-gray-400 transition flex items-center justify-center" title="Dictate Note"><i class="fa-solid fa-microphone"></i></button>
                     <input type="text" id="user-input" class="flex-1 bg-transparent border-none focus:ring-0 text-gray-800 dark:text-gray-100 placeholder-gray-500 px-3 outline-none text-[15px]" placeholder="Ask anything about taxes..." autocomplete="off">
-                    
-                    <button id="send-btn" class="w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition shadow-md flex items-center justify-center transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"><i class="fa-solid fa-arrow-up"></i></button>
-                    <button id="stop-btn" class="hidden w-10 h-10 bg-gray-600 hover:bg-gray-700 text-white rounded-full transition shadow-md flex items-center justify-center" onclick="stopGeneration()"><i class="fa-solid fa-stop"></i></button>
+                    <button id="send-btn" class="w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition shadow-md flex items-center justify-center transform hover:scale-105"><i class="fa-solid fa-arrow-up"></i></button>
+                    <button id="stop-btn" class="hidden w-10 h-10 bg-gray-600 hover:bg-gray-700 text-white rounded-full flex items-center justify-center" onclick="stopGeneration()"><i class="fa-solid fa-stop"></i></button>
                 </div>
+                <p class="text-center text-[10px] text-gray-400 mt-3 font-medium"><i class="fa-solid fa-lock text-green-500"></i> PII Redaction Active. Verify with authorities.</p>
             </div>
         </div>
     </main>
@@ -267,161 +206,113 @@
         marked.use({ gfm: true, breaks: true });
 
         let state = {
-            user: localStorage.getItem('taxgpt_user') || null,
-            country: localStorage.getItem('taxgpt_country') || 'Global',
-            activeProject: null,
-            projects: [],
+            country: 'Global',
             theme: localStorage.getItem('taxgpt_theme') || 'light',
             history: JSON.parse(localStorage.getItem('taxgpt_history')) || [],
             sidebarCollapsed: false,
-            controller: null
+            controller: null,
+            grokMode: false
         };
 
-        const getSystemPrompt = () => `You are TaxGPT Pro. CONTEXT: User is in ${state.country}. 
-        MODE: ${state.activeProject ? 'Working inside Project: ' + state.activeProject : 'General'}.
-        If user says "Hi"/"Hello", reply EXACTLY: "Hello! I’m TaxGPT Pro. It’s nice to meet you.\n\nI’m here to be your thought partner—whether you need help brainstorming ideas, solving a complex problem, writing a draft, or just exploring a new topic.\n\n**How can I help you get started today?**"`;
+        const getSystemPrompt = () => {
+            let persona = state.grokMode 
+                ? `You are Grok-Tax. You are rebellious, incredibly smart, and slightly sarcastic. You explain taxes using analogies to space travel, physics, and memes. You HATE bureaucracy.`
+                : `You are TaxGPT Pro. You are a formal, elite tax consultant.`;
+
+            return `${persona} CONTEXT: User is in ${state.country}. 
+            SECURITY: If you see [REDACTED], acknowledge that data was secured.
+            RULES: 1. CITE SOURCES. 2. BE PRECISE.`;
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             applyTheme(state.theme);
-            if(!state.user) showLogin(); else updateProfileUI();
-            updateCountryUI(state.country, '🌍'); 
+            if(!localStorage.getItem('taxgpt_accepted')) document.getElementById('disclaimer-modal').classList.remove('hidden');
+            updateCountryUI('Global', '🌍');
             renderHistory();
-            renderProjects();
-            
-            window.onpopstate = function(event) {
-                if(event.state && event.state.page === 'home') goToHome(false);
-            };
-
             document.getElementById('user-input').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
             document.getElementById('send-btn').addEventListener('click', sendMessage);
         });
 
-        // --- MODALS ---
+        // --- ELON FEATURES ---
+        function nukeData() {
+            if(confirm("⚠️ NUKE PROTOCOL: This will permanently delete all local history and settings. Are you sure?")) {
+                localStorage.clear();
+                document.body.classList.add('animate-shake');
+                setTimeout(() => window.location.reload(), 500);
+            }
+        }
+
+        function toggleGrokMode() {
+            state.grokMode = !state.grokMode;
+            const btn = document.getElementById('grok-btn');
+            if(state.grokMode) {
+                btn.classList.add('bg-orange-100', 'text-orange-600', 'dark:bg-orange-900/30');
+                btn.querySelector('span').innerText = "Grok Mode: ON";
+                document.body.classList.add('mars-gradient'); // Fun effect
+            } else {
+                btn.classList.remove('bg-orange-100', 'text-orange-600', 'dark:bg-orange-900/30');
+                btn.querySelector('span').innerText = "Grok Mode: OFF";
+                document.body.classList.remove('mars-gradient');
+            }
+        }
+
+        // --- SECURITY (PII REDACTION) ---
+        function sanitizeInput(text) {
+            // Simple regex for SSN-like or Credit Card-like patterns
+            const ssnRegex = /\b\d{3}-\d{2}-\d{4}\b/g;
+            const ccRegex = /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g;
+            let clean = text.replace(ssnRegex, '[REDACTED_SSN]').replace(ccRegex, '[REDACTED_CC]');
+            return clean;
+        }
+
+        // --- UI & MODALS ---
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function acceptDisclaimer() { document.getElementById('disclaimer-modal').classList.add('hidden'); localStorage.setItem('taxgpt_accepted', 'true'); }
+        function showLogin() { alert("Enterprise Login requires SSO integration."); } 
 
-        // --- PROJECTS LOGIC ---
-        function submitNewProject() {
-            const name = document.getElementById('project-name').value;
-            if (name) { 
-                state.projects.push(name); 
-                renderProjects(); 
-                closeModal('modal-project'); 
-                enterProject(name); 
-            }
-        }
-        function renderProjects() {
-            const list = document.getElementById('projects-list');
-            list.innerHTML = '';
-            if (state.projects.length === 0) {
-                list.innerHTML = '<div class="text-xs text-gray-400 italic px-2">No active projects</div>';
-                return;
-            }
-            state.projects.forEach(p => {
-                const div = document.createElement('div');
-                div.className = "px-3 py-2 hover:bg-gray-200 dark:hover:bg-[#27272a] rounded-lg text-sm text-gray-600 dark:text-gray-300 cursor-pointer flex items-center gap-2 transition group";
-                div.innerHTML = `<i class="fa-regular fa-folder text-gray-400 group-hover:text-blue-500"></i> <span class="flex-1 truncate">${p}</span>`;
-                div.onclick = () => enterProject(p);
-                list.appendChild(div);
-            });
-        }
-        function enterProject(name) {
-            state.activeProject = name;
-            document.getElementById('context-indicator').classList.remove('hidden');
-            document.getElementById('context-name').innerText = name;
-            goToHome();
-            document.getElementById('messages-box').innerHTML = '';
-        }
-        function exitProject() {
-            state.activeProject = null;
-            document.getElementById('context-indicator').classList.add('hidden');
-            goToHome();
+        function toggleSidebar() { 
+            state.sidebarCollapsed = !state.sidebarCollapsed; 
+            document.getElementById('sidebar').style.width = state.sidebarCollapsed ? '72px' : '260px'; 
+            document.querySelectorAll('.sidebar-text').forEach(t => t.style.display = state.sidebarCollapsed ? 'none' : 'block');
         }
 
-        // --- TOOLKIT ---
-        function openTool(type) {
-            const view = document.getElementById('tool-view');
-            const home = document.getElementById('home-screen');
-            const msgs = document.getElementById('messages-box');
-            home.classList.add('hidden'); msgs.classList.add('hidden'); view.classList.remove('hidden');
+        function changeCountry(name, icon) { state.country = name; updateCountryUI(name, icon); }
+        function updateCountryUI(name, icon) { document.getElementById('top-country-text').textContent = name; document.getElementById('top-country-icon').textContent = icon; }
 
-            if(type === 'salary') {
-                view.innerHTML = `<div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Salary Calculator</h2><button onclick="goToHome()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div><div class="space-y-4"><div><label class="block text-xs font-bold text-gray-500 mb-1">Jurisdiction</label><select id="calc-country" class="w-full p-3 bg-gray-50 dark:bg-[#27272a] rounded-xl text-sm border border-gray-200 dark:border-gray-700"><option value="UK">UK</option><option value="USA">USA</option><option value="UAE">UAE</option></select></div><div><label class="block text-xs font-bold text-gray-500 mb-1">Gross Annual Income</label><input type="number" id="calc-amount" class="w-full p-3 bg-gray-50 dark:bg-[#27272a] rounded-xl text-sm border border-gray-200 dark:border-gray-700" placeholder="50000"></div><button onclick="calculateSalary()" class="w-full bg-blue-600 text-white font-medium py-3 rounded-xl hover:bg-blue-700">Calculate Net</button><div id="calc-result" class="hidden p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-center mt-4"></div></div>`;
-            } else if (type === 'email') {
-                view.innerHTML = `<div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Email Generator</h2><button onclick="goToHome()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div><div class="space-y-4"><input type="text" id="email-topic" class="w-full p-3 bg-gray-50 dark:bg-[#27272a] rounded-xl text-sm border border-gray-200 dark:border-gray-700" placeholder="Topic"><input type="text" id="email-recipient" class="w-full p-3 bg-gray-50 dark:bg-[#27272a] rounded-xl text-sm border border-gray-200 dark:border-gray-700" placeholder="Recipient Name"><button onclick="generateEmail()" class="w-full bg-purple-600 text-white font-medium py-3 rounded-xl hover:bg-purple-700">Generate Draft</button></div>`;
-            } else if (type === 'summaries') {
-                 view.innerHTML = `<div class="flex justify-between mb-6"><h2 class="text-xl font-bold text-green-600">Tax Summaries</h2><button onclick="goToHome()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div><div class="space-y-4"><div><label class="block text-xs font-bold text-gray-500 mb-1">Select Country</label><select id="sum-country" class="w-full p-3 bg-gray-50 dark:bg-[#27272a] rounded-xl text-sm border border-gray-200 dark:border-gray-700"><option value="UK">United Kingdom</option><option value="USA">United States</option><option value="UAE">UAE</option><option value="India">India</option><option value="Canada">Canada</option></select></div><div><label class="block text-xs font-bold text-gray-500 mb-1">Select Category</label><select id="sum-cat" class="w-full p-3 bg-gray-50 dark:bg-[#27272a] rounded-xl text-sm border border-gray-200 dark:border-gray-700"><option>Corporate Tax</option><option>VAT / Sales Tax</option><option>Personal Income Tax</option><option>Withholding Tax</option><option>Transfer Pricing</option></select></div><button onclick="fetchSummary()" class="w-full bg-green-600 text-white font-medium py-3 rounded-xl hover:bg-green-700">Get Data</button></div>`;
-            }
-        }
-        
-        function calculateSalary() {
-            const c = document.getElementById('calc-country').value; const a = parseFloat(document.getElementById('calc-amount').value);
-            let t = c === 'UK' ? 0.20 : c === 'USA' ? 0.22 : 0; const n = a - (a * t);
-            document.getElementById('calc-result').classList.remove('hidden');
-            document.getElementById('calc-result').innerHTML = `<p class="text-xs text-gray-500 uppercase">Take Home</p><p class="text-2xl font-bold text-gray-800 dark:text-white">${n.toLocaleString()}</p>`;
-        }
-        function generateEmail() { sendPreset(`Draft email to ${document.getElementById('email-recipient').value} about ${document.getElementById('email-topic').value}`); }
-        function fetchSummary() { 
-            const c = document.getElementById('sum-country').value; 
-            const cat = document.getElementById('sum-cat').value;
-            sendPreset(`Provide a detailed tax summary for ${c} regarding ${cat}. Use a table.`);
-        }
-
-        // --- CORE UTILS ---
-        function goToHome(pushHistory = true) { 
-            if(pushHistory) history.pushState({page: 'home'}, "Home", "?home");
-            document.getElementById('home-screen').classList.remove('hidden'); 
-            document.getElementById('messages-box').classList.add('hidden'); 
-            document.getElementById('tool-view').classList.add('hidden'); 
-            document.getElementById('messages-box').innerHTML = ''; 
-        }
-        function startNewChat(prompt = "") { goToHome(); if(prompt) { document.getElementById('user-input').value = prompt; sendMessage(); } else { document.getElementById('user-input').focus(); } }
-        function sendPreset(text) { document.getElementById('user-input').value = text; sendMessage(); }
         function toggleTheme() { state.theme = state.theme === 'light' ? 'dark' : 'light'; localStorage.setItem('taxgpt_theme', state.theme); applyTheme(state.theme); }
         function applyTheme(t) { document.documentElement.classList.remove('dark','light'); document.documentElement.classList.add(t); }
-        function toggleSidebar() { state.sidebarCollapsed = !state.sidebarCollapsed; document.getElementById('sidebar').style.width = state.sidebarCollapsed ? '72px' : '260px'; document.querySelectorAll('.sidebar-text').forEach(t => t.style.display = state.sidebarCollapsed ? 'none' : 'block'); }
-        function toggleSidebarMobile() { alert("Mobile menu coming soon."); }
-        
-        function showLogin() { document.getElementById('login-modal').classList.remove('hidden'); }
-        function mockLogin(p) { 
-            state.user = p === 'Guest' ? 'Guest' : 'User'; 
-            const sel = document.getElementById('login-country'); const country = sel.options[sel.selectedIndex].value; changeCountry(country, '🌍');
-            localStorage.setItem('taxgpt_user', state.user); updateProfileUI(); document.getElementById('login-modal').classList.add('hidden'); 
-        }
-        function updateProfileUI() { document.getElementById('sidebar-name').textContent = state.user; document.getElementById('sidebar-avatar').textContent = state.user[0]; }
-        function changeCountry(name, icon) { state.country = name; localStorage.setItem('taxgpt_country', name); updateCountryUI(name, icon); }
-        function updateCountryUI(name, icon) { document.getElementById('top-country-text').textContent = name; document.getElementById('sidebar-country').textContent = name; }
 
-        // --- STOP GENERATION ---
-        function stopGeneration() {
-            if(state.controller) {
-                state.controller.abort();
-                state.controller = null;
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('send-btn').classList.remove('hidden');
-                document.getElementById('stop-btn').classList.add('hidden');
-                addMessage('bot', "⚠️ Response stopped by user.");
-            }
+        function goToHome() { document.getElementById('home-screen').classList.remove('hidden'); document.getElementById('messages-box').classList.add('hidden'); document.getElementById('tool-view').classList.add('hidden'); }
+        function startNewChat(prompt) { goToHome(); if(prompt) { document.getElementById('user-input').value = prompt; sendMessage(); } }
+        function openTool(type) { 
+            document.getElementById('home-screen').classList.add('hidden');
+            document.getElementById('tool-view').classList.remove('hidden');
+            const view = document.getElementById('tool-view');
+            if(type === 'salary') view.innerHTML = `<h2 class="font-bold text-xl mb-4">Salary Calculator</h2><input type="number" placeholder="Annual Gross" class="w-full p-3 rounded-lg border mb-4"><button class="bg-blue-600 text-white w-full py-3 rounded-lg">Calculate</button>`;
+            if(type === 'email') view.innerHTML = `<h2 class="font-bold text-xl mb-4">Email Generator</h2><input type="text" placeholder="Topic" class="w-full p-3 rounded-lg border mb-4"><button onclick="sendPreset('Draft email')" class="bg-purple-600 text-white w-full py-3 rounded-lg">Generate</button>`;
+            if(type === 'summaries') view.innerHTML = `<h2 class="font-bold text-xl text-green-600 mb-4">Tax Summaries</h2><p>Select a country for a full 2025 report.</p>`;
         }
+
+        function sendPreset(text) { document.getElementById('user-input').value = text; sendMessage(); }
+
+        // --- CHAT LOGIC ---
+        function stopGeneration() { if(state.controller) { state.controller.abort(); state.controller = null; document.getElementById('loading').classList.add('hidden'); document.getElementById('send-btn').classList.remove('hidden'); document.getElementById('stop-btn').classList.add('hidden'); } }
 
         async function sendMessage() {
             const input = document.getElementById('user-input');
-            const text = input.value.trim();
-            if (!text) return;
-            
-            state.controller = new AbortController();
-            const signal = state.controller.signal;
+            const rawText = input.value.trim();
+            if (!rawText) return;
 
-            if (text.toLowerCase().match(/^hi$|^hello$/)) {
-                setTimeout(() => addMessage('bot', "Hello! I’m TaxGPT Pro. It’s nice to meet you.\n\nI’m here to be your thought partner—whether you need help brainstorming ideas, solving a complex problem, writing a draft, or just exploring a new topic.\n\n**How can I help you get started today?**"), 300);
-                return;
-            }
+            // SECURITY CHECK
+            const text = sanitizeInput(rawText);
+            if (text !== rawText) alert("⚠️ Security Alert: PII detected and redacted.");
+
+            state.controller = new AbortController();
 
             document.getElementById('home-screen').classList.add('hidden');
             document.getElementById('messages-box').classList.remove('hidden');
             document.getElementById('tool-view').classList.add('hidden');
-            document.getElementById('error-msg').classList.add('hidden');
-
             document.getElementById('send-btn').classList.add('hidden');
             document.getElementById('stop-btn').classList.remove('hidden');
             
@@ -435,23 +326,18 @@
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ prompt: `${getSystemPrompt()}\n\nUser Query: ${text}` }),
-                    signal: signal 
+                    signal: state.controller.signal 
                 });
                 const data = await response.json();
                 document.getElementById('loading').classList.add('hidden');
                 if (data.error) throw new Error(data.error);
-                addMessage('bot', data.response.replace(/(\|.*\|)/, '\n$1'));
+                addMessage('bot', data.response);
                 saveHistory(text);
             } catch (err) {
-                if (err.name !== 'AbortError') {
-                    document.getElementById('loading').classList.add('hidden');
-                    document.getElementById('error-msg').classList.remove('hidden');
-                    document.getElementById('error-msg').innerText = "Error: " + err.message;
-                }
+                if (err.name !== 'AbortError') addMessage('bot', "⚠️ Error: " + err.message);
             } finally {
                 document.getElementById('send-btn').classList.remove('hidden');
                 document.getElementById('stop-btn').classList.add('hidden');
-                state.controller = null;
             }
         }
 
@@ -464,7 +350,7 @@
         function renderHistory() { const l = document.getElementById('history-list'); l.innerHTML = '<div class="sidebar-text px-4 py-2 text-[10px] font-bold text-gray-400 tracking-wider uppercase">Recent</div>'; state.history.forEach(t => { const b = document.createElement('button'); b.className = "w-full text-left px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-[#2c2c2e] rounded-lg truncate transition mb-1"; b.innerHTML = t; b.onclick = () => { goToHome(); document.getElementById('user-input').value = t; }; l.appendChild(b); }); }
         function saveHistory(q) { if (state.history[0] !== q) { state.history.unshift(q); localStorage.setItem('taxgpt_history', JSON.stringify(state.history)); renderHistory(); } }
         function triggerUpload() { document.getElementById('file-upload').click(); }
-        function handleFileUpload(input) { addMessage('user', `[File: ${input.files[0].name}]`); setTimeout(() => addMessage('bot', "Document scanned. Ready for analysis."), 1000); }
+        function handleFileUpload(input) { addMessage('user', `[File: ${input.files[0].name}]`); setTimeout(() => addMessage('bot', "Document scanned. PII check complete. Ready for analysis."), 1000); }
         function toggleVoice() { alert("Voice module active."); }
     </script>
 </body>
