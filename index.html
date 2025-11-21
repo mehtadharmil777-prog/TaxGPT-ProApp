@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TaxLLM | Professional Tax Intelligence</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     
@@ -22,8 +22,8 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: { appleGray: '#F5F5F7', appleDark: '#1D1D1F', appleBlue: '#0066CC' },
-                    animation: { 'fade-in': 'fadeIn 0.3s ease-out' },
-                    keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'scale(0.95)' }, '100%': { opacity: '1', transform: 'scale(1)' } } }
+                    animation: { 'fade-in': 'fadeIn 0.4s ease-out' },
+                    keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
                 }
             }
         }
@@ -31,195 +31,136 @@
 
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
-        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .glass-nav { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
         
-        /* Markdown Styling */
+        /* Markdown */
         .prose h3 { font-weight: 600; font-size: 1.1em; margin-top: 1em; margin-bottom: 0.5em; color: #111; }
         .prose ul { list-style-type: disc; padding-left: 1.4em; margin-bottom: 1em; color: #374151; }
         .prose strong { color: #000; font-weight: 600; }
         .prose a { color: #0066CC; text-decoration: none; font-weight: 500; }
-        .prose a:hover { text-decoration: underline; }
-        .prose table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 1em 0; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; font-size: 0.9em; }
-        .prose th { background: #f8fafc; padding: 10px 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb; }
-        .prose td { padding: 10px 14px; border-bottom: 1px solid #e5e7eb; }
-        
-        /* Loading Dots */
+        .prose table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.9em; }
+        .prose th { background: #f9fafb; padding: 8px; border: 1px solid #e5e7eb; text-align: left; }
+        .prose td { padding: 8px; border: 1px solid #e5e7eb; }
+
+        /* Loading */
         .dot-flashing { position: relative; width: 6px; height: 6px; border-radius: 5px; background-color: #888; animation: dot-flashing 1s infinite linear alternate; animation-delay: 0.5s; }
         .dot-flashing::before, .dot-flashing::after { content: ''; display: inline-block; position: absolute; top: 0; width: 6px; height: 6px; border-radius: 5px; background-color: #888; animation: dot-flashing 1s infinite alternate; }
         .dot-flashing::before { left: -10px; animation-delay: 0s; }
         .dot-flashing::after { left: 10px; animation-delay: 1s; }
         @keyframes dot-flashing { 0% { background-color: #888; } 50%, 100% { background-color: #ccc; } }
-
-        /* Citations */
-        .citation-badge { display: inline-flex; align-items: center; background-color: #f5f5f7; border: 1px solid #e5e5ea; border-radius: 4px; padding: 0px 6px; font-size: 0.7rem; font-weight: 500; color: #6e6e73; margin-left: 6px; vertical-align: middle; cursor: default; }
     </style>
 </head>
 <body class="bg-white text-appleDark">
 
-    <div id="modal-library" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm hidden" onclick="if(event.target === this) this.classList.add('hidden')">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-4xl m-4 animate-fade-in max-h-[80vh] overflow-y-auto relative">
-            <button onclick="document.getElementById('modal-library').classList.add('hidden')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-2xl font-bold mb-6">Official Tax Library</h3>
+    <div id="modal-library" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm hidden" onclick="closeModals(event)">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-4xl m-4 animate-fade-in max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-bold">Official Tax Library</h3><button onclick="closeModals(null, true)" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button></div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <a href="https://www.gov.uk/government/organisations/hm-revenue-customs" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 hover:border-blue-500 transition group"><div class="font-bold group-hover:text-blue-600">🇬🇧 UK</div><div class="text-xs text-gray-500">HMRC</div></a>
-                <a href="https://www.irs.gov/" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 hover:border-blue-500 transition group"><div class="font-bold group-hover:text-blue-600">🇺🇸 USA</div><div class="text-xs text-gray-500">IRS</div></a>
-                <a href="https://tax.gov.ae/en" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 hover:border-blue-500 transition group"><div class="font-bold group-hover:text-blue-600">🇦🇪 UAE</div><div class="text-xs text-gray-500">FTA</div></a>
-                <a href="https://incometaxindia.gov.in/" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 hover:border-blue-500 transition group"><div class="font-bold group-hover:text-blue-600">🇮🇳 India</div><div class="text-xs text-gray-500">ITD</div></a>
-                <a href="https://www.canada.ca/en/revenue-agency.html" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 hover:border-blue-500 transition group"><div class="font-bold group-hover:text-blue-600">🇨🇦 Canada</div><div class="text-xs text-gray-500">CRA</div></a>
-                <a href="https://www.ato.gov.au/" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 hover:border-blue-500 transition group"><div class="font-bold group-hover:text-blue-600">🇦🇺 Australia</div><div class="text-xs text-gray-500">ATO</div></a>
-                <a href="https://www.bzst.bund.de/" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 hover:border-blue-500 transition group"><div class="font-bold group-hover:text-blue-600">🇩🇪 Germany</div><div class="text-xs text-gray-500">BZSt</div></a>
-                <a href="https://www.impots.gouv.fr/" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 transition text-center"><div class="font-bold group-hover:text-blue-600">🇫🇷 France</div><div class="text-xs text-gray-500">DGFiP</div></a>
-                <a href="https://www.nta.go.jp/english/index.htm" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 transition text-center"><div class="font-bold group-hover:text-blue-600">🇯🇵 Japan</div><div class="text-xs text-gray-500">NTA</div></a>
-                <a href="https://www.gov.br/receitafederal/pt-br" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 transition text-center"><div class="font-bold group-hover:text-blue-600">🇧🇷 Brazil</div><div class="text-xs text-gray-500">RFB</div></a>
+                <a href="https://www.gov.uk/government/organisations/hm-revenue-customs" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 transition"><div class="font-bold">🇬🇧 UK</div><div class="text-xs text-gray-500">HMRC</div></a>
+                <a href="https://www.irs.gov/" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 transition"><div class="font-bold">🇺🇸 USA</div><div class="text-xs text-gray-500">IRS</div></a>
+                <a href="https://tax.gov.ae/en" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 transition"><div class="font-bold">🇦🇪 UAE</div><div class="text-xs text-gray-500">FTA</div></a>
+                <a href="https://incometaxindia.gov.in/" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 transition"><div class="font-bold">🇮🇳 India</div><div class="text-xs text-gray-500">ITD</div></a>
+                <a href="https://www.canada.ca/en/revenue-agency.html" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 transition"><div class="font-bold">🇨🇦 Canada</div><div class="text-xs text-gray-500">CRA</div></a>
+                <a href="https://www.ato.gov.au/" target="_blank" class="p-4 border rounded-xl hover:bg-gray-50 transition"><div class="font-bold">🇦🇺 Australia</div><div class="text-xs text-gray-500">ATO</div></a>
             </div>
         </div>
     </div>
 
-    <div id="modal-about" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm hidden" onclick="if(event.target === this) this.classList.add('hidden')">
+    <div id="modal-info" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm hidden" onclick="closeModals(event)">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-lg m-4 animate-fade-in relative">
-            <button onclick="document.getElementById('modal-about').classList.add('hidden')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-2xl font-bold mb-4">About TaxLLM</h3>
-            <p class="text-gray-600 mb-4 leading-relaxed">Built by <strong>Dharmil Mehta</strong>, Founder of TaxLLM. Our mission is to bridge the gap between complex tax legislation and modern AI technology. TaxLLM provides accurate, cited, and instant tax intelligence for professionals.</p>
-            <p class="text-gray-600 leading-relaxed">We leverage advanced Large Language Models grounded in official government documentation to ensure high reliability and reduced hallucination.</p>
-        </div>
-    </div>
-
-    <div id="modal-security" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm hidden" onclick="if(event.target === this) this.classList.add('hidden')">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-lg m-4 animate-fade-in relative">
-            <button onclick="document.getElementById('modal-security').classList.add('hidden')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-2xl font-bold mb-4">Data Security</h3>
-            <div class="space-y-4 text-gray-600">
-                <p>We utilize industry-standard <strong>TLS 1.3 encryption</strong> for all data in transit.</p>
-                <p>We do <strong>not</strong> store sensitive personally identifiable information (PII) or financial records on our servers. All AI interactions are stateless and anonymized.</p>
-                <p>Your chat history is stored locally on your device for maximum privacy.</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-terms" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm hidden" onclick="if(event.target === this) this.classList.add('hidden')">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-lg m-4 animate-fade-in relative">
-            <button onclick="document.getElementById('modal-terms').classList.add('hidden')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-2xl font-bold mb-4">Terms & Disclaimer</h3>
-            <div class="space-y-3 text-gray-600 text-sm leading-relaxed">
-                <p><strong>1. Information Only:</strong> TaxLLM provides general information, not legal or financial advice.</p>
-                <p><strong>2. Verification:</strong> Always verify outputs with a qualified accountant or tax advisor.</p>
-                <p><strong>3. Liability:</strong> By using this tool, you agree that TaxLLM and its founders are not liable for any errors or omissions.</p>
-                <p><strong>4. Changes:</strong> Tax laws change frequently; ensure you are using the latest guidance.</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-contact" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm hidden" onclick="if(event.target === this) this.classList.add('hidden')">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-lg m-4 animate-fade-in relative">
-            <button onclick="document.getElementById('modal-contact').classList.add('hidden')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-            <h3 class="text-2xl font-bold mb-4">Contact Us</h3>
-            <p class="text-gray-600 mb-4">For support, enterprise inquiries, or feedback, please reach out.</p>
-            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                <p class="text-sm text-gray-500 uppercase font-bold mb-1">Email</p>
-                <p class="text-lg font-medium text-blue-600">dharmil@taxllm.pro</p>
-            </div>
-            <p class="text-gray-500 text-sm mt-4">Response Time: Within 24 hours.</p>
-        </div>
-    </div>
-
-    <div id="modal-disclaimer" class="fixed inset-0 z-[250] flex items-center justify-center bg-black/70 backdrop-blur-md hidden px-4">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center animate-fade-in">
-            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-xl"><i class="fa-solid fa-gavel"></i></div>
-            <h2 class="text-xl font-bold mb-2">Legal Disclaimer</h2>
-            <div class="text-left bg-gray-50 p-3 rounded-lg border border-gray-200 text-xs text-gray-600 mb-4 h-32 overflow-y-auto leading-relaxed">
-                <p class="mb-2"><strong>1. NO PROFESSIONAL ADVICE:</strong> TaxLLM is an AI-powered informational tool. It is NOT a substitute for professional legal or tax advice.</p>
-                <p class="mb-2"><strong>2. ACCURACY:</strong> Automated systems may produce errors. You assume full responsibility for verifying all information.</p>
-                <p class="mb-2"><strong>3. LIABILITY:</strong> TO THE FULLEST EXTENT PERMITTED BY LAW, TAXLLM AND ITS FOUNDERS SHALL NOT BE LIABLE FOR ANY DAMAGES.</p>
-            </div>
-            <label class="flex items-center gap-2 text-sm text-gray-600 mb-4 cursor-pointer select-none">
-                <input type="checkbox" id="agree-check" class="rounded text-blue-600 w-4 h-4" onchange="document.getElementById('btn-enter').disabled = !this.checked; document.getElementById('btn-enter').classList.toggle('opacity-50'); document.getElementById('btn-enter').classList.toggle('cursor-not-allowed');">
-                I have read and agree to the Terms.
-            </label>
-            <button id="btn-enter" onclick="localStorage.setItem('taxgpt_accepted', 'true'); document.getElementById('modal-disclaimer').classList.add('hidden');" class="w-full bg-black text-white py-3 rounded-xl font-bold opacity-50 cursor-not-allowed transition" disabled>Enter Workspace</button>
+            <button onclick="closeModals(null, true)" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="modal-title" class="text-2xl font-bold mb-4">Title</h3>
+            <div id="modal-content" class="prose text-sm text-gray-600 leading-relaxed max-h-[60vh] overflow-y-auto"></div>
         </div>
     </div>
 
     <div id="landing-view">
         <nav class="fixed w-full z-50 glass-nav transition-all duration-300">
             <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                <div class="flex items-center gap-2 font-bold text-xl tracking-tight text-gray-900 cursor-pointer" onclick="location.reload()">
-                    <i class="fa-solid fa-scale-balanced text-black"></i> TaxLLM
-                </div>
+                <div class="flex items-center gap-2 font-bold text-xl tracking-tight text-gray-900 cursor-pointer" onclick="location.reload()"><i class="fa-solid fa-scale-balanced text-black"></i> TaxLLM</div>
                 <div class="hidden md:flex space-x-8 text-sm font-medium text-gray-600">
-                    <button onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})" class="hover:text-black transition">Features</button>
-                    <button onclick="document.getElementById('pricing').scrollIntoView({behavior: 'smooth'})" class="hover:text-black transition">Pricing</button>
-                    <button onclick="document.getElementById('modal-library').classList.remove('hidden')" class="hover:text-black transition">Library</button>
-                    <button onclick="document.getElementById('modal-about').classList.remove('hidden')" class="hover:text-black transition">About</button>
+                    <button onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})" class="hover:text-black">Features</button>
+                    <button onclick="document.getElementById('faq').scrollIntoView({behavior: 'smooth'})" class="hover:text-black">FAQ</button>
+                    <button onclick="openModal('library')" class="hover:text-black">Library</button>
+                    <button onclick="openContentModal('about')" class="hover:text-black">About</button>
                 </div>
-                <div class="flex gap-3 text-sm">
-                    <button onclick="switchView('app')" class="bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition transform hover:scale-105">Launch App</button>
-                </div>
+                <div class="flex gap-3 text-sm"><button onclick="switchView('app')" class="bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition transform hover:scale-105">Launch App</button></div>
             </div>
         </nav>
 
-        <section class="pt-40 pb-20 px-6 text-center max-w-5xl mx-auto animate-fade-in">
-            <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight text-gray-900">Your AI Tax Expert.</h1>
-            <p class="text-xl md:text-2xl text-gray-500 font-light mb-10 max-w-3xl mx-auto">Accurate. Cited. Country-specific. Trusted by professionals.</p>
+        <section class="pt-32 pb-20 px-6 text-center max-w-5xl mx-auto animate-fade-in">
+            <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-6 leading-tight text-gray-900">Your AI Tax Expert.</h1>
+            <p class="text-lg text-gray-500 font-light mb-10 max-w-2xl mx-auto">Accurate. Cited. Country-specific. Trusted by professionals.</p>
             <div class="relative max-w-2xl mx-auto mb-20 group">
                 <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none"><i class="fa-solid fa-magnifying-glass text-gray-400 text-lg"></i></div>
-                <input type="text" id="landing-search" class="w-full pl-14 pr-14 py-5 rounded-full border border-gray-200 shadow-lg text-lg focus:outline-none focus:ring-4 focus:ring-gray-100 transition" placeholder="Ask anything about tax..." onkeydown="if(event.key === 'Enter') handleLandingSearch()">
-                <button onclick="handleLandingSearch()" class="absolute right-2 top-2 bg-black text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-800 transition shadow-md"><i class="fa-solid fa-arrow-right"></i></button>
+                <input type="text" id="landing-search" class="w-full pl-14 pr-14 py-4 rounded-full border border-gray-200 shadow-lg text-lg focus:outline-none focus:ring-4 focus:ring-gray-100 transition" placeholder="Ask anything about tax..." onkeydown="if(event.key === 'Enter') handleLandingSearch()">
+                <button onclick="handleLandingSearch()" class="absolute right-2 top-2 bg-black text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-800 transition shadow-md"><i class="fa-solid fa-arrow-right"></i></button>
             </div>
         </section>
 
         <section id="features" class="bg-white py-20 px-6 border-t border-gray-100">
             <div class="max-w-6xl mx-auto">
-                <div class="text-center mb-16"><h2 class="text-3xl font-bold">Everything You Need for Tax</h2><p class="text-gray-500 mt-2">Powerful tools integrated into one workspace.</p></div>
+                <div class="text-center mb-12"><h2 class="text-3xl font-bold">Everything You Need for Tax</h2></div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4 cursor-default"><i class="fa-solid fa-magnifying-glass text-gray-600 text-xl"></i> <span class="font-medium">Tax Search</span></div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4 cursor-default"><i class="fa-solid fa-globe text-gray-600 text-xl"></i> <span class="font-medium">Country Summaries</span></div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4 cursor-default"><i class="fa-solid fa-envelope-open-text text-gray-600 text-xl"></i> <span class="font-medium">Email Generator</span></div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4 cursor-default"><i class="fa-solid fa-file-pdf text-gray-600 text-xl"></i> <span class="font-medium">Document Helper</span></div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4 cursor-default"><i class="fa-solid fa-gavel text-gray-600 text-xl"></i> <span class="font-medium">Case Law Explorer</span></div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4 cursor-default"><i class="fa-solid fa-scale-balanced text-gray-600 text-xl"></i> <span class="font-medium">Comparisons</span></div>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4"><i class="fa-solid fa-magnifying-glass text-gray-600 text-xl"></i> <span class="font-medium">Tax Search</span></div>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4"><i class="fa-solid fa-globe text-gray-600 text-xl"></i> <span class="font-medium">Country Summaries</span></div>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4"><i class="fa-solid fa-envelope-open-text text-gray-600 text-xl"></i> <span class="font-medium">Email Generator</span></div>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4"><i class="fa-solid fa-file-pdf text-gray-600 text-xl"></i> <span class="font-medium">Document Helper</span></div>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4"><i class="fa-solid fa-list-check text-gray-600 text-xl"></i> <span class="font-medium">Reminders & Notes</span></div>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4"><i class="fa-solid fa-calculator text-gray-600 text-xl"></i> <span class="font-medium">Calculators</span></div>
                 </div>
             </div>
         </section>
-        
-        <section id="pricing" class="py-24 px-6 max-w-6xl mx-auto bg-appleGray">
-             <div class="text-center mb-12"><h2 class="text-3xl font-bold">Simple Pricing</h2></div>
-             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                 <div class="bg-white p-8 rounded-3xl border border-gray-200"><h3 class="font-bold text-xl">Free</h3><p class="text-3xl font-bold my-4">$0</p><button onclick="switchView('app')" class="w-full border py-2 rounded-lg hover:bg-gray-50">Get Started</button></div>
-                 <div class="bg-black text-white p-8 rounded-3xl shadow-xl transform scale-105"><h3 class="font-bold text-xl">Pro</h3><p class="text-3xl font-bold my-4">$29</p><button onclick="switchView('app')" class="w-full bg-white text-black py-2 rounded-lg hover:bg-gray-100">Start Trial</button></div>
-                 <div class="bg-white p-8 rounded-3xl border border-gray-200"><h3 class="font-bold text-xl">Enterprise</h3><p class="text-3xl font-bold my-4">Custom</p><button class="w-full border py-2 rounded-lg hover:bg-gray-50">Contact Sales</button></div>
-             </div>
+
+        <section id="faq" class="py-20 px-6 bg-appleGray">
+            <div class="max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+                <div class="space-y-4">
+                    <div class="bg-white p-6 rounded-2xl border border-gray-200">
+                        <h3 class="font-bold text-sm mb-2">What is TaxLLM?</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">TaxLLM is a specialized AI workspace designed for accountants and tax professionals. Unlike generic chatbots, it is grounded in official tax documentation for major economies. It combines AI reasoning with practical tools like calculators, email drafting, and document analysis.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-gray-200">
+                        <h3 class="font-bold text-sm mb-2">Why is this different from Gemini or ChatGPT?</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">Generic models often hallucinate tax rates. TaxLLM uses hard-coded 2025 thresholds and forces citations. We do not use your data to train models. Plus, we offer built-in tools like Salary Calculators and Reminders that standard chatbots lack.</p>
+                        <button onclick="switchView('app')" class="mt-3 text-blue-600 text-xs font-bold uppercase hover:underline">Try it yourself <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <footer class="py-12 border-t border-gray-100 text-center text-sm text-gray-500 bg-white">
             <div class="flex justify-center gap-8 mb-6">
-                <button onclick="document.getElementById('modal-about').classList.remove('hidden')" class="hover:text-black">About</button>
-                <button onclick="document.getElementById('modal-security').classList.remove('hidden')" class="hover:text-black">Security</button>
-                <button onclick="document.getElementById('modal-terms').classList.remove('hidden')" class="hover:text-black">Terms</button>
-                <button onclick="document.getElementById('modal-contact').classList.remove('hidden')" class="hover:text-black">Contact</button>
+                <button onclick="openContentModal('about')" class="hover:text-black">About</button>
+                <button onclick="openContentModal('security')" class="hover:text-black">Security</button>
+                <button onclick="openContentModal('terms')" class="hover:text-black">Terms</button>
+                <button onclick="openContentModal('contact')" class="hover:text-black">Contact</button>
             </div>
-            <div class="mb-6 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-50 border border-gray-200 text-xs font-medium text-gray-600"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span></span><span id="live-counter">1,242</span> Visits</div>
-            <p>&copy; 2025 TaxLLM. Built by Dharmil Mehta.</p>
+            <p>&copy; 2025 TaxLLM. v2.0</p>
         </footer>
     </div>
 
     <div id="app-view" class="hidden h-screen flex bg-white font-sans text-gray-900">
-        <aside class="w-[260px] bg-[#202123] text-gray-200 flex flex-col h-full border-r border-gray-800 flex-shrink-0">
+        <aside class="w-[260px] bg-[#fbfbfd] flex flex-col h-full border-r border-gray-200 flex-shrink-0">
             <div class="p-3">
-                <button onclick="resetChat()" class="w-full border border-gray-600 hover:bg-[#2A2B32] text-white rounded-md py-3 px-3 flex items-center gap-3 text-sm transition text-left"><i class="fa-solid fa-plus"></i> New Chat</button>
+                <button onclick="resetChat()" class="w-full border border-gray-200 hover:border-gray-300 bg-white rounded-md py-2.5 px-3 flex items-center gap-2 text-sm transition font-medium shadow-sm text-gray-700"><i class="fa-solid fa-plus text-gray-400"></i> New Chat</button>
             </div>
             <div class="flex-1 overflow-y-auto px-3 py-2 space-y-1 custom-scroll">
-                <div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-2 mt-4 mb-1">Tools</div>
-                <button onclick="openTool('summaries')" class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-globe w-4"></i> Tax Summaries</button>
-                <button onclick="openTool('email')" class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-envelope-open-text w-4"></i> Correspondence</button>
-                <button onclick="openTool('salary')" class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-calculator w-4"></i> Salary Calculator</button>
-                <button onclick="triggerUpload()" class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-file-pdf w-4"></i> Document Helper</button>
+                <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-2 mt-4 mb-1">Productivity</div>
+                <button onclick="openTool('todo')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-sm transition text-left text-gray-700"><i class="fa-solid fa-check-circle w-4 text-blue-500"></i> Reminders</button>
+                <button onclick="openTool('notes')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-sm transition text-left text-gray-700"><i class="fa-solid fa-note-sticky w-4 text-yellow-500"></i> Notes</button>
+
+                <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-2 mt-6 mb-1">Tools</div>
+                <button onclick="openTool('summaries')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-sm transition text-left text-gray-700"><i class="fa-solid fa-globe w-4 text-gray-500"></i> Tax Summaries</button>
+                <button onclick="openTool('email')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-sm transition text-left text-gray-700"><i class="fa-solid fa-envelope-open-text w-4 text-gray-500"></i> Correspondence</button>
+                <button onclick="openTool('salary')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-sm transition text-left text-gray-700"><i class="fa-solid fa-calculator w-4 text-gray-500"></i> Salary Calculator</button>
+                <button onclick="triggerUpload()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-sm transition text-left text-gray-700"><i class="fa-solid fa-file-pdf w-4 text-gray-500"></i> Document Helper</button>
                 
-                <div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-2 mt-6 mb-1">History</div>
+                <div class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-2 mt-6 mb-1">History</div>
                 <div id="history-list" class="space-y-1"></div>
             </div>
-            <div class="p-3 border-t border-gray-700">
-                <button onclick="document.getElementById('modal-library').classList.remove('hidden')" class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left mb-1"><i class="fa-solid fa-book-atlas w-4"></i> Official Library</button>
-                <button onclick="switchView('landing')" class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-right-from-bracket w-4"></i> Exit App</button>
+            <div class="p-3 border-t border-gray-200">
+                <button onclick="switchView('landing')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 text-sm transition text-left text-gray-500"><i class="fa-solid fa-right-from-bracket w-4"></i> Exit App</button>
             </div>
         </aside>
 
@@ -227,136 +168,221 @@
             <header class="h-14 border-b border-gray-100 flex items-center justify-between px-6 bg-white/95 backdrop-blur z-10">
                 <div class="font-semibold text-gray-700 cursor-pointer" onclick="resetChat()">TaxLLM <span class="bg-gray-100 text-gray-500 text-[10px] px-1.5 py-0.5 rounded ml-2">PRO</span></div>
                 <div class="flex items-center gap-4 text-sm">
-                    <div class="flex items-center gap-2 cursor-pointer" onclick="toggleMode()">
-                        <span class="text-gray-400 text-xs">Simple</span><i class="fa-solid fa-toggle-on text-black text-xl" id="mode-icon"></i><span class="font-medium text-xs">Expert</span>
-                    </div>
+                    <div class="flex items-center gap-2 cursor-pointer" onclick="toggleMode()"><span class="text-gray-400 text-xs">Simple</span><i class="fa-solid fa-toggle-on text-black text-xl" id="mode-icon"></i><span class="font-medium text-xs">Expert</span></div>
                 </div>
             </header>
 
             <div id="chat-container" class="flex-1 overflow-y-auto p-6 pb-40 scroll-smooth">
                 <div id="welcome-screen" class="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto animate-fade-in">
-                    <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center text-3xl mb-6 text-gray-400"><i class="fa-solid fa-scale-balanced"></i></div>
-                    <h2 class="text-2xl font-semibold mb-2 text-gray-800">How can I help with your taxes?</h2>
+                    <div class="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-3xl mb-6 text-gray-400 border border-gray-100"><i class="fa-solid fa-scale-balanced"></i></div>
+                    <h2 class="text-2xl font-semibold mb-2 text-gray-900">How can I help with your taxes?</h2>
                     <div class="grid grid-cols-2 gap-4 w-full mt-8">
-                        <button onclick="sendPreset('Summarize 2025 Corporate Tax rates for UK')" class="p-4 border border-gray-200 rounded-xl text-left hover:bg-gray-50 hover:border-gray-300 transition"><div class="font-bold text-sm mb-1 text-gray-800">Summarize Rates</div><div class="text-xs text-gray-400">Corporate tax info</div></button>
-                        <button onclick="sendPreset('Draft a penalty appeal letter')" class="p-4 border border-gray-200 rounded-xl text-left hover:bg-gray-50 hover:border-gray-300 transition"><div class="font-bold text-sm mb-1 text-gray-800">Draft Appeal</div><div class="text-xs text-gray-400">Professional letter</div></button>
+                        <button onclick="openTool('salary')" class="p-4 border border-gray-200 rounded-xl text-left hover:bg-gray-50 hover:border-gray-300 transition bg-white group"><div class="font-bold text-sm mb-1 text-gray-800 group-hover:text-blue-600">Salary Calculator</div><div class="text-xs text-gray-400">Calculate net pay</div></button>
+                        <button onclick="openTool('email')" class="p-4 border border-gray-200 rounded-xl text-left hover:bg-gray-50 hover:border-gray-300 transition bg-white group"><div class="font-bold text-sm mb-1 text-gray-800 group-hover:text-purple-600">Email Generator</div><div class="text-xs text-gray-400">Draft letters</div></button>
                     </div>
                 </div>
-                
-                <div id="tool-view" class="hidden max-w-2xl mx-auto mt-4 bg-white p-8 rounded-3xl border border-gray-200 shadow-lg"></div>
-
+                <div id="tool-view" class="hidden max-w-xl mx-auto mt-4 bg-white p-8 rounded-3xl border border-gray-200 shadow-lg"></div>
                 <div id="chat-output" class="max-w-3xl mx-auto space-y-8 hidden pt-4"></div>
-                <div id="loading" class="hidden max-w-3xl mx-auto pt-4 flex gap-4 items-center"><div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white"><i class="fa-solid fa-bolt text-xs"></i></div><div class="text-sm text-gray-500 font-medium">Thinking...</div></div>
+                <div id="loading" class="hidden max-w-3xl mx-auto pt-4 flex gap-4 items-center"><div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500"><i class="fa-solid fa-bolt text-xs"></i></div><div class="text-sm text-gray-500 font-medium">Thinking...</div></div>
             </div>
 
-            <div class="absolute bottom-0 w-full bg-gradient-to-t from-white via-white to-transparent pt-10 pb-8 px-6">
+            <div class="absolute bottom-0 w-full bg-white pt-4 pb-8 px-6 border-t border-gray-100">
                 <div class="max-w-3xl mx-auto relative">
-                    <div class="relative shadow-card rounded-xl border border-gray-200 bg-white overflow-hidden focus-within:border-gray-400 focus-within:shadow-md transition">
+                    <div class="relative shadow-sm rounded-xl border border-gray-300 bg-white focus-within:border-gray-500 focus-within:ring-1 focus-within:ring-gray-500 transition">
                         <input type="file" id="file-upload" class="hidden" accept="image/*,application/pdf" onchange="handleFileUpload(this)">
-                        <textarea id="user-input" rows="1" class="w-full p-4 pr-24 resize-none focus:outline-none text-sm max-h-40" placeholder="Ask TaxLLM..." onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"></textarea>
+                        <textarea id="user-input" rows="1" class="w-full p-4 pr-24 resize-none focus:outline-none text-sm max-h-40 rounded-xl" placeholder="Ask TaxLLM..." onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"></textarea>
                         <div class="absolute right-2 bottom-2 flex gap-1">
-                            <button id="stop-btn" onclick="stopGeneration()" class="hidden bg-gray-200 text-black w-10 h-10 rounded-lg hover:bg-gray-300 transition flex items-center justify-center"><i class="fa-solid fa-stop"></i></button>
-                            <button id="send-btn" onclick="sendMessage()" class="bg-black text-white w-10 h-10 rounded-lg hover:bg-gray-800 transition flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
+                            <button id="stop-btn" onclick="stopGeneration()" class="hidden bg-gray-200 text-black w-8 h-8 rounded-lg hover:bg-gray-300 transition flex items-center justify-center"><i class="fa-solid fa-stop text-xs"></i></button>
+                            <button id="send-btn" onclick="sendMessage()" class="bg-black text-white w-8 h-8 rounded-lg hover:bg-gray-800 transition flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
                         </div>
                     </div>
-                    <div class="text-center mt-2 text-[10px] text-gray-400">Answers are verified by official sources. Check important info.</div>
+                    <div class="text-center mt-2 text-[10px] text-gray-400">Answers are verified by official sources.</div>
                 </div>
             </div>
         </main>
     </div>
 
-    <div id="toast-container" class="fixed top-14 left-1/2 transform -translate-x-1/2 z-[150] flex flex-col gap-2 pointer-events-none"></div>
-
     <script>
-        let state = { mode: 'Expert', controller: null, history: [] };
+        let state = { mode: 'Expert', controller: null, history: [], todos: [], notes: [], lists: {'Personal': [], 'Work': []} };
 
-        // --- UI FUNCTIONS ---
-        function switchView(view) { 
-            document.getElementById('landing-view').classList.toggle('hidden', view === 'app'); 
-            document.getElementById('app-view').classList.toggle('hidden', view !== 'app');
-            if(view === 'app') window.scrollTo(0, 0);
-        }
-        
-        function handleLandingSearch() { 
-            const q = document.getElementById('landing-search').value; 
-            if(q.trim()) { switchView('app'); document.getElementById('user-input').value = q; sendMessage(); } 
-        }
+        // --- CONTENT ---
+        const contentData = {
+            'about': { title: 'About TaxLLM', body: 'Our mission is to provide professional-grade tax intelligence using advanced AI. Built by <strong>Dharmil Mehta</strong>, Founder of TaxLLM.' },
+            'security': { title: 'Data Security', body: 'Encryption in transit (TLS 1.3). No PII storage. Local-first history.' },
+            'terms': { title: 'Terms of Service', body: 'Information only. Not legal advice. Verify all outputs.' },
+            'contact': { title: 'Contact', body: 'Email: support@taxllm.pro' }
+        };
 
-        function resetChat() { 
-            document.getElementById('welcome-screen').classList.remove('hidden'); 
-            document.getElementById('chat-output').classList.add('hidden'); 
-            document.getElementById('chat-output').innerHTML = ''; 
-            document.getElementById('tool-view').classList.add('hidden'); 
-        }
+        // --- UI ---
+        function openContentModal(t) { document.getElementById('modal-title').innerHTML = contentData[t].title; document.getElementById('modal-content').innerHTML = contentData[t].body; document.getElementById('modal-info').classList.remove('hidden'); }
+        function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); }
+        function closeModals(e,f) { if(f || e.target.id.startsWith('modal-')) document.querySelectorAll('[id^="modal-"]').forEach(m => m.classList.add('hidden')); }
+        function switchView(v) { document.getElementById('landing-view').classList.toggle('hidden', v === 'app'); document.getElementById('app-view').classList.toggle('hidden', v !== 'app'); }
+        function handleLandingSearch() { const q=document.getElementById('landing-search').value; if(q.trim()){ switchView('app'); document.getElementById('user-input').value=q; sendMessage(); } }
+        function resetChat() { document.getElementById('welcome-screen').classList.remove('hidden'); document.getElementById('tool-view').classList.add('hidden'); document.getElementById('chat-output').classList.add('hidden'); document.getElementById('chat-output').innerHTML=''; }
+        function toggleMode() { state.mode = state.mode==='Expert'?'Simple':'Expert'; document.getElementById('mode-icon').className = state.mode==='Expert'?'fa-solid fa-toggle-on text-black text-xl':'fa-solid fa-toggle-off text-gray-400 text-xl'; }
+        function stopGeneration() { if(state.controller){state.controller.abort(); state.controller=null; document.getElementById('loading').classList.add('hidden'); document.getElementById('send-btn').classList.remove('hidden'); document.getElementById('stop-btn').classList.add('hidden');} }
+        function sendPreset(t) { document.getElementById('user-input').value=t; sendMessage(); }
+        function scrollToSection(id) { const el=document.getElementById(id); if(el)el.scrollIntoView({behavior:'smooth'}); }
 
-        function toggleMode() { 
-            state.mode = state.mode === 'Expert' ? 'Simple' : 'Expert'; 
-            document.getElementById('mode-icon').className = state.mode === 'Expert' ? 'fa-solid fa-toggle-on text-black text-xl' : 'fa-solid fa-toggle-off text-gray-400 text-xl'; 
-        }
-
-        function stopGeneration() { 
-            if(state.controller) { 
-                state.controller.abort(); 
-                state.controller = null; 
-                document.getElementById('loading').classList.add('hidden'); 
-                document.getElementById('send-btn').classList.remove('hidden'); 
-                document.getElementById('stop-btn').classList.add('hidden'); 
-            } 
-        }
-
-        function sendPreset(t) { document.getElementById('user-input').value = t; sendMessage(); }
-        function scrollToSection(id) { const el = document.getElementById(id); if(el) el.scrollIntoView({behavior: 'smooth'}); }
-
-        function showToast(msg) {
-            const t = document.createElement('div');
-            t.className = "bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg text-sm animate-fade-in";
-            t.innerText = msg;
-            document.getElementById('toast-container').appendChild(t);
-            setTimeout(() => t.remove(), 2000);
-        }
-
-        // --- TOOL FUNCTIONS ---
+        // --- TOOLS ---
         function openTool(type) {
             document.getElementById('welcome-screen').classList.add('hidden'); document.getElementById('chat-output').classList.add('hidden');
             const view = document.getElementById('tool-view'); view.classList.remove('hidden');
             
             if(type === 'salary') {
-                view.innerHTML = `<div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Salary Calculator</h2><button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div><div class="space-y-4"><input type="number" id="calc-amount" class="w-full p-3 border rounded-lg" placeholder="Gross Annual Income"><button onclick="document.getElementById('calc-res').innerHTML='Net: '+(document.getElementById('calc-amount').value*0.8).toFixed(0)" class="w-full bg-black text-white py-2 rounded-lg">Calculate</button><div id="calc-res" class="text-center font-bold text-xl mt-4"></div></div>`;
+                // Deep Salary Calculator
+                view.innerHTML = `
+                    <div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Salary Calculator</h2><button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
+                    <div class="space-y-4">
+                        <div><label class="block text-xs font-bold text-gray-500 mb-1">Country</label><select id="calc-country" class="w-full p-2 border rounded-lg" onchange="updateCalcFields()"><option value="UK">UK</option><option value="USA">USA</option></select></div>
+                        <div><label class="block text-xs font-bold text-gray-500 mb-1">Gross Salary</label><input type="number" id="calc-amount" class="w-full p-2 border rounded-lg" placeholder="Amount"></div>
+                        <div id="calc-extra-fields"></div>
+                        <button onclick="calculateSalary()" class="w-full bg-black text-white py-2 rounded-lg">Calculate Breakdown</button>
+                        <div id="calc-res" class="hidden bg-gray-50 p-4 rounded-lg mt-4 text-sm"></div>
+                    </div>`;
+                updateCalcFields();
             } else if(type === 'email') {
                 view.innerHTML = `
-                    <div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Correspondence Engine</h2><button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
+                    <div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Correspondence</h2><button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
                     <div class="space-y-4">
-                        <input type="text" id="email-to" class="w-full p-3 border rounded-lg" placeholder="Recipient (e.g. HMRC)">
-                        <input type="text" id="email-purpose" class="w-full p-3 border rounded-lg" placeholder="Purpose (e.g. Appeal)">
-                        <select id="email-tone" class="w-full p-3 border rounded-lg"><option>Formal</option><option>Urgent</option></select>
-                        <button onclick="sendPreset('Draft a ' + document.getElementById('email-tone').value + ' letter to ' + document.getElementById('email-to').value + ' regarding ' + document.getElementById('email-purpose').value)" class="w-full bg-black text-white py-2 rounded-lg">Generate Draft</button>
+                        <input type="text" id="email-to" class="w-full p-3 border rounded-lg" placeholder="Recipient Name">
+                        <input type="text" id="email-purpose" class="w-full p-3 border rounded-lg" placeholder="Purpose (e.g. Late Filing Appeal)">
+                        <input type="text" id="email-facts" class="w-full p-3 border rounded-lg" placeholder="Key Facts (Dates, Ref No)">
+                        <select id="email-tone" class="w-full p-3 border rounded-lg"><option>Formal</option><option>Urgent</option><option>Apologetic</option></select>
+                        <button onclick="sendPreset('Draft a ' + document.getElementById('email-tone').value + ' letter to ' + document.getElementById('email-to').value + ' regarding ' + document.getElementById('email-purpose').value + '. Key facts: ' + document.getElementById('email-facts').value)" class="w-full bg-black text-white py-2 rounded-lg">Generate</button>
                     </div>`;
             } else if(type === 'summaries') {
-                 view.innerHTML = `
+                view.innerHTML = `
                     <div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Deep Tax Summaries</h2><button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
                     <div class="space-y-4">
-                        <select id="sum-country" class="w-full p-3 border rounded-lg"><option>UK</option><option>USA</option><option>UAE</option><option>India</option></select>
-                        <select id="sum-cat" class="w-full p-3 border rounded-lg"><option>Corporate Tax</option><option>VAT/GST</option><option>Withholding Tax</option><option>Transfer Pricing</option><option>R&D Credits</option><option>Employment Tax</option></select>
+                        <label class="block text-xs font-bold text-gray-500">Jurisdiction</label>
+                        <select id="sum-country" class="w-full p-3 border rounded-lg"><option>UK</option><option>USA</option><option>UAE</option><option>India</option><option>Canada</option></select>
+                        <label class="block text-xs font-bold text-gray-500">Category</label>
+                        <select id="sum-cat" class="w-full p-3 border rounded-lg">
+                            <option>Corporate Income Tax</option><option>VAT / GST</option><option>Withholding Tax (WHT)</option><option>Transfer Pricing</option><option>R&D Incentives</option><option>Capital Gains</option><option>Payroll Taxes</option><option>Crypto Assets</option><option>Property Tax</option><option>Tax Treaties</option>
+                        </select>
                         <button onclick="sendPreset('Provide a detailed tax summary for ' + document.getElementById('sum-country').value + ' regarding ' + document.getElementById('sum-cat').value + '. Use a table.')" class="w-full bg-black text-white py-2 rounded-lg">Fetch Data</button>
                     </div>`;
-            }
+            } else if(type === 'todo') { renderTodo(view); } 
+              else if(type === 'notes') { renderNotes(view); }
         }
 
+        // --- CALCULATOR LOGIC ---
+        function updateCalcFields() {
+            const c = document.getElementById('calc-country').value;
+            const div = document.getElementById('calc-extra-fields');
+            if(c === 'UK') div.innerHTML = `<label class="flex items-center gap-2 text-sm"><input type="checkbox" id="calc-student"> Student Loan (Plan 2)</label>`;
+            else if(c === 'USA') div.innerHTML = `<label class="flex items-center gap-2 text-sm"><input type="checkbox" id="calc-401k"> 401k Contribution (5%)</label>`;
+        }
+
+        function calculateSalary() {
+            const c = document.getElementById('calc-country').value;
+            const gross = parseFloat(document.getElementById('calc-amount').value);
+            let tax = 0, ni = 0, net = 0;
+            
+            // Demo Logic (Simplified 2025 rates)
+            if(c === 'UK') {
+                tax = gross > 12570 ? (gross - 12570) * 0.2 : 0;
+                ni = gross > 12570 ? (gross - 12570) * 0.08 : 0;
+                if(document.getElementById('calc-student').checked && gross > 27295) tax += (gross - 27295) * 0.09;
+            } else {
+                tax = gross * 0.22; // Flat est for US
+                ni = gross * 0.0765; // FICA
+            }
+            net = gross - tax - ni;
+            
+            document.getElementById('calc-res').classList.remove('hidden');
+            document.getElementById('calc-res').innerHTML = `
+                <div class="flex justify-between border-b pb-2 mb-2"><span>Gross</span><span>${gross.toFixed(0)}</span></div>
+                <div class="flex justify-between text-red-500"><span>Tax</span><span>-${tax.toFixed(0)}</span></div>
+                <div class="flex justify-between text-red-500 mb-2"><span>${c==='UK'?'NI':'FICA'}</span><span>-${ni.toFixed(0)}</span></div>
+                <div class="flex justify-between font-bold text-lg border-t pt-2"><span>Net Pay</span><span>${net.toFixed(0)}</span></div>
+            `;
+        }
+
+        // --- REMINDERS (APPLE STYLE) ---
+        function renderTodo(container) {
+            // Initialize data structure if empty
+            if (!state.lists['Personal']) state.lists = {'Personal': [], 'Work': []};
+            
+            let activeList = localStorage.getItem('tax_active_list') || 'Work';
+            const todos = state.lists[activeList] || [];
+            
+            const itemsHtml = todos.map((t, i) => 
+                `<div class="flex items-center gap-3 p-3 bg-white border-b border-gray-100 last:border-0 group">
+                    <input type="checkbox" ${t.done?'checked':''} onclick="toggleTodo('${activeList}', ${i})" class="w-5 h-5 rounded-full border-2 border-gray-300 appearance-none cursor-pointer checked:bg-blue-500 checked:border-blue-500 relative checked:after:content-['✓'] checked:after:text-white checked:after:text-xs checked:after:absolute checked:after:top-0.5 checked:after:left-1">
+                    <span class="text-sm text-gray-700 ${t.done?'line-through text-gray-400':''}">${t.text}</span>
+                    <button onclick="deleteTodo('${activeList}', ${i})" class="ml-auto text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash"></i></button>
+                </div>`
+            ).join('');
+
+            container.innerHTML = `
+                <div class="flex justify-between mb-4 items-center">
+                    <div class="flex gap-2">
+                        <button onclick="switchList('Work')" class="px-3 py-1 rounded-full text-xs font-bold ${activeList==='Work'?'bg-black text-white':'bg-gray-100 text-gray-500'}">Work</button>
+                        <button onclick="switchList('Personal')" class="px-3 py-1 rounded-full text-xs font-bold ${activeList==='Personal'?'bg-black text-white':'bg-gray-100 text-gray-500'}">Personal</button>
+                    </div>
+                    <button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <h2 class="text-2xl font-bold mb-4 text-blue-600">${activeList}</h2>
+                <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden mb-4">${itemsHtml || '<p class="p-4 text-xs text-gray-400 text-center">No reminders</p>'}</div>
+                <div class="relative">
+                    <input type="text" id="new-todo" class="w-full p-3 pr-12 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="New Reminder" onkeydown="if(event.key==='Enter')addTodo('${activeList}')">
+                    <button onclick="addTodo('${activeList}')" class="absolute right-2 top-2 w-8 h-8 bg-blue-500 text-white rounded-lg hover:bg-blue-600"><i class="fa-solid fa-plus"></i></button>
+                </div>`;
+        }
+        function switchList(name) { localStorage.setItem('tax_active_list', name); renderTodo(document.getElementById('tool-view')); }
+        function addTodo(listName) { const txt=document.getElementById('new-todo').value; if(txt){ state.lists[listName].push({text:txt, done:false}); renderTodo(document.getElementById('tool-view')); } }
+        function toggleTodo(list, idx) { state.lists[list][idx].done = !state.lists[list][idx].done; renderTodo(document.getElementById('tool-view')); }
+        function deleteTodo(list, idx) { state.lists[list].splice(idx, 1); renderTodo(document.getElementById('tool-view')); }
+
+        // --- NOTES (APPLE STYLE) ---
+        function renderNotes(container) {
+            let activeNote = parseInt(localStorage.getItem('tax_active_note') || 0);
+            // Default notes if empty
+            if (state.notes.length === 0) state.notes = [{title: "New Note", body: ""}];
+            
+            const sidebarHtml = state.notes.map((n,i) => 
+                `<div onclick="selectNote(${i})" class="p-3 border-b border-gray-100 cursor-pointer hover:bg-yellow-50 ${i===activeNote?'bg-yellow-100':''}">
+                    <div class="font-bold text-xs text-gray-800 truncate">${n.title || 'New Note'}</div>
+                    <div class="text-[10px] text-gray-400 truncate">${n.body.substring(0,20)}...</div>
+                </div>`
+            ).join('');
+
+            container.innerHTML = `
+                <div class="flex h-[400px] border border-gray-200 rounded-xl overflow-hidden">
+                    <div class="w-1/3 border-r border-gray-200 bg-gray-50 flex flex-col">
+                        <div class="p-2 border-b border-gray-200 flex justify-between items-center"><span class="text-xs font-bold text-gray-500">iCloud</span><button onclick="createNote()" class="text-yellow-500 hover:text-yellow-600"><i class="fa-regular fa-pen-to-square"></i></button></div>
+                        <div class="flex-1 overflow-y-auto">${sidebarHtml}</div>
+                    </div>
+                    <div class="w-2/3 bg-white flex flex-col">
+                         <div class="flex justify-end p-2"><button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
+                         <input type="text" id="note-title" class="px-4 py-2 font-bold text-lg outline-none" value="${state.notes[activeNote].title}" oninput="updateNote(${activeNote})">
+                         <textarea id="note-body" class="flex-1 p-4 resize-none outline-none text-sm text-gray-600 font-mono" oninput="updateNote(${activeNote})">${state.notes[activeNote].body}</textarea>
+                         <div class="p-2 border-t flex justify-between text-xs text-gray-400"><span>${new Date().toLocaleDateString()}</span><button onclick="deleteNote(${activeNote})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button></div>
+                    </div>
+                </div>`;
+        }
+        function selectNote(i) { localStorage.setItem('tax_active_note', i); renderNotes(document.getElementById('tool-view')); }
+        function createNote() { state.notes.push({title: "New Note", body: ""}); selectNote(state.notes.length-1); }
+        function updateNote(i) { state.notes[i].title = document.getElementById('note-title').value; state.notes[i].body = document.getElementById('note-body').value; }
+        function deleteNote(i) { if(state.notes.length > 1) { state.notes.splice(i,1); selectNote(0); } else { state.notes=[{title:"",body:""}]; renderNotes(document.getElementById('tool-view')); } }
+
+        // --- CHAT ---
         function triggerUpload() { document.getElementById('file-upload').click(); }
         function handleFileUpload(input) { 
-             if (input.files && input.files[0]) {
+             if (input.files[0]) {
                 switchView('app'); document.getElementById('welcome-screen').classList.add('hidden'); document.getElementById('chat-output').classList.remove('hidden');
-                document.getElementById('chat-output').insertAdjacentHTML('beforeend', `<div class="flex justify-end"><div class="bg-gray-100 text-gray-800 px-5 py-3 rounded-2xl max-w-xl text-sm leading-relaxed">📄 File: ${input.files[0].name}</div></div>`);
+                document.getElementById('chat-output').insertAdjacentHTML('beforeend', `<div class="flex justify-end"><div class="bg-gray-100 text-gray-800 px-5 py-3 rounded-2xl max-w-xl text-sm leading-relaxed">📄 ${input.files[0].name}</div></div>`);
                 document.getElementById('loading').classList.remove('hidden');
                 Tesseract.recognize(input.files[0], 'eng').then(({ data: { text } }) => {
                      document.getElementById('loading').classList.add('hidden');
-                     document.getElementById('user-input').value = `Analyze this document text: "${text.substring(0, 500)}..."`;
+                     document.getElementById('user-input').value = `Analyze: "${text.substring(0, 300)}..."`;
                      sendMessage();
                 });
              }
         }
-
-        // --- CHAT LOGIC ---
         async function sendMessage() {
             const input = document.getElementById('user-input'); const text = input.value.trim(); if(!text) return;
             state.controller = new AbortController();
@@ -364,77 +390,21 @@
             const output = document.getElementById('chat-output'); output.classList.remove('hidden');
             document.getElementById('send-btn').classList.add('hidden'); document.getElementById('stop-btn').classList.remove('hidden');
 
-            output.insertAdjacentHTML('beforeend', `<div class="flex justify-end"><div class="bg-gray-100 text-gray-800 px-5 py-3 rounded-2xl max-w-xl text-sm leading-relaxed">${text}</div></div>`);
+            output.insertAdjacentHTML('beforeend', `<div class="flex justify-end"><div class="bg-[#F7F7F8] text-gray-800 px-5 py-3 rounded-2xl max-w-xl text-sm leading-relaxed">${text}</div></div>`);
             input.value = ''; window.scrollTo(0, document.body.scrollHeight);
             document.getElementById('loading').classList.remove('hidden');
 
             try {
-                const promptText = `You are TaxLLM. 
-                FORMAT RULES:
-                1. Use this EXACT structure:
-                ### Key Facts
-                (Bullet points)
-                ### Scope & Thresholds
-                (Details)
-                ### Practical Implications
-                (Advice)
-                ### Sources
-                [Source 1] [Source 2] (Use bracket notation like [HMRC])
-
-                MODE: ${state.mode}.
-                User Query: ${text}`;
-
-                const res = await fetch('/api/chat', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ prompt: promptText }),
-                    signal: state.controller.signal
-                });
+                const res = await fetch('/api/chat', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ prompt: `You are TaxLLM. MODE: ${state.mode}. QUERY: ${text}` }), signal: state.controller.signal });
                 const data = await res.json();
                 document.getElementById('loading').classList.add('hidden');
-                
                 const msgId = Date.now();
-                let formattedResp = marked.parse(data.response);
-                formattedResp = formattedResp.replace(/\[(.*?)\]/g, '<span class="citation-badge">$1</span>');
-
-                output.insertAdjacentHTML('beforeend', `
-                    <div class="flex gap-4 group fade-in">
-                        <div class="w-8 h-8 bg-gray-900 text-white rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold">AI</div>
-                        <div class="flex-1 max-w-3xl">
-                            <div class="prose prose-sm text-gray-800 leading-7 mb-3" id="content-${msgId}">${formattedResp}</div>
-                            <div class="flex gap-2 items-center opacity-0 group-hover:opacity-100 transition">
-                                <button onclick="navigator.clipboard.writeText(document.getElementById('content-${msgId}').innerText);showToast('Copied')" class="px-3 py-1 rounded-full bg-gray-50 text-xs text-gray-600 border hover:bg-gray-100">Copy</button>
-                                <button onclick="document.getElementById('user-input').value='Simplify this';sendMessage()" class="px-3 py-1 rounded-full bg-gray-50 text-xs text-gray-600 border hover:bg-gray-100">Simplify</button>
-                                <button onclick="document.getElementById('user-input').value='Key Takeaways';sendMessage()" class="px-3 py-1 rounded-full bg-gray-50 text-xs text-gray-600 border hover:bg-gray-100">Key Takeaways</button>
-                                <div class="flex gap-1 ml-2 border-l pl-2">
-                                    <button class="p-1.5 text-gray-400 hover:text-green-500" onclick="showToast('Thanks for feedback')"><i class="fa-regular fa-thumbs-up"></i></button>
-                                    <button class="p-1.5 text-gray-400 hover:text-red-500" onclick="showToast('Thanks for feedback')"><i class="fa-regular fa-thumbs-down"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`);
-                
-                if(state.history[0] !== text) {
-                    state.history.unshift(text);
-                    const histList = document.getElementById('history-list');
-                    const btn = document.createElement('button');
-                    btn.className = "w-full flex items-center gap-3 px-3 py-2 rounded hover:bg-gray-100 text-sm transition text-left text-gray-400 truncate";
-                    btn.innerHTML = `<i class="fa-regular fa-message w-4"></i> ${text}`;
-                    btn.onclick = () => { document.getElementById('user-input').value = text; sendMessage(); };
-                    histList.prepend(btn);
-                }
-
+                output.insertAdjacentHTML('beforeend', `<div class="flex gap-4 group fade-in"><div class="w-8 h-8 bg-green-600 text-white rounded-sm flex items-center justify-center flex-shrink-0 text-xs font-bold">T</div><div class="flex-1 max-w-3xl"><div class="prose prose-sm text-gray-800 leading-7 mb-2" id="content-${msgId}">${marked.parse(data.response)}</div><div class="flex gap-2 items-center opacity-0 group-hover:opacity-100 transition"><button onclick="navigator.clipboard.writeText(document.getElementById('content-${msgId}').innerText)" class="px-3 py-1 rounded-full bg-gray-50 text-xs text-gray-600 border hover:bg-gray-100">Copy</button><button onclick="document.getElementById('user-input').value='Simplify this';sendMessage()" class="px-3 py-1 rounded-full bg-gray-50 text-xs text-gray-600 border hover:bg-gray-100">Simplify</button></div></div></div>`);
+                if(state.history[0] !== text) { state.history.unshift(text); renderHistory(); }
             } catch(err) { if(err.name !== 'AbortError') document.getElementById('loading').classList.add('hidden'); }
-            finally { document.getElementById('send-btn').classList.remove('hidden'); document.getElementById('stop-btn').classList.add('hidden'); state.controller = null; }
-            window.scrollTo(0, document.body.scrollHeight);
+            finally { document.getElementById('send-btn').classList.remove('hidden'); document.getElementById('stop-btn').classList.add('hidden'); state.controller = null; scrollToBottom(); }
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            if(!localStorage.getItem('taxgpt_accepted')) document.getElementById('modal-disclaimer').classList.remove('hidden');
-            let visits = parseInt(localStorage.getItem('taxgpt_visits') || 1240);
-            visits++;
-            localStorage.setItem('taxgpt_visits', visits);
-            document.getElementById('live-counter').innerText = visits.toLocaleString();
-        });
+        function renderHistory() { const l = document.getElementById('history-list'); l.innerHTML = ''; state.history.forEach(t => { const b = document.createElement('button'); b.className = "w-full text-left px-3 py-2 text-sm text-gray-500 hover:bg-gray-100 rounded-lg truncate transition mb-1"; b.innerHTML = t; b.onclick = () => { resetChat(); document.getElementById('user-input').value = t; sendMessage(); }; l.appendChild(b); }); }
     </script>
 </body>
 </html>
