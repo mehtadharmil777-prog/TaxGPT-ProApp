@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaxLLM | Professional Tax Intelligence</title>
+    <title>TaxLLM | Professional Tax OS</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,7 +22,7 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: { appleGray: '#F5F5F7', appleDark: '#1D1D1F', appleBlue: '#0066CC' },
-                    animation: { 'fade-in': 'fadeIn 0.5s ease-out', 'pulse-slow': 'pulse 2s infinite' },
+                    animation: { 'fade-in': 'fadeIn 0.5s ease-out' },
                     keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
                 }
             }
@@ -32,6 +32,12 @@
     <style>
         body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
         .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        
+        /* Apple Reminders Checkbox */
+        .apple-checkbox {
+            appearance: none; width: 20px; height: 20px; border: 2px solid #d1d5db; border-radius: 50%; cursor: pointer; transition: all 0.2s;
+        }
+        .apple-checkbox:checked { background-color: #0066CC; border-color: #0066CC; background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e"); }
         
         /* Markdown Styling */
         .prose h3 { font-weight: 600; font-size: 1.1em; margin-top: 1em; margin-bottom: 0.5em; color: #111; }
@@ -46,8 +52,6 @@
         .dot-flashing::before { left: -10px; animation-delay: 0s; }
         .dot-flashing::after { left: 10px; animation-delay: 1s; }
         @keyframes dot-flashing { 0% { background-color: #888; } 50%, 100% { background-color: #ccc; } }
-        
-        .mic-listening { color: #ef4444 !important; animation: pulse-slow 1.5s infinite; }
     </style>
 </head>
 <body class="bg-white text-appleDark">
@@ -106,7 +110,6 @@
                     <button onclick="scrollToSection('features')" class="hover:text-black transition">Features</button>
                     <button onclick="scrollToSection('pricing')" class="hover:text-black transition">Pricing</button>
                     <button onclick="openModal('library')" class="hover:text-black transition">Library</button>
-                    <button onclick="openContentModal('about')" class="hover:text-black transition">About</button>
                 </div>
                 <div class="flex gap-3 text-sm">
                     <button onclick="switchView('app')" class="bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition transform hover:scale-105">Launch App</button>
@@ -133,7 +136,7 @@
                     <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4 cursor-default"><i class="fa-solid fa-envelope-open-text text-gray-600 text-xl"></i> <span class="font-medium">Email Generator</span></div>
                     <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4 cursor-default"><i class="fa-solid fa-file-pdf text-gray-600 text-xl"></i> <span class="font-medium">Document Helper</span></div>
                     <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4 cursor-default"><i class="fa-solid fa-gavel text-gray-600 text-xl"></i> <span class="font-medium">Case Law Explorer</span></div>
-                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4 cursor-default"><i class="fa-solid fa-scale-balanced text-gray-600 text-xl"></i> <span class="font-medium">Comparisons</span></div>
+                    <div class="p-6 border border-gray-100 rounded-2xl hover:shadow-lg transition flex items-center gap-4 cursor-default"><i class="fa-solid fa-check-double text-gray-600 text-xl"></i> <span class="font-medium">To-Do Lists</span></div>
                 </div>
             </div>
         </section>
@@ -165,7 +168,11 @@
                 <button onclick="resetChat()" class="w-full border border-gray-600 hover:bg-[#2A2B32] text-white rounded-md py-3 px-3 flex items-center gap-3 text-sm transition text-left"><i class="fa-solid fa-plus"></i> New Chat</button>
             </div>
             <div class="flex-1 overflow-y-auto px-3 py-2 space-y-1 custom-scroll">
-                <div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-2 mt-4 mb-1">Tools</div>
+                <div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-2 mt-4 mb-1">Organizer</div>
+                <button onclick="openTool('todo')" class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-check-circle w-4 text-blue-400"></i> Reminders</button>
+                <button onclick="openTool('notes')" class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-note-sticky w-4 text-yellow-400"></i> Notes</button>
+
+                <div class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-2 mt-6 mb-1">Tools</div>
                 <button onclick="openTool('summaries')" class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-globe w-4"></i> Tax Summaries</button>
                 <button onclick="openTool('email')" class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-envelope-open-text w-4"></i> Correspondence</button>
                 <button onclick="openTool('salary')" class="w-full flex items-center gap-3 px-3 py-3 rounded hover:bg-[#2A2B32] text-sm transition text-left"><i class="fa-solid fa-calculator w-4"></i> Salary Calculator</button>
@@ -194,38 +201,24 @@
                 <div id="welcome-screen" class="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto animate-fade-in">
                     <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center text-3xl mb-6 text-gray-400"><i class="fa-solid fa-scale-balanced"></i></div>
                     <h2 class="text-2xl font-semibold mb-2 text-gray-800">How can I help with your taxes?</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-8">
-                        <button onclick="openTool('salary')" class="p-4 border border-gray-200 rounded-xl text-left hover:bg-gray-50 hover:border-gray-300 transition">
-                            <div class="font-bold text-sm mb-1 text-gray-800">Salary Calc</div>
-                            <div class="text-xs text-gray-400">Net pay estimator</div>
-                        </button>
-                        <button onclick="openTool('email')" class="p-4 border border-gray-200 rounded-xl text-left hover:bg-gray-50 hover:border-gray-300 transition">
-                            <div class="font-bold text-sm mb-1 text-gray-800">Email Gen</div>
-                            <div class="text-xs text-gray-400">Draft letters</div>
-                        </button>
-                        <button onclick="sendPreset('I need to visualize data. Ask me for the figures.')" class="p-4 border border-gray-200 rounded-xl text-left hover:bg-gray-50 hover:border-gray-300 transition">
-                            <div class="font-bold text-sm mb-1 text-gray-800">Visualizer</div>
-                            <div class="text-xs text-gray-400">Create charts</div>
-                        </button>
+                    <div class="grid grid-cols-2 gap-4 w-full mt-8">
+                        <button onclick="sendPreset('Summarize 2025 Corporate Tax rates for UK')" class="p-4 border border-gray-200 rounded-xl text-left hover:bg-gray-50 hover:border-gray-300 transition"><div class="font-bold text-sm mb-1 text-gray-800">Summarize Rates</div><div class="text-xs text-gray-400">Corporate tax info</div></button>
+                        <button onclick="sendPreset('Draft a penalty appeal letter')" class="p-4 border border-gray-200 rounded-xl text-left hover:bg-gray-50 hover:border-gray-300 transition"><div class="font-bold text-sm mb-1 text-gray-800">Draft Appeal</div><div class="text-xs text-gray-400">Professional letter</div></button>
                     </div>
                 </div>
-                
                 <div id="tool-view" class="hidden max-w-xl mx-auto mt-4 bg-white p-8 rounded-3xl border border-gray-200 shadow-lg"></div>
-
                 <div id="chat-output" class="max-w-3xl mx-auto space-y-8 hidden pt-4"></div>
-                <div id="loading" class="hidden max-w-3xl mx-auto pt-4 flex gap-4 items-center"><div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500"><i class="fa-solid fa-bolt text-xs"></i></div><div class="text-sm text-gray-500 font-medium">Thinking...</div></div>
+                <div id="loading" class="hidden max-w-3xl mx-auto pt-4 flex gap-4 items-center"><div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white"><i class="fa-solid fa-bolt text-xs"></i></div><div class="text-sm text-gray-500 font-medium" id="loading-text">Thinking...</div></div>
             </div>
 
-            <div class="absolute bottom-0 w-full bg-white pt-4 pb-8 px-6 border-t border-gray-100">
+            <div class="absolute bottom-0 w-full bg-gradient-to-t from-white via-white to-transparent pt-10 pb-8 px-6">
                 <div class="max-w-3xl mx-auto relative">
-                    <div class="relative shadow-card rounded-xl border border-gray-300 bg-white focus-within:border-gray-500 focus-within:ring-1 focus-within:ring-gray-500 transition">
+                    <div class="relative shadow-card rounded-xl border border-gray-200 bg-white overflow-hidden focus-within:border-gray-400 focus-within:shadow-md transition">
                         <input type="file" id="file-upload" class="hidden" accept="image/*,application/pdf" onchange="handleFileUpload(this)">
-                        <div class="flex items-center p-2">
-                            <button onclick="triggerUpload()" class="p-2 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-paperclip"></i></button>
-                            <button onclick="toggleVoice()" class="p-2 text-gray-400 hover:text-gray-600"><i id="mic-icon" class="fa-solid fa-microphone"></i></button>
-                            <textarea id="user-input" rows="1" class="w-full p-2 resize-none focus:outline-none text-sm max-h-40" placeholder="Ask TaxLLM..." onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"></textarea>
-                            <button id="stop-btn" onclick="stopGeneration()" class="hidden p-2 text-gray-600 hover:text-red-500"><i class="fa-solid fa-stop"></i></button>
-                            <button id="send-btn" onclick="sendMessage()" class="p-2 text-white bg-black rounded-lg hover:bg-gray-800 ml-2"><i class="fa-solid fa-arrow-up"></i></button>
+                        <textarea id="user-input" rows="1" class="w-full p-4 pr-24 resize-none focus:outline-none text-sm max-h-40" placeholder="Ask TaxLLM..." onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"></textarea>
+                        <div class="absolute right-2 bottom-2 flex gap-1">
+                            <button id="stop-btn" onclick="stopGeneration()" class="hidden bg-gray-200 text-black w-10 h-10 rounded-lg hover:bg-gray-300 transition flex items-center justify-center"><i class="fa-solid fa-stop text-xs"></i></button>
+                            <button id="send-btn" onclick="sendMessage()" class="bg-black text-white w-10 h-10 rounded-lg hover:bg-gray-800 transition flex items-center justify-center"><i class="fa-solid fa-paper-plane text-xs"></i></button>
                         </div>
                     </div>
                     <div class="text-center mt-2 text-[10px] text-gray-400">Answers are verified by official sources. Check important info.</div>
@@ -234,55 +227,30 @@
         </main>
     </div>
 
-    <div id="toast-container" class="fixed top-14 left-1/2 transform -translate-x-1/2 z-[150] flex flex-col gap-2 pointer-events-none"></div>
-
     <script>
-        let state = { mode: 'Expert', controller: null, history: [] };
+        let state = { mode: 'Expert', controller: null, history: [], todos: [], notes: [] };
 
-        // --- CONTENT MODALS ---
+        // --- MODALS CONTENT ---
         const contentData = {
-            'about': { title: 'About TaxLLM', body: 'Built by <strong>Dharmil Mehta</strong>, Founder of TaxLLM. Our mission is to bridge the gap between complex tax legislation and modern AI. TaxLLM provides accurate, cited, and instant tax answers for professionals.' },
-            'security': { title: 'Data Security', body: 'We utilize industry-standard encryption (TLS 1.3) for all data in transit. We do not store sensitive personally identifiable information (PII) or financial records on our servers. All AI interactions are stateless and anonymized.' },
-            'terms': { title: 'Terms of Service', body: 'Disclaimer: TaxLLM provides information, not legal advice. Always verify outputs with a qualified accountant or tax advisor. By using this tool, you agree to our terms of service. Limitation of Liability applies.' },
-            'contact': { title: 'Contact Us', body: 'For general inquiries, partnerships, or support, please reach out.<br><br><strong>Email:</strong> dharmil@taxllm.pro<br><strong>Response Time:</strong> Within 24 hours.' }
+            'about': { title: 'About TaxLLM', body: 'Built by <strong>Dharmil Mehta</strong>, Founder of TaxLLM. Our mission is to provide professional-grade tax intelligence using advanced AI, grounded in official sources.' },
+            'security': { title: 'Data Security', body: 'We utilize industry-standard TLS encryption. We do not store sensitive personally identifiable information (PII) on our servers. All sessions are anonymized.' },
+            'terms': { title: 'Terms of Service', body: 'Disclaimer: TaxLLM provides information, not legal advice. Users must verify all outputs with a qualified accountant. By using this tool, you agree to these terms.' },
+            'contact': { title: 'Contact Us', body: 'For support or enterprise inquiries, please reach out:<br><br><strong>Email:</strong> dharmil@taxllm.pro' }
         };
 
         // --- UI FUNCTIONS ---
-        function openContentModal(type) {
-            document.getElementById('modal-title').innerHTML = contentData[type].title;
-            document.getElementById('modal-content').innerHTML = contentData[type].body;
-            document.getElementById('modal-info').classList.remove('hidden');
-        }
+        function openContentModal(type) { document.getElementById('modal-title').innerHTML = contentData[type].title; document.getElementById('modal-content').innerHTML = contentData[type].body; document.getElementById('modal-info').classList.remove('hidden'); }
         function openModal(id) { document.getElementById('modal-' + id).classList.remove('hidden'); }
         function closeModals(e, force) { if(force || e.target.id.startsWith('modal-')) document.querySelectorAll('[id^="modal-"]').forEach(m => m.classList.add('hidden')); }
         function toggleEnterBtn() { const b = document.getElementById('btn-enter'); b.disabled = !document.getElementById('agree-check').checked; b.classList.toggle('opacity-50'); b.classList.toggle('cursor-not-allowed'); }
         function acceptDisclaimer() { localStorage.setItem('taxgpt_accepted', 'true'); document.getElementById('modal-disclaimer').classList.add('hidden'); }
-        function switchView(view) { 
-            document.getElementById('landing-view').classList.toggle('hidden', view === 'app'); 
-            document.getElementById('app-view').classList.toggle('hidden', view !== 'app');
-            if(view === 'app') scrollToSection('app-view'); // Ensure top of app
-        }
+        function switchView(view) { document.getElementById('landing-view').classList.toggle('hidden', view === 'app'); document.getElementById('app-view').classList.toggle('hidden', view !== 'app'); }
         function handleLandingSearch() { const q = document.getElementById('landing-search').value; if(q.trim()) { switchView('app'); document.getElementById('user-input').value = q; sendMessage(); } }
-        function resetChat() { 
-            document.getElementById('welcome-screen').classList.remove('hidden'); 
-            document.getElementById('chat-output').classList.add('hidden'); 
-            document.getElementById('chat-output').innerHTML = ''; 
-            document.getElementById('tool-view').classList.add('hidden'); 
-        }
+        function resetChat() { document.getElementById('welcome-screen').classList.remove('hidden'); document.getElementById('tool-view').classList.add('hidden'); document.getElementById('chat-output').classList.add('hidden'); document.getElementById('chat-output').innerHTML = ''; }
         function toggleMode() { state.mode = state.mode === 'Expert' ? 'Simple' : 'Expert'; document.getElementById('mode-icon').className = state.mode === 'Expert' ? 'fa-solid fa-toggle-on text-black text-xl' : 'fa-solid fa-toggle-off text-gray-400 text-xl'; }
         function stopGeneration() { if(state.controller) { state.controller.abort(); state.controller = null; document.getElementById('loading').classList.add('hidden'); document.getElementById('send-btn').classList.remove('hidden'); document.getElementById('stop-btn').classList.add('hidden'); } }
         function sendPreset(t) { document.getElementById('user-input').value = t; sendMessage(); }
-        function scrollToSection(id) { 
-            const el = document.getElementById(id);
-            if(el) el.scrollIntoView({behavior: 'smooth'}); 
-        }
-        function showToast(msg) {
-            const t = document.createElement('div');
-            t.className = "bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg text-sm animate-fade-in";
-            t.innerText = msg;
-            document.getElementById('toast-container').appendChild(t);
-            setTimeout(() => t.remove(), 2000);
-        }
+        function scrollToSection(id) { const el = document.getElementById(id); if(el) el.scrollIntoView({behavior: 'smooth'}); }
 
         // --- TOOL FUNCTIONS ---
         function openTool(type) {
@@ -292,24 +260,51 @@
             if(type === 'salary') {
                 view.innerHTML = `<div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Salary Calculator</h2><button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div><div class="space-y-4"><input type="number" id="calc-amount" class="w-full p-3 border rounded-lg" placeholder="Gross Annual Income"><button onclick="document.getElementById('calc-res').innerHTML='Net: '+(document.getElementById('calc-amount').value*0.8).toFixed(0)" class="w-full bg-black text-white py-2 rounded-lg">Calculate</button><div id="calc-res" class="text-center font-bold text-xl mt-4"></div></div>`;
             } else if(type === 'email') {
-                view.innerHTML = `
-                    <div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Letter Generator</h2><button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
-                    <div class="space-y-4">
-                        <input type="text" id="email-to" class="w-full p-3 border rounded-lg" placeholder="Recipient (e.g. HMRC)">
-                        <input type="text" id="email-purpose" class="w-full p-3 border rounded-lg" placeholder="Purpose (e.g. Appeal)">
-                        <select id="email-tone" class="w-full p-3 border rounded-lg"><option>Formal</option><option>Urgent</option></select>
-                        <button onclick="sendPreset('Draft a ' + document.getElementById('email-tone').value + ' letter to ' + document.getElementById('email-to').value + ' regarding ' + document.getElementById('email-purpose').value)" class="w-full bg-black text-white py-2 rounded-lg">Generate</button>
-                    </div>`;
+                view.innerHTML = `<div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Letter Generator</h2><button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div><div class="space-y-4"><input type="text" id="email-to" class="w-full p-3 border rounded-lg" placeholder="Recipient (e.g. HMRC)"><input type="text" id="email-purpose" class="w-full p-3 border rounded-lg" placeholder="Purpose (e.g. Appeal)"><select id="email-tone" class="w-full p-3 border rounded-lg"><option>Formal</option><option>Urgent</option></select><button onclick="sendPreset('Draft a ' + document.getElementById('email-tone').value + ' letter to ' + document.getElementById('email-to').value + ' regarding ' + document.getElementById('email-purpose').value)" class="w-full bg-black text-white py-2 rounded-lg">Generate</button></div>`;
             } else if(type === 'summaries') {
-                 view.innerHTML = `
-                    <div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Deep Tax Summaries</h2><button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
-                    <div class="space-y-4">
-                        <select id="sum-country" class="w-full p-3 border rounded-lg"><option>UK</option><option>USA</option><option>UAE</option><option>India</option></select>
-                        <select id="sum-cat" class="w-full p-3 border rounded-lg"><option>Corporate Tax</option><option>VAT/GST</option><option>Withholding Tax</option><option>Transfer Pricing</option><option>R&D Credits</option><option>Employment Tax</option></select>
-                        <button onclick="sendPreset('Provide a detailed tax summary for ' + document.getElementById('sum-country').value + ' regarding ' + document.getElementById('sum-cat').value + '. Use a table.')" class="w-full bg-black text-white py-2 rounded-lg">Fetch Data</button>
-                    </div>`;
+                 view.innerHTML = `<div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Deep Tax Summaries</h2><button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div><div class="space-y-4"><select id="sum-country" class="w-full p-3 border rounded-lg"><option>UK</option><option>USA</option><option>UAE</option><option>India</option></select><select id="sum-cat" class="w-full p-3 border rounded-lg"><option>Corporate Tax</option><option>VAT/GST</option><option>Withholding Tax</option><option>Transfer Pricing</option><option>R&D Credits</option><option>Employment Tax</option></select><button onclick="sendPreset('Provide a detailed tax summary for ' + document.getElementById('sum-country').value + ' regarding ' + document.getElementById('sum-cat').value + '. Use a table.')" class="w-full bg-black text-white py-2 rounded-lg">Fetch Data</button></div>`;
+            } else if(type === 'todo') {
+                renderTodoList(view);
+            } else if(type === 'notes') {
+                renderNotes(view);
             }
         }
+
+        // --- TODO & NOTES ---
+        function renderTodoList(container) {
+            state.todos = JSON.parse(localStorage.getItem('tax_todos') || '[]');
+            const listHtml = state.todos.map((t, i) => 
+                `<div class="flex items-center gap-3 p-2 border-b border-gray-50">
+                    <input type="checkbox" class="apple-checkbox" ${t.done ? 'checked' : ''} onclick="toggleTodo(${i})">
+                    <span class="${t.done ? 'line-through text-gray-400' : 'text-gray-800'}">${t.text}</span>
+                    <button onclick="deleteTodo(${i})" class="ml-auto text-gray-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
+                </div>`).join('');
+            
+            container.innerHTML = `
+                <div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Reminders</h2><button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
+                <div class="space-y-2 mb-4 max-h-64 overflow-y-auto">${listHtml}</div>
+                <div class="flex gap-2"><input type="text" id="new-todo" class="flex-1 p-2 border rounded-lg" placeholder="New task..."><button onclick="addTodo()" class="bg-black text-white px-4 rounded-lg">Add</button></div>`;
+        }
+        function addTodo() {
+            const txt = document.getElementById('new-todo').value;
+            if(txt) { state.todos.push({text: txt, done: false}); localStorage.setItem('tax_todos', JSON.stringify(state.todos)); renderTodoList(document.getElementById('tool-view')); }
+        }
+        function toggleTodo(i) { state.todos[i].done = !state.todos[i].done; localStorage.setItem('tax_todos', JSON.stringify(state.todos)); renderTodoList(document.getElementById('tool-view')); }
+        function deleteTodo(i) { state.todos.splice(i, 1); localStorage.setItem('tax_todos', JSON.stringify(state.todos)); renderTodoList(document.getElementById('tool-view')); }
+
+        function renderNotes(container) {
+            state.notes = JSON.parse(localStorage.getItem('tax_notes') || '[]');
+            const listHtml = state.notes.map((n, i) => `<div class="p-3 bg-yellow-50 rounded-lg border border-yellow-100 text-sm mb-2 relative group">${n}<button onclick="deleteNote(${i})" class="absolute top-2 right-2 text-yellow-300 hover:text-yellow-600 opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash"></i></button></div>`).join('');
+            container.innerHTML = `
+                <div class="flex justify-between mb-6"><h2 class="text-xl font-bold">Notes</h2><button onclick="resetChat()" class="text-gray-400"><i class="fa-solid fa-xmark"></i></button></div>
+                <div class="space-y-2 mb-4 max-h-64 overflow-y-auto">${listHtml}</div>
+                <div class="flex gap-2"><textarea id="new-note" class="flex-1 p-2 border rounded-lg" rows="2" placeholder="Jot down something..."></textarea><button onclick="addNote()" class="bg-yellow-500 text-white px-4 rounded-lg">Save</button></div>`;
+        }
+        function addNote() {
+            const txt = document.getElementById('new-note').value;
+            if(txt) { state.notes.push(txt); localStorage.setItem('tax_notes', JSON.stringify(state.notes)); renderNotes(document.getElementById('tool-view')); }
+        }
+        function deleteNote(i) { state.notes.splice(i, 1); localStorage.setItem('tax_notes', JSON.stringify(state.notes)); renderNotes(document.getElementById('tool-view')); }
 
         function triggerUpload() { document.getElementById('file-upload').click(); }
         function handleFileUpload(input) { 
@@ -324,35 +319,20 @@
                 });
              }
         }
-        
-        // Voice Dictation
-        function toggleVoice() {
-            if (!('webkitSpeechRecognition' in window)) { alert("Voice not supported"); return; }
-            const btn = document.getElementById('mic-icon');
-            const recognition = new webkitSpeechRecognition();
-            recognition.onstart = () => { btn.classList.add('mic-listening'); };
-            recognition.onend = () => { btn.classList.remove('mic-listening'); };
-            recognition.onresult = (event) => { document.getElementById('user-input').value = event.results[0][0].transcript; };
-            recognition.start();
-        }
 
         // --- CHAT LOGIC ---
         async function sendMessage() {
             const input = document.getElementById('user-input'); const text = input.value.trim(); if(!text) return;
-            
             state.controller = new AbortController();
-            document.getElementById('welcome-screen').classList.add('hidden');
-            document.getElementById('tool-view').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.add('hidden'); document.getElementById('tool-view').classList.add('hidden');
             const output = document.getElementById('chat-output'); output.classList.remove('hidden');
-            document.getElementById('send-btn').classList.add('hidden');
-            document.getElementById('stop-btn').classList.remove('hidden');
+            document.getElementById('send-btn').classList.add('hidden'); document.getElementById('stop-btn').classList.remove('hidden');
 
             output.insertAdjacentHTML('beforeend', `<div class="flex justify-end"><div class="bg-gray-100 text-gray-800 px-5 py-3 rounded-2xl max-w-xl text-sm leading-relaxed">${text}</div></div>`);
             input.value = ''; window.scrollTo(0, document.body.scrollHeight);
             document.getElementById('loading').classList.remove('hidden');
 
             try {
-                // UPDATED SYSTEM PROMPT TO FORCE APPLE-STYLE FORMATTING
                 const promptText = `You are TaxLLM. 
                 FORMAT RULES:
                 1. Use this EXACT structure:
@@ -377,9 +357,8 @@
                 document.getElementById('loading').classList.add('hidden');
                 
                 const msgId = Date.now();
-                // Parse [Source] into Citation Badges
                 let formattedResp = marked.parse(data.response);
-                formattedResp = formattedResp.replace(/\[(.*?)\]/g, '<span class="citation-badge">$1</span>');
+                formattedResp = formattedResp.replace(/\[(.*?)\]/g, '<span class="inline-flex items-center bg-gray-50 border rounded px-1.5 py-0.5 text-[10px] text-gray-500 ml-1 cursor-default font-medium">$1</span>');
 
                 output.insertAdjacentHTML('beforeend', `
                     <div class="flex gap-4 group fade-in">
@@ -387,12 +366,12 @@
                         <div class="flex-1 max-w-3xl">
                             <div class="prose prose-sm text-gray-800 leading-7 mb-3" id="content-${msgId}">${formattedResp}</div>
                             <div class="flex gap-2 items-center opacity-0 group-hover:opacity-100 transition">
-                                <button onclick="navigator.clipboard.writeText(document.getElementById('content-${msgId}').innerText);showToast('Copied')" class="px-3 py-1 rounded-full bg-gray-50 text-xs text-gray-600 border hover:bg-gray-100">Copy</button>
+                                <button onclick="navigator.clipboard.writeText(document.getElementById('content-${msgId}').innerText)" class="px-3 py-1 rounded-full bg-gray-50 text-xs text-gray-600 border hover:bg-gray-100">Copy</button>
                                 <button onclick="document.getElementById('user-input').value='Simplify this';sendMessage()" class="px-3 py-1 rounded-full bg-gray-50 text-xs text-gray-600 border hover:bg-gray-100">Simplify</button>
                                 <button onclick="document.getElementById('user-input').value='Key Takeaways';sendMessage()" class="px-3 py-1 rounded-full bg-gray-50 text-xs text-gray-600 border hover:bg-gray-100">Key Takeaways</button>
                                 <div class="flex gap-1 ml-2 border-l pl-2">
-                                    <button class="p-1.5 text-gray-400 hover:text-green-500" onclick="showToast('Thanks for feedback')"><i class="fa-regular fa-thumbs-up"></i></button>
-                                    <button class="p-1.5 text-gray-400 hover:text-red-500" onclick="showToast('Thanks for feedback')"><i class="fa-regular fa-thumbs-down"></i></button>
+                                    <button class="p-1.5 text-gray-400 hover:text-green-500"><i class="fa-regular fa-thumbs-up"></i></button>
+                                    <button class="p-1.5 text-gray-400 hover:text-red-500"><i class="fa-regular fa-thumbs-down"></i></button>
                                 </div>
                             </div>
                         </div>
