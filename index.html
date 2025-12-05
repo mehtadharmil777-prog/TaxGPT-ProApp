@@ -75,7 +75,7 @@
                 </div>
             </div>
             
-            <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-gray-100 p-4 space-y-4 shadow-lg absolute w-full">
+            <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-gray-100 p-4 space-y-4 shadow-lg absolute w-full top-16 z-40">
                 <button onclick="scrollToSection('features')" class="block w-full text-left text-sm font-medium text-gray-700">Features</button>
                 <button onclick="scrollToSection('pricing')" class="block w-full text-left text-sm font-medium text-gray-700">Pricing</button>
                 <button onclick="scrollToSection('about')" class="block w-full text-left text-sm font-medium text-gray-700">About</button>
@@ -93,7 +93,7 @@
             </div>
             <div class="relative max-w-2xl mx-auto mb-10 group">
                 <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none"><i class="fa-solid fa-magnifying-glass text-gray-400 text-lg"></i></div>
-                <input type="text" readonly class="w-full pl-14 pr-14 py-4 rounded-full border border-gray-300 shadow-lg text-lg bg-white cursor-pointer hover:border-blue-400 transition" placeholder="e.g., What is the corporate tax rate in UAE for 2025?" onclick="switchView('app')">
+                <input type="text" readonly class="w-full pl-14 pr-14 py-4 rounded-full border border-gray-300 shadow-lg text-lg bg-white cursor-pointer hover:border-blue-400 transition" placeholder="e.g., What is the corporate tax rate in UK for 2025?" onclick="switchView('app')">
                 <button onclick="switchView('app')" class="absolute right-2 top-2 bg-blue-600 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-700 transition shadow-md"><i class="fa-solid fa-arrow-right"></i></button>
             </div>
         </section>
@@ -305,9 +305,9 @@
                             <div class="font-bold text-gray-900 text-sm mb-1 group-hover:text-blue-700">🇦🇪 UAE Corporate Tax</div>
                             <div class="text-xs text-gray-500">What are the registration deadlines?</div>
                         </button>
-                        <button onclick="setInput('Draft a letter to HMRC appealing a late filing penalty')" class="p-4 border rounded-xl hover:border-blue-400 hover:bg-blue-50 transition group">
-                            <div class="font-bold text-gray-900 text-sm mb-1 group-hover:text-blue-700">📝 Draft Appeal Letter</div>
-                            <div class="text-xs text-gray-500">Write a formal appeal to HMRC...</div>
+                        <button onclick="setInput('What is the Corporate Tax rate in UK?')" class="p-4 border rounded-xl hover:border-blue-400 hover:bg-blue-50 transition group">
+                            <div class="font-bold text-gray-900 text-sm mb-1 group-hover:text-blue-700">🇬🇧 UK Corporate Tax</div>
+                            <div class="text-xs text-gray-500">Check Main Rate & Small Profits Rate</div>
                         </button>
                     </div>
                 </div>
@@ -352,7 +352,6 @@
             if (viewName === 'app') {
                 landing.classList.add('hidden');
                 app.classList.remove('hidden');
-                // Close mobile menu if open
                 document.getElementById('mobile-menu').classList.add('hidden');
             } else {
                 app.classList.add('hidden');
@@ -361,26 +360,19 @@
         }
 
         function scrollToSection(id) {
-            // Ensure we are on landing view
             switchView('landing');
             const element = document.getElementById(id);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth' });
-            }
-            // Close mobile menu
+            if (element) element.scrollIntoView({ behavior: 'smooth' });
             document.getElementById('mobile-menu').classList.add('hidden');
         }
 
         function toggleMobileMenu() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
+            document.getElementById('mobile-menu').classList.toggle('hidden');
         }
 
-        // --- App Sidebar Logic (Mobile) ---
         function toggleAppSidebar() {
             const sidebar = document.getElementById('app-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
-            
             if (sidebar.classList.contains('-translate-x-full')) {
                 sidebar.classList.remove('-translate-x-full');
                 overlay.classList.remove('hidden');
@@ -399,7 +391,6 @@
         function setInput(text) {
             inputField.value = text;
             inputField.focus();
-            // Auto-resize
             inputField.style.height = 'auto';
             inputField.style.height = inputField.scrollHeight + 'px';
         }
@@ -414,20 +405,14 @@
         function sendMessage() {
             const text = inputField.value.trim();
             if (!text) return;
-
-            // Hide Welcome State on first message
             if (welcomeState) welcomeState.classList.add('hidden');
 
-            // 1. Add User Message
             addMessage(text, 'user');
             inputField.value = '';
             inputField.style.height = 'auto';
-
-            // 2. Show Loading
             loadingIndicator.classList.remove('hidden');
             scrollToBottom();
 
-            // 3. Simulate AI Response
             setTimeout(() => {
                 loadingIndicator.classList.add('hidden');
                 const aiResponse = generateMockResponse(text);
@@ -438,26 +423,10 @@
         function addMessage(text, sender) {
             const div = document.createElement('div');
             div.className = 'flex gap-4 animate-fade-in';
-            
             if (sender === 'user') {
-                div.innerHTML = `
-                    <div class="flex-1 flex justify-end">
-                        <div class="user-msg p-4 rounded-2xl rounded-tr-none text-sm leading-relaxed max-w-[90%] whitespace-pre-wrap">${escapeHtml(text)}</div>
-                    </div>
-                    <div class="w-8 h-8 rounded-full bg-gray-300 flex-shrink-0 flex items-center justify-center text-gray-600 text-xs font-bold">JD</div>
-                `;
+                div.innerHTML = `<div class="flex-1 flex justify-end"><div class="user-msg p-4 rounded-2xl rounded-tr-none text-sm leading-relaxed max-w-[90%] whitespace-pre-wrap">${escapeHtml(text)}</div></div><div class="w-8 h-8 rounded-full bg-gray-300 flex-shrink-0 flex items-center justify-center text-gray-600 text-xs font-bold">JD</div>`;
             } else {
-                div.innerHTML = `
-                    <div class="w-8 h-8 rounded-full bg-blue-600 flex-shrink-0 flex items-center justify-center text-white text-xs"><i class="fa-solid fa-paper-plane"></i></div>
-                    <div class="flex-1">
-                        <div class="ai-msg p-6 rounded-2xl rounded-tl-none shadow-sm text-sm leading-relaxed text-gray-800 prose prose-sm max-w-none">
-                            ${marked.parse(text)}
-                        </div>
-                        <div class="flex gap-2 mt-2 ml-1">
-                            <button class="text-xs text-gray-400 hover:text-blue-600"><i class="fa-regular fa-copy"></i> Copy</button>
-                        </div>
-                    </div>
-                `;
+                div.innerHTML = `<div class="w-8 h-8 rounded-full bg-blue-600 flex-shrink-0 flex items-center justify-center text-white text-xs"><i class="fa-solid fa-paper-plane"></i></div><div class="flex-1"><div class="ai-msg p-6 rounded-2xl rounded-tl-none shadow-sm text-sm leading-relaxed text-gray-800 prose prose-sm max-w-none">${marked.parse(text)}</div><div class="flex gap-2 mt-2 ml-1"><button class="text-xs text-gray-400 hover:text-blue-600"><i class="fa-regular fa-copy"></i> Copy</button></div></div>`;
             }
             messagesArea.appendChild(div);
             scrollToBottom();
@@ -468,29 +437,71 @@
             container.scrollTop = container.scrollHeight;
         }
 
+        // --- IMPROVED AI LOGIC FOR COUNTRY SPECIFICITY ---
         function generateMockResponse(query) {
-            // Simple keyword matching for demo
-            if (query.toLowerCase().includes('uae')) {
-                return `Based on the **Federal Decree-Law No. 47 of 2022**, here is the information regarding UAE Corporate Tax:
+            const q = query.toLowerCase();
 
-### Key Deadlines
-* **Registration:** Taxable persons must register prior to filing their first return. For many companies, the deadline was **May 31, 2025** (for licenses issued in Jan-Feb).
-* **Filing:** The tax return must be filed within **9 months** from the end of the relevant tax period.
+            // 1. UK LOGIC (Fixed for your issue)
+            if (q.includes('uk') || q.includes('united kingdom') || q.includes('britain')) {
+                return `Based on **Finance Act 2024** applicable for the 2025 financial year, here are the current UK Corporate Tax rates:
+
+### UK Corporate Tax Rates
+* **Main Rate:** **25%** for companies with profits exceeding **£250,000**.
+* **Small Profits Rate:** **19%** for companies with profits of **£50,000** or less.
+* **Marginal Relief:** Available for profits between £50,000 and £250,000 to bridge the gap between the two rates.
 
 ### Official Source
-> "Any Person who is a Taxable Person shall register for Corporate Tax with the Authority..." — *Article 51, Federal Decree-Law No. 47*
+> "The main rate of Corporation Tax is 25%... The small profits rate is 19%." — *HMRC Guidance (Gov.uk)*
 
-Would you like me to check the specific deadline for your license issuance date?`;
-            } else {
+Would you like me to calculate the marginal relief for a specific profit amount?`;
+            } 
+            
+            // 2. UAE LOGIC
+            else if (q.includes('uae') || q.includes('dubai') || q.includes('emirates')) {
+                return `Based on **Federal Decree-Law No. 47 of 2022**, here is the summary for UAE Corporate Tax:
+
+### Key Rates & Deadlines
+* **Rate:** **9%** on Taxable Income exceeding **AED 375,000**. (0% for income up to this threshold).
+* **Registration:** Taxable persons must register prior to filing.
+* **Filing Deadline:** 9 months from the end of the relevant tax period.
+
+### Official Source
+> "Any Person who is a Taxable Person shall register for Corporate Tax with the Authority..." — *Article 51, Federal Decree-Law No. 47*`;
+            }
+
+            // 3. US LOGIC
+            else if (q.includes('us') || q.includes('usa') || q.includes('america') || q.includes('irs')) {
+                return `Based on the **Internal Revenue Code (IRC)** for the 2025 tax year:
+
+### US Corporate Tax
+* **Federal Rate:** A flat rate of **21%** applies to C Corporations.
+* **State Taxes:** Varies by state (e.g., California 8.84%, Texas 0% but has Franchise Tax).
+* **Filing Deadline:** Generally April 15th for calendar year taxpayers.
+
+### Official Source
+> "The Tax Cuts and Jobs Act (TCJA) established a flat corporate income tax rate of 21%." — *IRS Publication 542*`;
+            }
+            
+            // 4. INDIA LOGIC
+            else if (q.includes('india')) {
+                 return `Based on the **Finance Act 2024** for AY 2025-26:
+
+### India Corporate Tax
+* **Domestic Companies:** 25% (plus surcharge/cess) if turnover < ₹400 Cr; otherwise 30%.
+* **Section 115BAA:** Option to pay tax at **22%** (plus 10% surcharge and 4% cess) if no exemptions are claimed.
+* **Foreign Companies:** 40% (plus applicable surcharge/cess).
+
+### Official Source
+> "Domestic companies can opt for concessional tax rates under section 115BAA..." — *Income Tax Department*`;
+            }
+
+            // 5. GENERIC FALLBACK
+            else {
                 return `I have analyzed your request regarding **"${query}"**.
 
-### Analysis
-Based on current 2025 regulations:
-1.  **Compliance:** This appears to fall under standard reporting requirements.
-2.  **Thresholds:** Please confirm if your gross receipts exceed the **$250,000** threshold for this specific form.
+To give you a cited, accurate answer, could you please specify the **jurisdiction** (e.g., UK, US, UAE, India)?
 
-### Recommendation
-I recommend gathering your **Q4 2024 financial statements** to verify eligibility. I can help you draft a checklist for this process if you wish.`;
+TaxPilot requires a specific country to pull from the official 2025 tax code database to avoid hallucinations.`;
             }
         }
 
@@ -500,10 +511,9 @@ I recommend gathering your **Q4 2024 financial statements** to verify eligibilit
 
         function resetChat() {
             messagesArea.innerHTML = '';
-            welcomeState.classList.remove('hidden');
+            if(welcomeState) welcomeState.classList.remove('hidden');
         }
 
-        // Auto-resize input
         inputField.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
