@@ -35,14 +35,12 @@
 
     <style>
         body { background-color: #F5F5F7; color: #1D1D1F; -webkit-font-smoothing: antialiased; }
-        
-        /* Premium Gradients & Glass */
         .aurora-bg { background: radial-gradient(circle at 50% 0%, rgba(0, 113, 227, 0.08) 0%, rgba(255, 255, 255, 0) 50%); }
-        .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0,0,0,0.05); }
         
         /* Chat Aesthetics */
         .user-bubble { background: #0071e3; color: white; border-radius: 18px 18px 4px 18px; box-shadow: 0 2px 4px rgba(0,113,227,0.2); }
-        .ai-bubble { background: #FFFFFF; color: #000; border-radius: 18px 18px 18px 4px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .ai-bubble { background: #FFFFFF; color: #000; border-radius: 18px 18px 18px 4px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
         
         /* Formatting inside Chat */
         .prose strong { color: #1d1d1f; font-weight: 600; }
@@ -61,6 +59,10 @@
         /* Typewriter Cursor */
         .cursor { display: inline-block; width: 2px; height: 1.2em; background-color: #ccc; margin-left: 2px; animation: blink 1s step-end infinite; vertical-align: middle; }
         @keyframes blink { 50% { opacity: 0; } }
+        
+        /* Checkbox */
+        .reminder-check { appearance: none; border: 1.5px solid #C7C7CC; border-radius: 50%; width: 22px; height: 22px; transition: all 0.2s; }
+        .reminder-check:checked { background-color: #0071e3; border-color: #0071e3; background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e"); }
         
         /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
@@ -97,11 +99,9 @@
 
         <section class="pt-44 pb-20 px-6 text-center max-w-5xl mx-auto animate-fade-in">
             <span class="text-apple-blue font-semibold text-xs tracking-widest uppercase mb-6 block bg-blue-50 inline-block px-3 py-1 rounded-full">New for 2025</span>
-            
             <h1 class="text-6xl md:text-7xl font-semibold tracking-tight mb-6 text-[#1d1d1f] leading-[1.05]">
                 Cut Tax Research Time <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">by 90%. Guaranteed.</span>
             </h1>
-            
             <p class="text-xl md:text-2xl text-gray-500 font-light mb-10 max-w-2xl mx-auto leading-relaxed">
                 The only AI copilot that <span class="text-gray-900 font-normal">refuses to guess.</span> <br>
                 Answers anchored to the 2025 Tax Code. Zero hallucinations.
@@ -152,7 +152,7 @@
                     <div class="apple-card p-8 rounded-[32px] shadow-sm border border-gray-100 h-full">
                         <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 text-apple-blue text-xl"><i class="fa-solid fa-scale-balanced"></i></div>
                         <h3 class="text-xl font-semibold mb-2">Audit-Proof Answers</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed">We retrieve the exact clause from the 2025 tax code and force the AI to cite it. If we can't cite it, we don't say it.</p>
+                        <p class="text-gray-500 text-sm leading-relaxed">We don't just generate text. We retrieve the exact clause from the 2025 tax code and force the AI to cite it.</p>
                     </div>
                     <div class="apple-card p-8 rounded-[32px] shadow-sm border border-gray-100 h-full">
                         <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center mb-6 text-green-600 text-xl"><i class="fa-solid fa-earth-americas"></i></div>
@@ -181,29 +181,6 @@
                         <h3 class="text-xl font-semibold mb-2">Bank-Grade Security</h3>
                         <p class="text-gray-500 text-sm leading-relaxed">AES-256 encryption. Zero-retention policy means we never train our models on your client data.</p>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="security" class="py-24 px-6 bg-white border-t border-gray-100">
-            <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-12">
-                <div class="flex-1">
-                    <div class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold mb-4">SECURITY FIRST</div>
-                    <h2 class="text-3xl font-semibold mb-4 text-[#1d1d1f]">Data never leaves your control.</h2>
-                    <p class="text-gray-500 mb-6 leading-relaxed">Unlike free tools, TaxPilot is built for the enterprise. We employ a strict <strong>Zero-Retention Policy</strong>.</p>
-                    <ul class="space-y-3 text-sm text-gray-700">
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-green-500"></i> SOC-2 Type II Certified</li>
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-green-500"></i> ISO 27001 Compliant</li>
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-green-500"></i> GDPR & CCPA Ready</li>
-                    </ul>
-                </div>
-                <div class="flex-1 bg-gray-50 rounded-3xl p-8 border border-gray-100 shadow-sm">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center"><i class="fa-solid fa-lock text-gray-400"></i></div>
-                        <div><div class="text-sm font-bold">End-to-End Encryption</div><div class="text-xs text-gray-400">Status: Active</div></div>
-                    </div>
-                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden"><div class="h-full bg-green-500 w-full animate-pulse-slow"></div></div>
-                    <p class="text-xs text-gray-400 mt-4 font-mono">256-bit AES Encryption verified.</p>
                 </div>
             </div>
         </section>
@@ -370,10 +347,10 @@
             }, 1000);
         }
 
-        // --- FIXED AI LOGIC ("THE BRAIN v6") ---
+        // --- INTELLIGENT BRAIN V7 (Fixing the Logic Gap) ---
         const knowledgeBase = {
-            'malaysia': { rate: '24%', sme: '15-17%', source: 'LHDN Official Portal' },
-            'kuala lumpur': { rate: '24%', sme: '15-17%', source: 'LHDN Official Portal' },
+            'malaysia': { rate: '24%', sme: '15-24%', source: 'LHDN Official Portal' },
+            'kuala lumpur': { rate: '24%', sme: '15-24%', source: 'LHDN Official Portal' },
             'uae': { rate: '9% (Standard) / 0% (Free Zone)', source: 'FTA Decree-Law No. 47' },
             'dubai': { rate: '9% (Standard) / 0% (Free Zone)', source: 'FTA Decree-Law No. 47' },
             'uk': { rate: '25% (Main) / 19% (Small Profits)', source: 'HMRC Finance Act 2024' },
@@ -387,25 +364,35 @@
             'brunei': { rate: '18.5% (Standard Corporate Tax)', source: 'Ministry of Finance and Economy' }
         };
 
+        const conceptBase = {
+            'transfer pricing': 'Transfer Pricing regulations ensure transactions between related parties are conducted at arm\'s length prices.',
+            'vat': 'Value Added Tax (VAT) is a consumption tax placed on a product whenever value is added at each stage of the supply chain.',
+            'gst': 'Goods and Services Tax (GST) is a value-added tax levied on most goods and services sold for domestic consumption.',
+            'audit': 'A tax audit is an examination of your tax return by the IRS or other tax authority to verify that your income and deductions are accurate.',
+            'detail': 'To provide a detailed analysis, I need to anchor my response to a specific legal jurisdiction.',
+            'explain': 'I can explain that concept, but tax rules vary significantly by border.',
+            'hello': 'Hello! I am TaxPilot. I can help you research global tax rates, filing deadlines, and compliance rules for 2025. Try asking "What is the tax rate in Singapore?"'
+        };
+
         function generateResponse(query) {
             const q = query.toLowerCase();
             
-            // 1. Find matched country in our knowledge base
-            const matchedKey = Object.keys(knowledgeBase).find(key => q.includes(key));
-
-            if (matchedKey) {
-                const data = knowledgeBase[matchedKey];
-                const countryName = matchedKey.charAt(0).toUpperCase() + matchedKey.slice(1);
-                
+            // 1. Check for Country Match (Priority)
+            const matchedCountry = Object.keys(knowledgeBase).find(key => q.includes(key));
+            if (matchedCountry) {
+                const data = knowledgeBase[matchedCountry];
+                const countryName = matchedCountry.charAt(0).toUpperCase() + matchedCountry.slice(1);
                 return `**${countryName} Corporate Tax (2025 Data)**\n\nBased on official sources:\n\n* **Standard Rate:** **${data.rate}**\n* **SME/Special Rates:** ${data.sme || 'Not applicable/Varies by sector'}\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=${data.source.toLowerCase().replace(/ /g,'')}.com"> Source: ${data.source} [Verified]</a>`;
             }
 
-            // 2. Generic Fallback (Echoes the noun to sound smart)
-            // Extract the last noun-like word if possible to make it sound specific
-            const words = query.split(' ');
-            const topic = words[words.length - 1].replace('?', '');
-            
-            return `**Researching: ${topic}**\n\nI am analyzing the global tax database for 2025 regarding "${topic}".\n\n* **Status:** Retrieving latest circulars...\n* **Action:** Please specify a Country (e.g., Malaysia, UAE, UK) for a verified citation.\n\n<div class="source-chip"><i class="fa-solid fa-circle-notch fa-spin"></i> Indexing Global Tax Laws...</div>`;
+            // 2. Check for Concept Match (Secondary)
+            const matchedConcept = Object.keys(conceptBase).find(key => q.includes(key));
+            if (matchedConcept) {
+                return `**Concept: ${matchedConcept.charAt(0).toUpperCase() + matchedConcept.slice(1)}**\n\n${conceptBase[matchedConcept]}\n\n* **Action:** To give you the specific 2025 thresholds or rates, please specify the **Country** you are working with (e.g., "Transfer Pricing in UK").\n\n<div class="source-chip"><img src="https://www.google.com/s2/favicons?domain=oecd.org"> Source: OECD Guidelines / International Standards</div>`;
+            }
+
+            // 3. Fallback (If no country and no concept)
+            return `**I am listening.**\n\nTo ensure 100% accuracy and avoid hallucinations, TaxPilot requires a **Jurisdiction** (Country) or a specific **Tax Concept** to retrieve verified citations.\n\n*Try asking: "What is the VAT rate in Dubai?" or "Explain Transfer Pricing."*`;
         }
     </script>
 </body>
