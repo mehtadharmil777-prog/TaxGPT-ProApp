@@ -102,7 +102,7 @@
             
             <div class="relative max-w-2xl mx-auto group cursor-pointer" onclick="authManager.checkAuthAndRedirect()">
                 <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 blur-[60px] opacity-20 rounded-full group-hover:opacity-30 transition duration-500"></div>
-                <div class="relative bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-2xl border border-white/50 ring-1 ring-black/5">
+                <div class="relative bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-2xl border border-white/50 ring-1 ring-black/5 transform transition hover:scale-[1.01]">
                     <div class="flex items-center px-6 py-5 bg-white/50 rounded-xl">
                         <i class="fa-solid fa-magnifying-glass text-gray-400 mr-4 text-lg"></i>
                         <span id="typewriter-text" class="text-gray-500 text-lg font-light"></span><span class="cursor"></span>
@@ -238,6 +238,7 @@
                 <input type="password" id="auth-password" placeholder="Password" class="auth-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all">
                 <button onclick="authManager.showProfileCreation()" class="w-full py-3 bg-apple-blue text-white rounded-xl font-bold shadow-lg hover:bg-[#0077ED] transition transform active:scale-95" id="auth-action-btn">Continue</button>
             </div>
+            <button onclick="authManager.continueAsGuest()" class="w-full py-3 mt-3 bg-white border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition">Continue as Guest</button>
             <div class="text-center mt-6">
                 <p class="text-sm text-gray-500">
                     <span id="auth-footer-text">New to TaxPilot?</span>
@@ -264,13 +265,17 @@
                 <button onclick="authManager.logout()" class="text-xs text-gray-400 hover:text-gray-600">Sign Out</button>
             </div>
             <div class="px-3 space-y-1">
-                <button onclick="appManager.switchTab('chat')" id="nav-chat" class="w-full text-left px-3 py-2 rounded-lg bg-white shadow-sm flex items-center gap-3 text-sm font-medium text-apple-blue transition"><i class="fa-solid fa-message w-5"></i> Assistant</button>
-                <button onclick="appManager.switchTab('reminders')" id="nav-reminders" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-solid fa-list-check w-5"></i> Reminders</button>
-                <button onclick="appManager.switchTab('notes')" id="nav-notes" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-regular fa-note-sticky w-5"></i> Notes</button>
+                <button onclick="switchAppTab('chat')" id="nav-chat" class="w-full text-left px-3 py-2 rounded-lg bg-white shadow-sm flex items-center gap-3 text-sm font-medium text-apple-blue transition"><i class="fa-solid fa-message w-5"></i> Assistant</button>
+                <button onclick="switchAppTab('reminders')" id="nav-reminders" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-solid fa-list-check w-5"></i> Reminders</button>
+                <button onclick="switchAppTab('notes')" id="nav-notes" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-regular fa-note-sticky w-5"></i> Notes</button>
             </div>
             <div class="mt-8 px-4">
                 <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">Recent Research</div>
-                <div id="search-history" class="space-y-1"></div>
+                <div class="space-y-1">
+                    <div class="px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-md cursor-pointer truncate">UK Corp Tax 2025</div>
+                    <div class="px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-md cursor-pointer truncate">UAE VAT Threshold</div>
+                    <div class="px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-md cursor-pointer truncate">Malaysia Income Tax</div>
+                </div>
             </div>
         </aside>
 
@@ -307,7 +312,7 @@
                     <div class="grid grid-cols-2 gap-3"><div class="bg-white p-3 rounded-xl shadow-sm cursor-pointer hover:bg-gray-50"><div class="flex justify-between items-start mb-2"><div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center"><i class="fa-solid fa-calendar-day"></i></div><span class="text-xl font-bold text-gray-800">2</span></div><span class="text-gray-500 font-medium text-sm">Today</span></div></div>
                 </div>
                 <div class="flex-1 p-8 bg-white overflow-y-auto">
-                    <div class="flex justify-between items-center mb-6"><h1 class="text-3xl font-bold text-apple-blue">Today</h1><button class="md:hidden text-gray-500" onclick="appManager.switchTab('chat')">Back</button></div>
+                    <div class="flex justify-between items-center mb-6"><h1 class="text-3xl font-bold text-apple-blue">Today</h1><button class="md:hidden text-gray-500" onclick="switchAppTab('chat')">Back</button></div>
                     <div class="space-y-0"><div class="flex items-start gap-4 py-3 border-b border-gray-100 reminder-list-item cursor-pointer"><input type="checkbox" class="reminder-check mt-1"><div><div class="text-[15px] text-gray-800">Review UAE Corp Tax Registration</div><div class="text-xs text-red-500 mt-1">Due 5:00 PM</div></div></div><div class="py-3 text-gray-400 text-sm cursor-text hover:text-gray-600 transition"><i class="fa-solid fa-plus mr-2"></i> New Reminder</div></div>
                 </div>
             </div>
@@ -318,7 +323,7 @@
                     <div class="overflow-y-auto"><div class="p-4 border-b border-gray-100 bg-[#FFF8ea] cursor-pointer"><h3 class="font-bold text-sm text-gray-800 mb-1">UK VAT Threshold Research</h3><p class="text-xs text-gray-500 line-clamp-2">Meeting notes regarding the new threshold changes for 2025...</p><span class="text-[10px] text-gray-400 mt-2 block">10:42 AM</span></div></div>
                 </div>
                 <div class="flex-1 bg-white p-10 overflow-y-auto">
-                     <div class="flex justify-between items-center mb-6 md:hidden"><button class="text-gray-500" onclick="appManager.switchTab('chat')">Back</button></div>
+                     <div class="flex justify-between items-center mb-6 md:hidden"><button class="text-gray-500" onclick="switchAppTab('chat')">Back</button></div>
                     <div class="text-gray-400 text-xs text-center mb-6">Today at 10:42 AM</div>
                     <h1 class="text-2xl font-bold text-gray-900 mb-4">UK VAT Threshold Research</h1>
                     <div class="prose prose-stone text-gray-700"><p>Research conducted using TaxPilot AI.</p><ul><li>Current threshold confirmed at £90,000 (frozen).</li></ul></div>
@@ -362,6 +367,12 @@
                 // In a real app we'd validate email here. For demo, we simulate success.
                 document.getElementById('auth-view').classList.add('hidden');
                 document.getElementById('profile-view').classList.remove('hidden');
+            },
+            continueAsGuest() {
+                 const guestUser = { name: "Guest User", initials: "G" };
+                 localStorage.setItem('taxpilot_user', JSON.stringify(guestUser));
+                 this.updateUIForUser(guestUser);
+                 appManager.showApp();
             },
             completeLogin() {
                 const name = document.getElementById('user-name-input').value;
@@ -487,9 +498,11 @@
             if(q.includes('transfer pricing')) return `**Transfer Pricing (General Principles)**\n\nEnsures transactions between related parties are at **arm's length prices**.\n\n* ✅ **Standard:** Follows OECD Guidelines.\n* 📄 **Docs:** Master File & Local File required.\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=oecd.org"> Source: OECD Guidelines</a>`;
             if(q.includes('pillar 2')) return `**OECD Pillar Two (Global Minimum Tax)**\n\n* 🌍 **Rate:** Minimum effective tax of **15%**.\n* 🏢 **Scope:** MNEs with revenue > €750M.\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=oecd.org"> Source: OECD Inclusive Framework</a>`;
 
-            // 4. UNIVERSAL FALLBACK
+            // 4. UNIVERSAL FALLBACK (Safety Net)
+            // Use regex to find any capitalized word that looks like a country
             const likelyCountry = q.match(/\b[A-Z][a-z]+\b/) || "the requested jurisdiction";
             const countryName = Array.isArray(likelyCountry) ? likelyCountry[0] : likelyCountry;
+            
             return `**Researching: ${countryName} Tax Code (2025)**\n\nI am analyzing the official gazette for **${countryName}**...\n\n* **Standard Rate:** [Retrieving latest 2025 rate...]\n* **Registration Threshold:** [Verifying with local authority...]\n\n<div class="source-chip"><i class="fa-solid fa-circle-notch fa-spin"></i> Connecting to Global Tax Database...</div>`;
         }
 
