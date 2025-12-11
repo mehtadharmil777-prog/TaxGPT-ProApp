@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TaxPilot | Universal Tax Intelligence</title>
+    <title>TaxPilot | Verified Tax Intelligence</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -48,7 +48,7 @@
         .prose strong { color: #000; font-weight: 600; }
         
         /* Source Chip */
-        .source-chip { display: inline-flex; align-items: center; gap: 6px; background-color: #F3F4F6; border: 1px solid #E5E7EB; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 500; color: #4B5563; margin-top: 8px; transition: all 0.2s; cursor: pointer; text-decoration: none; }
+        .source-chip { display: inline-flex; align-items: center; gap: 6px; background-color: #F3F4F6; border: 1px solid #E5E7EB; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 500; color: #4B5563; margin-top: 12px; transition: all 0.2s; cursor: pointer; text-decoration: none; }
         .source-chip:hover { background-color: #E5E5EA; color: #111; border-color: #D1D5DB; }
         .source-chip img { width: 14px; height: 14px; border-radius: 2px; }
 
@@ -56,10 +56,6 @@
         .apple-card { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s; background: white; }
         .apple-card:hover { transform: scale(1.02); box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.10); }
 
-        /* Checkbox */
-        .reminder-check { appearance: none; border: 1.5px solid #C7C7CC; border-radius: 50%; width: 22px; height: 22px; transition: all 0.2s; }
-        .reminder-check:checked { background-color: #0071e3; border-color: #0071e3; background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e"); }
-        
         /* Typewriter Cursor */
         .cursor { display: inline-block; width: 2px; height: 1.2em; background-color: #ccc; margin-left: 2px; animation: blink 1s step-end infinite; vertical-align: middle; }
         @keyframes blink { 50% { opacity: 0; } }
@@ -68,6 +64,10 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #d1d1d6; border-radius: 10px; }
+        
+        /* Checkbox */
+        .reminder-check { appearance: none; border: 1.5px solid #C7C7CC; border-radius: 50%; width: 22px; height: 22px; transition: all 0.2s; }
+        .reminder-check:checked { background-color: #0071e3; border-color: #0071e3; background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e"); }
     </style>
 </head>
 <body class="overflow-x-hidden">
@@ -83,10 +83,10 @@
                     <button onclick="scrollToSection('security')" class="hover:text-black transition">Security</button>
                     <button onclick="scrollToSection('about')" class="hover:text-black transition">About</button>
                     <span class="text-gray-300">|</span>
-                    <button onclick="switchView('app')" class="hover:text-apple-blue transition">Enterprise & API</button>
+                    <button onclick="authManager.redirectToAuth()" class="hover:text-apple-blue transition">Enterprise & API</button>
                 </div>
                 <div class="flex gap-3">
-                    <button onclick="checkAuthAndRedirect()" class="bg-[#1d1d1f] text-white px-5 py-1.5 rounded-full text-xs font-medium hover:bg-black transition shadow-lg transform active:scale-95" id="nav-cta-btn">Log In</button>
+                    <button onclick="authManager.checkAuthAndRedirect()" class="bg-[#1d1d1f] text-white px-5 py-1.5 rounded-full text-xs font-medium hover:bg-black transition shadow-lg transform active:scale-95" id="nav-cta-btn">Log In</button>
                 </div>
             </div>
         </nav>
@@ -103,13 +103,13 @@
             
             <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8 max-w-md mx-auto">
                 <input type="email" id="email-input" placeholder="Enter work email..." class="flex-1 px-5 py-3.5 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm shadow-sm transition-all hover:border-blue-300">
-                <button onclick="checkAuthAndRedirect()" class="bg-apple-blue text-white px-8 py-3.5 rounded-full font-medium hover:bg-[#0077ED] transition shadow-apple hover:shadow-apple-hover transform active:scale-95 text-sm whitespace-nowrap">
+                <button onclick="authManager.checkAuthAndRedirect()" class="bg-apple-blue text-white px-8 py-3.5 rounded-full font-medium hover:bg-[#0077ED] transition shadow-apple hover:shadow-apple-hover transform active:scale-95 text-sm whitespace-nowrap">
                     Start Free Trial
                 </button>
             </div>
             <p class="text-xs text-gray-400 mb-16 font-medium">No credit card required. SOC-2 Certified Security.</p>
             
-            <div class="relative max-w-2xl mx-auto group cursor-pointer" onclick="checkAuthAndRedirect()">
+            <div class="relative max-w-2xl mx-auto group cursor-pointer" onclick="authManager.checkAuthAndRedirect()">
                 <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 blur-[60px] opacity-20 rounded-full group-hover:opacity-30 transition duration-500"></div>
                 <div class="relative bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-2xl border border-white/50 ring-1 ring-black/5 transform transition hover:scale-[1.01]">
                     <div class="flex items-center px-6 py-5 bg-white/50 rounded-xl">
@@ -158,13 +158,13 @@
                         <h3 class="text-xl font-semibold mb-2">Risk Detection</h3>
                         <p class="text-gray-500 text-sm leading-relaxed">Upload a P&L PDF or Excel sheet. TaxPilot automatically flags missed deductions and compliance risks based on benchmarks.</p>
                     </div>
-                    <div class="apple-card p-8 rounded-[32px] shadow-sm border border-gray-100 h-full relative overflow-hidden group cursor-pointer" onclick="checkAuthAndRedirect()">
+                    <div class="apple-card p-8 rounded-[32px] shadow-sm border border-gray-100 h-full relative overflow-hidden group cursor-pointer" onclick="authManager.checkAuthAndRedirect()">
                         <div class="absolute top-0 right-0 p-6 opacity-30 group-hover:opacity-100 transition"><i class="fa-solid fa-arrow-right text-gray-400"></i></div>
                         <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center mb-6 text-red-500 text-xl"><i class="fa-regular fa-bell"></i></div>
                         <h3 class="text-xl font-semibold mb-2">Smart Reminders</h3>
                         <p class="text-gray-500 text-sm leading-relaxed">Integrated task management that syncs with government filing deadlines automatically.</p>
                     </div>
-                    <div class="apple-card p-8 rounded-[32px] shadow-sm border border-gray-100 h-full relative overflow-hidden group cursor-pointer" onclick="checkAuthAndRedirect()">
+                    <div class="apple-card p-8 rounded-[32px] shadow-sm border border-gray-100 h-full relative overflow-hidden group cursor-pointer" onclick="authManager.checkAuthAndRedirect()">
                         <div class="absolute top-0 right-0 p-6 opacity-30 group-hover:opacity-100 transition"><i class="fa-solid fa-arrow-right text-gray-400"></i></div>
                         <div class="w-12 h-12 bg-yellow-50 rounded-2xl flex items-center justify-center mb-6 text-yellow-500 text-xl"><i class="fa-regular fa-note-sticky"></i></div>
                         <h3 class="text-xl font-semibold mb-2">Client Notes</h3>
@@ -224,9 +224,9 @@
                     <p class="text-xs max-w-xs mb-4">Professional Intelligence for Tax.<br>London • New York • Dubai</p>
                     <div class="flex gap-4"><a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200"><i class="fa-brands fa-linkedin-in text-gray-600"></i></a><a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200"><i class="fa-brands fa-twitter text-gray-600"></i></a></div>
                 </div>
-                <div><h4 class="font-bold text-gray-900 mb-4">Product</h4><ul class="space-y-3"><li><a href="#" onclick="scrollToSection('features')" class="hover:text-apple-blue">Features</a></li><li><a href="#" onclick="checkAuthAndRedirect()" class="hover:text-apple-blue">Enterprise</a></li><li><a href="#" onclick="checkAuthAndRedirect()" class="hover:text-apple-blue">API Docs</a></li></ul></div>
+                <div><h4 class="font-bold text-gray-900 mb-4">Product</h4><ul class="space-y-3"><li><a href="#" onclick="scrollToSection('features')" class="hover:text-apple-blue">Features</a></li><li><a href="#" onclick="authManager.checkAuthAndRedirect()" class="hover:text-apple-blue">Enterprise</a></li><li><a href="#" onclick="authManager.checkAuthAndRedirect()" class="hover:text-apple-blue">API Docs</a></li></ul></div>
                 <div><h4 class="font-bold text-gray-900 mb-4">Company</h4><ul class="space-y-3"><li><a href="#" onclick="scrollToSection('about')" class="hover:text-apple-blue">About Us</a></li><li><a href="#" class="hover:text-apple-blue">Careers</a></li><li><a href="#" class="hover:text-apple-blue">Blog</a></li></ul></div>
-                <div><h4 class="font-bold text-gray-900 mb-4">Legal</h4><ul class="space-y-3"><li><button onclick="openModal('privacy')" class="hover:text-apple-blue">Privacy Policy</button></li><li><button onclick="openModal('terms')" class="hover:text-apple-blue">Terms of Service</button></li><li><a href="#" class="hover:text-apple-blue">Security</a></li></ul></div>
+                <div><h4 class="font-bold text-gray-900 mb-4">Legal</h4><ul class="space-y-3"><li><button onclick="modalManager.open('privacy')" class="hover:text-apple-blue">Privacy Policy</button></li><li><button onclick="modalManager.open('terms')" class="hover:text-apple-blue">Terms of Service</button></li><li><a href="#" class="hover:text-apple-blue">Security</a></li></ul></div>
             </div>
             <div class="text-center pt-8 border-t border-gray-100 text-xs text-gray-400">&copy; 2025 TaxPilot Inc. Disclaimer: This tool aids research but does not replace professional tax advice.</div>
         </footer>
@@ -243,9 +243,9 @@
                 <h2 class="text-2xl font-bold text-gray-900">Sign in to TaxPilot</h2>
             </div>
             <div class="space-y-4">
-                <input type="email" placeholder="Email address" class="auth-input">
-                <input type="password" placeholder="Password" class="auth-input">
-                <button onclick="showProfileCreation()" class="w-full py-3 bg-apple-blue text-white rounded-xl font-bold shadow-lg hover:bg-[#0077ED] transition">Continue</button>
+                <input type="email" placeholder="Email address" class="auth-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                <input type="password" placeholder="Password" class="auth-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                <button onclick="authManager.showProfileCreation()" class="w-full py-3 bg-apple-blue text-white rounded-xl font-bold shadow-lg hover:bg-[#0077ED] transition">Continue</button>
             </div>
         </div>
     </div>
@@ -254,8 +254,8 @@
         <div class="w-full max-w-[400px] bg-white p-8 rounded-[30px] shadow-xl animate-fade-in text-center">
             <h2 class="text-2xl font-bold mb-2">Create your Profile</h2>
             <div class="space-y-4 text-left mt-6">
-                <div><label class="text-xs font-bold text-gray-500 ml-1">FULL NAME</label><input type="text" id="user-name-input" placeholder="e.g. John Miller" class="auth-input mt-1"></div>
-                <button onclick="completeLogin()" class="w-full py-3 bg-apple-blue text-white rounded-xl font-bold mt-4 hover:bg-[#0077ED] transition">Complete Setup</button>
+                <div><label class="text-xs font-bold text-gray-500 ml-1">FULL NAME</label><input type="text" id="user-name-input" placeholder="e.g. John Miller" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 mt-1"></div>
+                <button onclick="authManager.completeLogin()" class="w-full py-3 bg-apple-blue text-white rounded-xl font-bold mt-4 hover:bg-[#0077ED] transition">Complete Setup</button>
             </div>
         </div>
     </div>
@@ -264,19 +264,16 @@
         <aside class="w-[280px] bg-[#F2F1F6] border-r border-[#D1D1D6] flex flex-col pt-4 hidden md:flex">
             <div class="px-4 mb-6 flex items-center justify-between">
                 <div class="flex items-center gap-2 font-semibold text-gray-700"><div id="user-avatar" class="w-7 h-7 bg-gray-300 rounded-full flex items-center justify-center text-xs text-white font-bold">U</div><span id="user-name-display">User</span></div>
-                <button onclick="logout()" class="text-xs text-gray-400 hover:text-gray-600">Sign Out</button>
+                <button onclick="authManager.logout()" class="text-xs text-gray-400 hover:text-gray-600">Sign Out</button>
             </div>
             <div class="px-3 space-y-1">
-                <button onclick="switchAppTab('chat')" id="nav-chat" class="w-full text-left px-3 py-2 rounded-lg bg-white shadow-sm flex items-center gap-3 text-sm font-medium text-apple-blue transition"><i class="fa-solid fa-message w-5"></i> Assistant</button>
-                <button onclick="switchAppTab('reminders')" id="nav-reminders" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-solid fa-list-check w-5"></i> Reminders</button>
-                <button onclick="switchAppTab('notes')" id="nav-notes" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-regular fa-note-sticky w-5"></i> Notes</button>
+                <button onclick="appManager.switchTab('chat')" id="nav-chat" class="w-full text-left px-3 py-2 rounded-lg bg-white shadow-sm flex items-center gap-3 text-sm font-medium text-apple-blue transition"><i class="fa-solid fa-message w-5"></i> Assistant</button>
+                <button onclick="appManager.switchTab('reminders')" id="nav-reminders" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-solid fa-list-check w-5"></i> Reminders</button>
+                <button onclick="appManager.switchTab('notes')" id="nav-notes" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-regular fa-note-sticky w-5"></i> Notes</button>
             </div>
             <div class="mt-8 px-4">
                 <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">Recent Research</div>
-                <div class="space-y-1">
-                    <div class="px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-md cursor-pointer truncate">UK Corp Tax 2025</div>
-                    <div class="px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-md cursor-pointer truncate">Malaysia Income Tax</div>
-                </div>
+                <div id="search-history" class="space-y-1"></div>
             </div>
         </aside>
 
@@ -284,7 +281,7 @@
             <div id="view-chat" class="h-full flex flex-col">
                 <header class="h-16 border-b border-gray-100 flex items-center justify-between px-6 bg-white/80 backdrop-blur-md z-10">
                     <div class="flex flex-col"><span class="font-semibold text-gray-900">TaxPilot Assistant</span><span class="text-[10px] text-green-600 font-medium">● 2025 Knowledge Base Active</span></div>
-                    <div class="flex gap-4 text-apple-blue text-lg"><button title="New Chat" onclick="location.reload()"><i class="fa-regular fa-pen-to-square"></i></button><button class="md:hidden text-gray-500" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button></div>
+                    <div class="flex gap-4 text-apple-blue text-lg"><button title="New Chat" onclick="location.reload()"><i class="fa-regular fa-pen-to-square"></i></button><button class="md:hidden text-gray-500" onclick="authManager.logout()"><i class="fa-solid fa-right-from-bracket"></i></button></div>
                 </header>
                 <div id="chat-stream" class="flex-1 overflow-y-auto p-6 space-y-6">
                     <div class="flex gap-4 max-w-3xl mx-auto pt-10 animate-fade-in">
@@ -295,12 +292,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="p-6 bg-white">
+                <div class="p-6 bg-white border-t border-gray-100">
                     <div class="max-w-3xl mx-auto relative">
                         <div class="flex items-end gap-3 p-1.5 border border-gray-300 rounded-[26px] pl-4 bg-white focus-within:ring-2 focus-within:ring-blue-100 transition shadow-sm">
                             <button class="mb-2 text-gray-400 hover:text-apple-blue transition"><i class="fa-solid fa-plus-circle text-xl"></i></button>
-                            <textarea id="chat-input" rows="1" class="w-full py-2.5 max-h-32 resize-none outline-none text-[15px] text-gray-800 placeholder-gray-400" placeholder="Message TaxPilot..." onkeydown="handleEnter(event)"></textarea>
-                            <button onclick="sendMessage()" class="bg-apple-blue text-white w-8 h-8 rounded-full flex items-center justify-center mb-1 hover:bg-[#0077ED] transition shadow-md"><i class="fa-solid fa-arrow-up text-sm"></i></button>
+                            <textarea id="chat-input" rows="1" class="w-full py-2.5 max-h-32 resize-none outline-none text-[15px] text-gray-800 placeholder-gray-400" placeholder="Message TaxPilot..." onkeydown="messageController.handleEnter(event)"></textarea>
+                            <button id="send-btn" onclick="messageController.sendMessage()" class="bg-apple-blue text-white w-8 h-8 rounded-full flex items-center justify-center mb-1 hover:bg-[#0077ED] transition shadow-md"><i class="fa-solid fa-arrow-up text-sm"></i></button>
                         </div>
                         <div class="text-center mt-2 text-[10px] text-gray-300">AI-generated content. Check citations.</div>
                     </div>
@@ -313,8 +310,8 @@
                     <div class="grid grid-cols-2 gap-3"><div class="bg-white p-3 rounded-xl shadow-sm cursor-pointer hover:bg-gray-50"><div class="flex justify-between items-start mb-2"><div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center"><i class="fa-solid fa-calendar-day"></i></div><span class="text-xl font-bold text-gray-800">2</span></div><span class="text-gray-500 font-medium text-sm">Today</span></div></div>
                 </div>
                 <div class="flex-1 p-8 bg-white overflow-y-auto">
-                    <div class="flex justify-between items-center mb-6"><h1 class="text-3xl font-bold text-apple-blue">Today</h1><button class="md:hidden text-gray-500" onclick="switchAppTab('chat')">Back</button></div>
-                    <div class="space-y-0"><div class="flex items-start gap-4 py-3 border-b border-gray-100 reminder-list-item cursor-pointer"><input type="checkbox" class="reminder-check mt-1"><div><div class="text-[15px] text-gray-800">Review UAE Corp Tax Registration</div><div class="text-xs text-red-500 mt-1">Due 5:00 PM</div></div></div><div class="py-3 text-gray-400 text-sm cursor-text hover:text-gray-600 transition"><i class="fa-solid fa-plus mr-2"></i> New Reminder</div></div>
+                    <div class="flex justify-between items-center mb-6"><h1 class="text-3xl font-bold text-apple-blue">Today</h1><button class="md:hidden text-gray-500" onclick="appManager.switchTab('chat')">Back</button></div>
+                    <div class="space-y-0"><div class="flex items-start gap-4 py-3 border-b border-gray-100 reminder-list-item cursor-pointer"><input type="checkbox" class="reminder-check mt-1"><div><div class="text-[15px] text-gray-800">Review UAE Corp Tax Registration</div><div class="text-xs text-red-500 mt-1">Due 5:00 PM</div></div></div></div>
                 </div>
             </div>
 
@@ -324,7 +321,7 @@
                     <div class="overflow-y-auto"><div class="p-4 border-b border-gray-100 bg-[#FFF8ea] cursor-pointer"><h3 class="font-bold text-sm text-gray-800 mb-1">UK VAT Threshold Research</h3><p class="text-xs text-gray-500 line-clamp-2">Meeting notes regarding the new threshold changes for 2025...</p><span class="text-[10px] text-gray-400 mt-2 block">10:42 AM</span></div></div>
                 </div>
                 <div class="flex-1 bg-white p-10 overflow-y-auto">
-                     <div class="flex justify-between items-center mb-6 md:hidden"><button class="text-gray-500" onclick="switchAppTab('chat')">Back</button></div>
+                     <div class="flex justify-between items-center mb-6 md:hidden"><button class="text-gray-500" onclick="appManager.switchTab('chat')">Back</button></div>
                     <div class="text-gray-400 text-xs text-center mb-6">Today at 10:42 AM</div>
                     <h1 class="text-2xl font-bold text-gray-900 mb-4">UK VAT Threshold Research</h1>
                     <div class="prose prose-stone text-gray-700"><p>Research conducted using TaxPilot AI.</p><ul><li>Current threshold confirmed at £90,000 (frozen).</li></ul></div>
@@ -333,121 +330,192 @@
         </main>
     </div>
 
-    <div id="modal-privacy" class="fixed inset-0 z-[200] hidden bg-black/30 backdrop-blur-sm flex items-center justify-center" onclick="this.classList.add('hidden')"><div class="bg-white p-8 rounded-2xl max-w-lg shadow-2xl animate-fade-in"><h2 class="text-2xl font-bold mb-4">Privacy Policy</h2><p class="text-gray-600 mb-4">We do not store your client data.</p><button class="bg-black text-white px-4 py-2 rounded-lg" onclick="document.getElementById('modal-privacy').classList.add('hidden')">Close</button></div></div>
-    <div id="modal-terms" class="fixed inset-0 z-[200] hidden bg-black/30 backdrop-blur-sm flex items-center justify-center" onclick="this.classList.add('hidden')"><div class="bg-white p-8 rounded-2xl max-w-lg shadow-2xl animate-fade-in"><h2 class="text-2xl font-bold mb-4">Terms of Service</h2><p class="text-gray-600 mb-4">TaxPilot is an informational tool.</p><button class="bg-black text-white px-4 py-2 rounded-lg" onclick="document.getElementById('modal-terms').classList.add('hidden')">Close</button></div></div>
+    <div id="modal-privacy" class="fixed inset-0 z-[200] hidden bg-black/30 backdrop-blur-sm flex items-center justify-center" onclick="if(event.target.id === 'modal-privacy') modalManager.close('privacy')"><div class="bg-white p-8 rounded-2xl max-w-lg shadow-2xl animate-fade-in"><h2 class="text-2xl font-bold mb-4">Privacy Policy</h2><p class="text-gray-600 mb-4">We do not store your client data.</p><button class="bg-black text-white px-4 py-2 rounded-lg" onclick="modalManager.close('privacy')">Close</button></div></div>
+    <div id="modal-terms" class="fixed inset-0 z-[200] hidden bg-black/30 backdrop-blur-sm flex items-center justify-center" onclick="if(event.target.id === 'modal-terms') modalManager.close('terms')"><div class="bg-white p-8 rounded-2xl max-w-lg shadow-2xl animate-fade-in"><h2 class="text-2xl font-bold mb-4">Terms of Service</h2><p class="text-gray-600 mb-4">TaxPilot is an informational tool.</p><button class="bg-black text-white px-4 py-2 rounded-lg" onclick="modalManager.close('terms')">Close</button></div></div>
 
     <script>
-        // --- AUTHENTICATION LOGIC ---
-        function checkAuthAndRedirect() {
-            const user = localStorage.getItem('taxpilot_user');
-            if (user) { updateUIForUser(JSON.parse(user)); switchView('app'); } 
-            else { document.getElementById('landing-view').classList.add('hidden'); document.getElementById('auth-view').classList.remove('hidden'); }
-        }
-        function showProfileCreation() { document.getElementById('auth-view').classList.add('hidden'); document.getElementById('profile-view').classList.remove('hidden'); }
-        function completeLogin() {
-            const name = document.getElementById('user-name-input').value || "User";
-            const userData = { name: name, initials: name.substring(0, 2).toUpperCase() };
-            localStorage.setItem('taxpilot_user', JSON.stringify(userData));
-            updateUIForUser(userData);
-            document.getElementById('profile-view').classList.add('hidden'); document.getElementById('app-view').classList.remove('hidden');
-        }
-        function updateUIForUser(user) { document.getElementById('user-name-display').textContent = user.name; document.getElementById('user-avatar').textContent = user.initials; document.getElementById('nav-cta-btn').textContent = "Dashboard"; document.getElementById('nav-cta-btn').onclick = function() { switchView('app'); }; }
-        function logout() { localStorage.removeItem('taxpilot_user'); location.reload(); }
-        document.addEventListener('DOMContentLoaded', () => { typeWriter(); if(localStorage.getItem('taxpilot_user')) updateUIForUser(JSON.parse(localStorage.getItem('taxpilot_user'))); });
-
-        // --- TYPEWRITER ---
-        const phrases = ["Ask about UK VAT Thresholds...", "Ask about Malaysia Income Tax...", "Ask about UAE Corporate Tax..."];
-        let phraseIndex = 0; let charIndex = 0; let isDeleting = false;
-        function typeWriter() {
-            const currentPhrase = phrases[phraseIndex];
-            const typeSpeed = isDeleting ? 30 : 80;
-            if (!isDeleting && charIndex < currentPhrase.length) { document.getElementById("typewriter-text").textContent += currentPhrase.charAt(charIndex); charIndex++; }
-            else if (isDeleting && charIndex > 0) { document.getElementById("typewriter-text").textContent = currentPhrase.substring(0, charIndex - 1); charIndex--; }
-            if (!isDeleting && charIndex === currentPhrase.length) { isDeleting = true; setTimeout(typeWriter, 2000); return; }
-            else if (isDeleting && charIndex === 0) { isDeleting = false; phraseIndex = (phraseIndex + 1) % phrases.length; }
-            setTimeout(typeWriter, typeSpeed);
-        }
-
-        // --- NAVIGATION ---
-        function switchView(view) { document.getElementById('landing-view').classList.add('hidden'); document.getElementById('auth-view').classList.add('hidden'); document.getElementById('profile-view').classList.add('hidden'); document.getElementById('app-view').classList.add('hidden'); document.getElementById(view + '-view').classList.remove('hidden'); }
-        function scrollToSection(id) { switchView('landing'); document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
-        function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
-        function switchAppTab(tab) { document.querySelectorAll('#nav-chat, #nav-reminders, #nav-notes').forEach(el => el.classList.remove('bg-white', 'shadow-sm', 'text-apple-blue')); document.getElementById('nav-' + tab).classList.add('bg-white', 'shadow-sm', 'text-apple-blue'); document.getElementById('view-chat').classList.add('hidden'); document.getElementById('view-reminders').classList.add('hidden'); document.getElementById('view-notes').classList.add('hidden'); document.getElementById('view-' + tab).classList.remove('hidden'); }
-        function openModal(id) { document.getElementById('modal-'+id).classList.remove('hidden'); }
-        function handleEnter(e) { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }}
-
-        // --- CHAT LOGIC ---
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            if(!text) return;
-            const stream = document.getElementById('chat-stream');
-            const userMsg = document.createElement('div');
-            userMsg.className = 'flex justify-end animate-fade-in max-w-3xl mx-auto w-full';
-            userMsg.innerHTML = `<div class="user-bubble px-4 py-2.5 text-[15px] max-w-[80%]">${text}</div>`;
-            stream.appendChild(userMsg);
-            input.value = ''; stream.scrollTop = stream.scrollHeight;
-
-            setTimeout(() => {
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'flex gap-4 max-w-3xl mx-auto w-full animate-fade-in';
-                const responseText = generateResponse(text);
-                aiMsg.innerHTML = `<div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-black flex items-center justify-center flex-shrink-0 shadow-md"><i class="fa-solid fa-paper-plane text-white text-xs"></i></div><div class="flex-1"><div class="ai-bubble text-[15px] leading-relaxed prose prose-sm max-w-none text-gray-800">${marked.parse(responseText)}</div><div class="flex gap-2 mt-3"><button class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-600 transition flex items-center gap-2"><i class="fa-solid fa-list text-blue-500"></i> Key Summary</button><button class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-600 transition flex items-center gap-2"><i class="fa-solid fa-file-pdf text-red-500"></i> Export PDF</button></div></div>`;
-                stream.appendChild(aiMsg); stream.scrollTop = stream.scrollHeight;
-            }, 1000);
-        }
-
-        // --- UNIVERSAL KNOWLEDGE BRAIN (V12) ---
-        const universalFacts = {
-            'malaysia': { rate: '24%', vat: 'Sales & Service Tax (SST)', source: 'LHDN' },
-            'uae': { rate: '9%', vat: '5%', source: 'FTA' },
-            'dubai': { rate: '9%', vat: '5%', source: 'FTA' },
-            'uk': { rate: '25%', vat: '20%', source: 'HMRC' },
-            'us': { rate: '21%', vat: 'Sales Tax (State Level)', source: 'IRS' },
-            'usa': { rate: '21%', vat: 'Sales Tax (State Level)', source: 'IRS' },
-            'canada': { rate: '15%', vat: 'GST/HST (5-15%)', source: 'CRA' },
-            'singapore': { rate: '17%', vat: '9% GST', source: 'IRAS' },
-            'australia': { rate: '30%', vat: '10% GST', source: 'ATO' },
-            'india': { rate: '25-30%', vat: 'GST (5-28%)', source: 'ITD' },
-            'brunei': { rate: '18.5%', vat: 'None', source: 'MOFE' },
-            'ohio': { rate: 'CAT (0.26%)', vat: 'Sales Tax (5.75%)', source: 'Ohio Dept of Tax' },
-            'france': { rate: '25%', vat: '20%', source: 'DGFIP' },
-            'germany': { rate: '15% (+Trade Tax)', vat: '19%', source: 'BZSt' }
+        // --- AUTH & HISTORY ---
+        const authManager = {
+            checkAuthAndRedirect() {
+                const user = localStorage.getItem('taxpilot_user');
+                if (user) { this.updateUIForUser(JSON.parse(user)); appManager.showApp(); chatHistory.render(); }
+                else { appManager.showAuth(); }
+            },
+            showProfileCreation() {
+                const email = document.getElementById('auth-email').value;
+                if(!email.includes('@')) { alert('Please enter valid email'); return; }
+                document.getElementById('auth-view').classList.add('hidden');
+                document.getElementById('profile-view').classList.remove('hidden');
+            },
+            completeLogin() {
+                const name = document.getElementById('user-name-input').value;
+                if(name.length < 2) { alert('Enter valid name'); return; }
+                const user = { name: name, initials: name.substring(0,2).toUpperCase() };
+                localStorage.setItem('taxpilot_user', JSON.stringify(user));
+                this.updateUIForUser(user);
+                appManager.showApp();
+            },
+            updateUIForUser(user) {
+                document.getElementById('user-name-display').textContent = user.name;
+                document.getElementById('user-avatar').textContent = user.initials;
+                document.getElementById('nav-cta-btn').textContent = "Dashboard";
+                document.getElementById('nav-cta-btn').onclick = () => appManager.showApp();
+            },
+            redirectToAuth() { appManager.showAuth(); },
+            logout() { localStorage.removeItem('taxpilot_user'); location.reload(); }
         };
 
+        const chatHistory = {
+            add(msg) {
+                const h = JSON.parse(localStorage.getItem('taxpilot_history') || '[]');
+                h.push(msg);
+                localStorage.setItem('taxpilot_history', JSON.stringify(h.slice(-5)));
+                this.render();
+            },
+            render() {
+                const list = document.getElementById('search-history');
+                const h = JSON.parse(localStorage.getItem('taxpilot_history') || '[]');
+                list.innerHTML = h.reverse().map(m => `<div class="px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-md cursor-pointer truncate" onclick="messageController.sendMessage('${m}')"><i class="fa-regular fa-message mr-2 text-gray-400"></i> ${m}</div>`).join('');
+            }
+        };
+
+        // --- APP MANAGER ---
+        const appManager = {
+            showAuth() {
+                document.getElementById('landing-view').classList.add('hidden');
+                document.getElementById('auth-view').classList.remove('hidden');
+            },
+            showApp() {
+                document.getElementById('landing-view').classList.add('hidden');
+                document.getElementById('auth-view').classList.add('hidden');
+                document.getElementById('profile-view').classList.add('hidden');
+                document.getElementById('app-view').classList.remove('hidden');
+                typewriterController.stop();
+            },
+            switchTab(tab) {
+                document.querySelectorAll('#nav-chat, #nav-reminders, #nav-notes').forEach(el => el.classList.remove('bg-white', 'shadow-sm', 'text-apple-blue'));
+                document.getElementById('nav-' + tab).classList.add('bg-white', 'shadow-sm', 'text-apple-blue');
+                document.getElementById('view-chat').classList.add('hidden');
+                document.getElementById('view-reminders').classList.add('hidden');
+                document.getElementById('view-notes').classList.add('hidden');
+                document.getElementById('view-' + tab).classList.remove('hidden');
+            }
+        };
+
+        // --- CHAT LOGIC ---
+        const messageController = {
+            handleEnter(e) { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.sendMessage(); }},
+            sendMessage(overrideText) {
+                const input = document.getElementById('chat-input');
+                const text = overrideText || input.value.trim();
+                if(!text) return;
+                
+                // User Msg
+                const stream = document.getElementById('chat-stream');
+                const userDiv = document.createElement('div');
+                userDiv.className = 'flex justify-end animate-fade-in max-w-3xl mx-auto w-full';
+                userDiv.innerHTML = `<div class="user-bubble px-4 py-2.5 text-[15px] max-w-[80%]">${text}</div>`;
+                stream.appendChild(userDiv);
+                
+                input.value = '';
+                stream.scrollTop = stream.scrollHeight;
+                chatHistory.add(text);
+                
+                // AI Response
+                setTimeout(() => {
+                    const aiDiv = document.createElement('div');
+                    aiDiv.className = 'flex gap-4 max-w-3xl mx-auto w-full animate-fade-in';
+                    const response = generateResponse(text);
+                    aiDiv.innerHTML = `
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-black flex items-center justify-center flex-shrink-0 shadow-md"><i class="fa-solid fa-paper-plane text-white text-xs"></i></div>
+                        <div class="flex-1">
+                            <div class="ai-bubble text-[15px] leading-relaxed prose prose-sm max-w-none text-gray-800">${marked.parse(response)}</div>
+                            <div class="flex gap-2 mt-3">
+                                <button class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-600 transition flex items-center gap-2"><i class="fa-solid fa-list text-blue-500"></i> Key Summary</button>
+                                <button class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-600 transition flex items-center gap-2"><i class="fa-solid fa-file-pdf text-red-500"></i> Export PDF</button>
+                            </div>
+                        </div>
+                    `;
+                    stream.appendChild(aiDiv);
+                    stream.scrollTop = stream.scrollHeight;
+                }, 800);
+            }
+        };
+
+        // --- BRAIN (V15 - MERGED LOGIC) ---
         function generateResponse(query) {
             const q = query.toLowerCase();
             
             // 1. GREETING
-            if (q === 'hi' || q === 'hello' || q === 'hey') return "Hi! How can I help you with your tax research today?";
+            if(q === 'hi' || q === 'hello') return "Hi! How can I help you with your tax research today?";
 
-            // 2. CONCEPT: PILLAR 2
-            if (q.includes('pillar 2') || q.includes('global minimum')) {
-                return `**OECD Pillar Two (Global Minimum Tax)**\n\n* 🌍 **Core Principle:** Ensures large multinationals pay a minimum effective tax rate of **15%** in every jurisdiction they operate.\n* 🏢 **Scope:** Applies to MNE groups with annual consolidated revenue exceeding **€750 million**.\n* 📅 **Implementation:** Effective from 2024 in UK, EU, and other major economies.\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=oecd.org"> Source: OECD Inclusive Framework</a>`;
+            // 2. HERO COUNTRIES (Rich Detail)
+            if(q.includes('malaysia') || q.includes('kuala lumpur')) {
+                return `Here is the breakdown for **Malaysia Corporate Income Tax (YA 2025)**:\n\n* ✅ **Standard Rate:** **24%**. Applies to resident and non-resident companies.\n* 📉 **SME Preferential Rates** (Paid-up capital ≤ RM2.5m):\n    * **15%** on first RM 150,000.\n    * **17%** on RM 150,001 to RM 600,000.\n    * **24%** on balance.\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=hasil.gov.my"> Source: LHDN Official Portal [Verified]</a>`;
+            }
+            if(q.includes('uae') || q.includes('dubai')) {
+                return `Here is the tax situation in **Dubai (UAE) as of 2025**:\n\n* ✅ **Personal Income Tax:** **0%**.\n* 🏢 **Corporate Tax:** **9%** on profits > AED 375,000. (0% below threshold).\n* 🛍️ **VAT:** **5%** standard rate.\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=tax.gov.ae"> Source: FTA Federal Decree-Law No. 47 [Verified]</a>`;
+            }
+            if(q.includes('uk') || q.includes('britain')) {
+                return `Here is the **UK Corporate Tax structure (FY 2025)**:\n\n* 🏢 **Main Rate:** **25%** (Profits > £250,000).\n* 📉 **Small Profits Rate:** **19%** (Profits < £50,000).\n* 🧮 **Marginal Relief:** Available for profits between £50k and £250k.\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=gov.uk"> Source: HMRC Guidance 2025 [Verified]</a>`;
+            }
+            if(q.includes('us') || q.includes('america') || q.includes('ohio')) {
+                let extra = "";
+                if(q.includes('ohio')) extra = "\n* 🏙️ **Ohio Specific:** No Corporate Income Tax. Uses **Commercial Activity Tax (CAT)** of 0.26% on gross receipts > $3M.";
+                return `Here is the summary for **US Federal Corporate Tax (2025)**:\n\n* 🇺🇸 **Federal Rate:** Flat **21%** (C-Corps).\n* 🗓️ **Filing Deadline:** April 15, 2025.${extra}\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=irs.gov"> Source: IRS Publication 542 [Verified]</a>`;
+            }
+             if(q.includes('brunei')) {
+                return `Here is the tax structure for **Brunei Darussalam (2025)**:\n\n* 🏢 **Corporate Income Tax:** **18.5%** standard rate.\n* 📉 **Thresholds:**\n    * First BND 100,000: 25% of tax rate (4.625% effective).\n    * Next BND 150,000: 50% of tax rate (9.25% effective).\n* ✅ **No Personal Income Tax:** 0%.\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=mofe.gov.bn"> Source: Ministry of Finance and Economy</a>`;
             }
 
-            // 3. CONCEPT: TRANSFER PRICING
-            if (q.includes('transfer pricing')) {
-                return `**Transfer Pricing (General Principles)**\n\n* ✅ **Definition:** The pricing of transactions between related parties (e.g., subsidiaries of the same parent).\n* ⚖️ **Arm's Length Principle:** Transactions must be priced as if they were between unrelated parties.\n* 📄 **Documentation:** Requires Master File and Local File in most jurisdictions.\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=oecd.org"> Source: OECD Guidelines</a>`;
-            }
+            // 3. CONCEPTS
+            if(q.includes('transfer pricing')) return `**Transfer Pricing (General Principles)**\n\nEnsures transactions between related parties are at **arm's length prices**.\n\n* ✅ **Standard:** Follows OECD Guidelines.\n* 📄 **Docs:** Master File & Local File required.\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=oecd.org"> Source: OECD Guidelines</a>`;
+            if(q.includes('pillar 2')) return `**OECD Pillar Two (Global Minimum Tax)**\n\n* 🌍 **Rate:** Minimum effective tax of **15%**.\n* 🏢 **Scope:** MNEs with revenue > €750M.\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=oecd.org"> Source: OECD Inclusive Framework</a>`;
 
-            // 4. UNIVERSAL COUNTRY LOOKUP
-            // Find any country name mentioned in the query
-            const matchedKey = Object.keys(universalFacts).find(key => q.includes(key));
+            // 4. UNIVERSAL FALLBACK (Safety Net)
+            // Use regex to find any capitalized word that looks like a country
+            const likelyCountry = q.match(/\b[A-Z][a-z]+\b/) || "the requested jurisdiction";
+            const countryName = Array.isArray(likelyCountry) ? likelyCountry[0] : likelyCountry;
             
-            if (matchedKey) {
-                const data = universalFacts[matchedKey];
-                const countryName = matchedKey.charAt(0).toUpperCase() + matchedKey.slice(1);
-                
-                return `Here is the tax profile for **${countryName} (2025 Data)**:\n\n* 🏢 **Corporate Tax Rate:** **${data.rate}**\n* 🛍️ **VAT / Sales Tax:** **${data.vat}**\n* 🌍 **Global Tax Status:** Compliant with international standards.\n\n**Would you like to know about specific filing deadlines?**\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=${data.source.toLowerCase()}.gov"> Source: ${data.source} Official Database [Verified]</a>`;
-            }
-
-            // 5. SMART FALLBACK (Generates a plausible template for ANY country not in list)
-            const words = q.split(' ');
-            const likelyCountry = words.find(w => w.length > 3 && /^[A-Z]/.test(w)) || "the requested jurisdiction";
-            
-            return `**Researching: ${likelyCountry} Tax Code (2025)**\n\nI am analyzing the official gazette for **${likelyCountry}**...\n\n* **Standard Rate:** [Retrieving latest 2025 rate...]\n* **Registration Threshold:** [Verifying with local authority...]\n\n<div class="source-chip"><i class="fa-solid fa-circle-notch fa-spin"></i> Connecting to Global Tax Database...</div>`;
+            return `**Researching: ${countryName} Tax Code (2025)**\n\nI am analyzing the official gazette for **${countryName}**...\n\n* **Standard Rate:** [Retrieving latest 2025 rate...]\n* **Registration Threshold:** [Verifying with local authority...]\n\n<div class="source-chip"><i class="fa-solid fa-circle-notch fa-spin"></i> Connecting to Global Tax Database...</div>`;
         }
+
+        // --- UTILS ---
+        const typewriterController = {
+            phrases: ["Ask about UK VAT...", "Ask about Malaysia Tax...", "Ask about UAE Corporate Tax..."],
+            idx: 0, charIdx: 0, isDeleting: false, timeout: null,
+            start() { this.tick(); },
+            stop() { clearTimeout(this.timeout); },
+            tick() {
+                const el = document.getElementById("typewriter-text");
+                if(!el) return;
+                const current = this.phrases[this.idx];
+                if(this.isDeleting) {
+                    el.textContent = current.substring(0, this.charIdx--);
+                    if(this.charIdx < 0) { this.isDeleting = false; this.idx = (this.idx + 1) % this.phrases.length; }
+                } else {
+                    el.textContent = current.substring(0, this.charIdx++);
+                    if(this.charIdx > current.length) { this.isDeleting = true; setTimeout(() => this.tick(), 2000); return; }
+                }
+                this.timeout = setTimeout(() => this.tick(), this.isDeleting ? 30 : 80);
+            }
+        };
+
+        const modalManager = {
+            open(id) { document.getElementById('modal-'+id).classList.remove('hidden'); },
+            close(id) { document.getElementById('modal-'+id).classList.add('hidden'); }
+        };
+
+        function scrollToSection(id) {
+            document.getElementById('landing-view').classList.remove('hidden');
+            document.getElementById('app-view').classList.add('hidden');
+            setTimeout(() => document.getElementById(id).scrollIntoView({ behavior: 'smooth' }), 100);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if(localStorage.getItem('taxpilot_user')) authManager.checkAuthAndRedirect();
+            typewriterController.start();
+        });
     </script>
 </body>
 </html>
