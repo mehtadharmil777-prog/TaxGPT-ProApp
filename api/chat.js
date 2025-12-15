@@ -3,7 +3,6 @@ export const config = {
 };
 
 export default async function handler(req) {
-    // 1. CORS Setup
     if (req.method === 'OPTIONS') {
         return new Response(null, {
             headers: {
@@ -19,61 +18,49 @@ export default async function handler(req) {
         const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey) {
-            return new Response(JSON.stringify({ result: "❌ Error: API Key missing in Vercel Settings." }), { 
-                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } 
+            return new Response(JSON.stringify({ result: "❌ Configuration Error: GEMINI_API_KEY is missing in Vercel." }), { 
+                headers: { 'Content-Type': 'application/json' } 
             });
         }
 
-        // 2. Discover Models (Solves 404/Not Found Errors)
-        const listResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
-        );
-        const listData = await listResponse.json();
+        // Auto-Discovery of available Gemini models to prevent 404s
+        let validModel = "models/gemini-1.5-flash"; // Fallback
         
-        let validModel = "models/gemini-1.5-flash"; // Default assumption
-        
-        // Find a valid model from your account's list
-        if (listData.models) {
-            const bestModel = listData.models.find(m => 
-                m.supportedGenerationMethods?.includes("generateContent") &&
-                (m.name.includes("gemini") || m.name.includes("1.5"))
-            );
-            if (bestModel) validModel = bestModel.name;
+        try {
+            const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+            const listData = await listResp.json();
+            if (listData.models) {
+                const found = listData.models.find(m => m.name.includes('gemini-1.5') && m.supportedGenerationMethods.includes('generateContent'));
+                if (found) validModel = found.name;
+            }
+        } catch (e) {
+            // Ignore discovery errors and use fallback
         }
 
-        // 3. Generate Answer
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/${validModel}:generateContent?key=${apiKey}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{
-                        parts: [{
-                            text: `You are TaxPilot. Answer professionally: ${message}`
-                        }]
-                    }]
+                    contents: [{ parts: [{ text: `You are TaxPilot, a professional tax assistant. Answer concisely: ${message}` }] }]
                 })
             }
         );
 
         const data = await response.json();
-
+        
         if (data.error) {
-            return new Response(JSON.stringify({ result: `❌ Google API Error: ${data.error.message}` }), { 
-                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } 
-            });
+            return new Response(JSON.stringify({ result: `❌ API Error: ${data.error.message}` }), { headers: { 'Content-Type': 'application/json' } });
         }
 
         const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || "No text returned.";
 
         return new Response(JSON.stringify({ result: answer }), {
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            headers: { 'Content-Type': 'application/json' },
         });
 
     } catch (error) {
-        return new Response(JSON.stringify({ result: `❌ System Error: ${error.message}` }), { 
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } 
-        });
+        return new Response(JSON.stringify({ result: `❌ Server Error: ${error.message}` }), { headers: { 'Content-Type': 'application/json' } });
     }
 }
