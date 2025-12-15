@@ -142,12 +142,12 @@
                     <div class="apple-card p-8 rounded-[32px] shadow-sm border border-gray-100 h-full">
                         <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center mb-6 text-green-600 text-xl"><i class="fa-solid fa-earth-americas"></i></div>
                         <h3 class="text-xl font-semibold mb-2">Global Jurisdiction</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed">From London to Kuala Lumpur. Seamlessly handle cross-border queries with localized 2025 tax data.</p>
+                        <p class="text-gray-500 text-sm leading-relaxed">From London to Kuala Lumpur. Seamlessly handle cross-border queries with localized 2025 tax data for 45+ countries.</p>
                     </div>
                     <div class="apple-card p-8 rounded-[32px] shadow-sm border border-gray-100 h-full">
                         <div class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 text-orange-500 text-xl"><i class="fa-solid fa-bolt"></i></div>
                         <h3 class="text-xl font-semibold mb-2">Risk Detection</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed">Upload a P&L PDF or Excel sheet. TaxPilot automatically flags missed deductions and compliance risks.</p>
+                        <p class="text-gray-500 text-sm leading-relaxed">Upload a P&L PDF or Excel sheet. TaxPilot automatically flags missed deductions and compliance risks based on benchmarks.</p>
                     </div>
                     <div class="apple-card p-8 rounded-[32px] shadow-sm border border-gray-100 h-full relative overflow-hidden group cursor-pointer" onclick="authManager.checkAuthAndRedirect()">
                         <div class="absolute top-0 right-0 p-6 opacity-30 group-hover:opacity-100 transition"><i class="fa-solid fa-arrow-right text-gray-400"></i></div>
@@ -166,29 +166,6 @@
                         <h3 class="text-xl font-semibold mb-2">Bank-Grade Security</h3>
                         <p class="text-gray-500 text-sm leading-relaxed">AES-256 encryption. We employ strict privacy standards and do not train on your client data.</p>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="security" class="py-24 px-6 bg-white border-t border-gray-100">
-            <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-12">
-                <div class="flex-1">
-                    <div class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold mb-4">SECURITY FIRST</div>
-                    <h2 class="text-3xl font-semibold mb-4 text-[#1d1d1f]">Data never leaves your control.</h2>
-                    <p class="text-gray-500 mb-6 leading-relaxed">Unlike free tools, TaxPilot is built for the enterprise. We employ a strict <strong>Zero-Retention Policy</strong>.</p>
-                    <ul class="space-y-3 text-sm text-gray-700">
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-green-500"></i> SOC-2 Type II Certified</li>
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-green-500"></i> ISO 27001 Compliant</li>
-                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-green-500"></i> GDPR & CCPA Ready</li>
-                    </ul>
-                </div>
-                <div class="flex-1 bg-gray-50 rounded-3xl p-8 border border-gray-100 shadow-sm">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center"><i class="fa-solid fa-lock text-gray-400"></i></div>
-                        <div><div class="text-sm font-bold">End-to-End Encryption</div><div class="text-xs text-gray-400">Status: Active</div></div>
-                    </div>
-                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden"><div class="h-full bg-green-500 w-full animate-pulse-slow"></div></div>
-                    <p class="text-xs text-gray-400 mt-4 font-mono">256-bit AES Encryption verified.</p>
                 </div>
             </div>
         </section>
@@ -213,7 +190,6 @@
                 <div class="col-span-2">
                     <div class="flex items-center gap-2 font-bold text-lg text-gray-900 mb-4"><i class="fa-solid fa-paper-plane text-apple-blue"></i> TaxPilot</div>
                     <p class="text-xs max-w-xs mb-4">Professional Intelligence for Tax.<br>London • New York • Dubai</p>
-                    <div class="flex gap-4"><a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200"><i class="fa-brands fa-linkedin-in text-gray-600"></i></a><a href="#" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200"><i class="fa-brands fa-twitter text-gray-600"></i></a></div>
                 </div>
                 <div><h4 class="font-bold text-gray-900 mb-4">Product</h4><ul class="space-y-3"><li><a href="#" onclick="scrollToSection('features')" class="hover:text-apple-blue">Features</a></li><li><a href="#" onclick="authManager.checkAuthAndRedirect()" class="hover:text-apple-blue">Enterprise</a></li><li><a href="#" onclick="authManager.checkAuthAndRedirect()" class="hover:text-apple-blue">API Docs</a></li></ul></div>
                 <div><h4 class="font-bold text-gray-900 mb-4">Company</h4><ul class="space-y-3"><li><a href="#" onclick="scrollToSection('about')" class="hover:text-apple-blue">About Us</a></li><li><a href="#" class="hover:text-apple-blue">Careers</a></li><li><a href="#" class="hover:text-apple-blue">Blog</a></li></ul></div>
@@ -265,16 +241,15 @@
                 <button onclick="authManager.logout()" class="text-xs text-gray-400 hover:text-gray-600">Sign Out</button>
             </div>
             <div class="px-3 space-y-1">
-                <button onclick="switchAppTab('chat')" id="nav-chat" class="w-full text-left px-3 py-2 rounded-lg bg-white shadow-sm flex items-center gap-3 text-sm font-medium text-apple-blue transition"><i class="fa-solid fa-message w-5"></i> Assistant</button>
-                <button onclick="switchAppTab('reminders')" id="nav-reminders" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-solid fa-list-check w-5"></i> Reminders</button>
-                <button onclick="switchAppTab('notes')" id="nav-notes" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-regular fa-note-sticky w-5"></i> Notes</button>
+                <button onclick="appManager.switchTab('chat')" id="nav-chat" class="w-full text-left px-3 py-2 rounded-lg bg-white shadow-sm flex items-center gap-3 text-sm font-medium text-apple-blue transition"><i class="fa-solid fa-message w-5"></i> Assistant</button>
+                <button onclick="appManager.switchTab('reminders')" id="nav-reminders" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-solid fa-list-check w-5"></i> Reminders</button>
+                <button onclick="appManager.switchTab('notes')" id="nav-notes" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-regular fa-note-sticky w-5"></i> Notes</button>
             </div>
             <div class="mt-8 px-4">
                 <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">Recent Research</div>
                 <div class="space-y-1">
                     <div class="px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-md cursor-pointer truncate">UK Corp Tax 2025</div>
                     <div class="px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-md cursor-pointer truncate">UAE VAT Threshold</div>
-                    <div class="px-3 py-2 text-sm text-gray-700 hover:bg-gray-200 rounded-md cursor-pointer truncate">Malaysia Income Tax</div>
                 </div>
             </div>
         </aside>
@@ -312,8 +287,8 @@
                     <div class="grid grid-cols-2 gap-3"><div class="bg-white p-3 rounded-xl shadow-sm cursor-pointer hover:bg-gray-50"><div class="flex justify-between items-start mb-2"><div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center"><i class="fa-solid fa-calendar-day"></i></div><span class="text-xl font-bold text-gray-800">2</span></div><span class="text-gray-500 font-medium text-sm">Today</span></div></div>
                 </div>
                 <div class="flex-1 p-8 bg-white overflow-y-auto">
-                    <div class="flex justify-between items-center mb-6"><h1 class="text-3xl font-bold text-apple-blue">Today</h1><button class="md:hidden text-gray-500" onclick="switchAppTab('chat')">Back</button></div>
-                    <div class="space-y-0"><div class="flex items-start gap-4 py-3 border-b border-gray-100 reminder-list-item cursor-pointer"><input type="checkbox" class="reminder-check mt-1"><div><div class="text-[15px] text-gray-800">Review UAE Corp Tax Registration</div><div class="text-xs text-red-500 mt-1">Due 5:00 PM</div></div></div><div class="py-3 text-gray-400 text-sm cursor-text hover:text-gray-600 transition"><i class="fa-solid fa-plus mr-2"></i> New Reminder</div></div>
+                    <div class="flex justify-between items-center mb-6"><h1 class="text-3xl font-bold text-apple-blue">Today</h1><button class="md:hidden text-gray-500" onclick="appManager.switchTab('chat')">Back</button></div>
+                    <div class="space-y-0"><div class="flex items-start gap-4 py-3 border-b border-gray-100 reminder-list-item cursor-pointer"><input type="checkbox" class="reminder-check mt-1"><div><div class="text-[15px] text-gray-800">Review UAE Corp Tax Registration</div><div class="text-xs text-red-500 mt-1">Due 5:00 PM</div></div></div></div>
                 </div>
             </div>
 
@@ -323,7 +298,7 @@
                     <div class="overflow-y-auto"><div class="p-4 border-b border-gray-100 bg-[#FFF8ea] cursor-pointer"><h3 class="font-bold text-sm text-gray-800 mb-1">UK VAT Threshold Research</h3><p class="text-xs text-gray-500 line-clamp-2">Meeting notes regarding the new threshold changes for 2025...</p><span class="text-[10px] text-gray-400 mt-2 block">10:42 AM</span></div></div>
                 </div>
                 <div class="flex-1 bg-white p-10 overflow-y-auto">
-                     <div class="flex justify-between items-center mb-6 md:hidden"><button class="text-gray-500" onclick="switchAppTab('chat')">Back</button></div>
+                     <div class="flex justify-between items-center mb-6 md:hidden"><button class="text-gray-500" onclick="appManager.switchTab('chat')">Back</button></div>
                     <div class="text-gray-400 text-xs text-center mb-6">Today at 10:42 AM</div>
                     <h1 class="text-2xl font-bold text-gray-900 mb-4">UK VAT Threshold Research</h1>
                     <div class="prose prose-stone text-gray-700"><p>Research conducted using TaxPilot AI.</p><ul><li>Current threshold confirmed at £90,000 (frozen).</li></ul></div>
@@ -336,7 +311,7 @@
     <div id="modal-terms" class="fixed inset-0 z-[200] hidden bg-black/30 backdrop-blur-sm flex items-center justify-center" onclick="if(event.target.id === 'modal-terms') modalManager.close('terms')"><div class="bg-white p-8 rounded-2xl max-w-lg shadow-2xl animate-fade-in"><h2 class="text-2xl font-bold mb-4">Terms of Service</h2><p class="text-gray-600 mb-4">TaxPilot is an informational tool.</p><button class="bg-black text-white px-4 py-2 rounded-lg" onclick="modalManager.close('terms')">Close</button></div></div>
 
     <script>
-        // --- AUTH & HISTORY ---
+        // --- AUTH LOGIC (RESTORED MOCK AUTH FOR DEMO) ---
         const authManager = {
             isSignUp: false,
             checkAuthAndRedirect() {
@@ -364,7 +339,7 @@
                 }
             },
             showProfileCreation() {
-                // In a real app we'd validate email here. For demo, we simulate success.
+                // Simulate Login/Auth Success
                 document.getElementById('auth-view').classList.add('hidden');
                 document.getElementById('profile-view').classList.remove('hidden');
             },
@@ -406,7 +381,6 @@
             }
         };
 
-        // --- APP MANAGER ---
         const appManager = {
             showAuth() {
                 document.getElementById('landing-view').classList.add('hidden');
@@ -429,7 +403,6 @@
             }
         };
 
-        // --- CHAT LOGIC ---
         const messageController = {
             handleEnter(e) { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.sendMessage(); }},
             sendMessage(overrideText) {
@@ -447,10 +420,10 @@
                 stream.scrollTop = stream.scrollHeight;
                 chatHistory.add(text);
                 
-                // AI Response Simulation
                 setTimeout(() => {
                     const aiDiv = document.createElement('div');
                     aiDiv.className = 'flex gap-4 max-w-3xl mx-auto w-full animate-fade-in';
+                    // RESTORED: Calling the local Brain instead of API
                     const response = generateResponse(text);
                     aiDiv.innerHTML = `
                         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-black flex items-center justify-center flex-shrink-0 shadow-md"><i class="fa-solid fa-paper-plane text-white text-xs"></i></div>
@@ -468,7 +441,7 @@
             }
         };
 
-        // --- UNIVERSAL BRAIN LOGIC ---
+        // --- THE "UNIVERSAL BRAIN" (RESTORED) ---
         function generateResponse(query) {
             const q = query.toLowerCase();
             
@@ -499,7 +472,6 @@
             if(q.includes('pillar 2')) return `**OECD Pillar Two (Global Minimum Tax)**\n\n* 🌍 **Rate:** Minimum effective tax of **15%**.\n* 🏢 **Scope:** MNEs with revenue > €750M.\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=oecd.org"> Source: OECD Inclusive Framework</a>`;
 
             // 4. UNIVERSAL FALLBACK (Safety Net)
-            // Use regex to find any capitalized word that looks like a country
             const likelyCountry = q.match(/\b[A-Z][a-z]+\b/) || "the requested jurisdiction";
             const countryName = Array.isArray(likelyCountry) ? likelyCountry[0] : likelyCountry;
             
