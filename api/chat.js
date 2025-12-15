@@ -26,6 +26,7 @@ export default async function handler(req) {
         }
 
         // Auto-Discovery of available Gemini models to prevent 404s (Self-Healing Backend)
+        // THIS FIXES THE "models/gemini-1.5-flash is not found" ERROR
         let validModel = "models/gemini-1.5-flash"; // Default fallback
         
         try {
