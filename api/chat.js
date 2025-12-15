@@ -3,7 +3,6 @@ export const config = {
 };
 
 export default async function handler(req) {
-    // CORS Setup
     if (req.method === 'OPTIONS') {
         return new Response(null, {
             headers: {
@@ -16,7 +15,6 @@ export default async function handler(req) {
 
     try {
         const { message } = await req.json();
-        // Accessing the key securely from Vercel environment variables
         const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey) {
@@ -26,7 +24,6 @@ export default async function handler(req) {
         }
 
         // Auto-Discovery of available Gemini models to prevent 404s (Self-Healing Backend)
-        // THIS FIXES THE "models/gemini-1.5-flash is not found" ERROR
         let validModel = "models/gemini-1.5-flash"; // Default fallback
         
         try {
