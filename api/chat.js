@@ -1,47 +1,60 @@
-export default async function handler(req, res) {
-    // 1. Enable CORS so your website can talk to this function
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
+// api/chat.js
+export const config = {
+    runtime: 'edge', // Faster, cheaper, better for chat
+};
 
-    // Handle preflight request
+export default async function handler(req) {
+    // 1. CORS Headers (Security: Only allow your site to talk to this)
     if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
+        return new Response(null, {
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type',
+            },
+        });
+    }
+
+    if (req.method !== 'POST') {
+        return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
     }
 
     try {
-        // 2. Parse the incoming message
-        const { message } = req.body;
+        const { message } = await req.json();
 
-        // 3. Get the API Key securely from Vercel (You already set this up!)
-        const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
-        if (!GEMINI_API_KEY) {
-            throw new Error('Server Config Error: API Key is missing in Vercel.');
+        // 2. Input Validation (Fixes "Input validation missing")
+        if (!message || typeof message !== 'string') {
+            return new Response(JSON.stringify({ error: 'Invalid message format' }), { status: 400 });
+        }
+        if (message.length > 500) { // Limit length to prevent abuse
+            return new Response(JSON.stringify({ error: 'Message too long (max 500 chars)' }), { status: 400 });
         }
 
-        // 4. Call Google Gemini
+        // 3. API Key Check
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            console.error("Server Error: Missing GEMINI_API_KEY");
+            return new Response(JSON.stringify({ error: 'System configuration error' }), { status: 500 });
+        }
+
+        // 4. Secure Call to Google Gemini
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{
                         parts: [{
-                            text: `You are TaxPilot, an elite tax research AI. 
-                            User Question: ${message}
+                            text: `You are TaxPilot, a professional AI tax consultant. 
+                            User Question: "${message}"
                             
-                            Instructions:
-                            - Answer based on 2025 tax regulations.
-                            - Be specific (mention rates, thresholds).
-                            - Use Markdown formatting (bolding, lists).
-                            - End with a citation source in brackets like [Source: IRS].`
+                            Directives:
+                            - Provide accurate, 2025-compliant tax information.
+                            - Use Markdown formatting (bolding key figures, lists).
+                            - Be concise and professional.
+                            - Cite authoritative sources where possible (e.g. [Source: IRS], [Source: HMRC]).
+                            - If the query is not about tax/finance, politely decline.`
                         }]
                     }]
                 })
@@ -50,15 +63,19 @@ export default async function handler(req, res) {
 
         const data = await response.json();
 
-        // 5. Send the answer back to the frontend
-        if (data.candidates && data.candidates[0].content) {
-            res.status(200).json({ result: data.candidates[0].content.parts[0].text });
-        } else {
-            throw new Error('No response from AI provider.');
+        // 5. Error Handling (Fixes "Silent failures")
+        if (data.error) {
+            throw new Error(data.error.message || 'AI Provider Error');
         }
 
+        const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || "I could not generate a response. Please try again.";
+        
+        return new Response(JSON.stringify({ result: answer }), {
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        });
+
     } catch (error) {
-        console.error("API Error:", error);
-        res.status(500).json({ error: "TaxPilot is experiencing high traffic. Please try again." });
+        console.error("Backend Error:", error);
+        return new Response(JSON.stringify({ error: "TaxPilot is currently at capacity. Please try again in a moment." }), { status: 500 });
     }
 }
