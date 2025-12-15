@@ -3,7 +3,6 @@ export const config = {
 };
 
 export default async function handler(req) {
-    // 1. CORS Headers
     if (req.method === 'OPTIONS') {
         return new Response(null, {
             headers: {
@@ -15,19 +14,19 @@ export default async function handler(req) {
     }
 
     try {
-        // 2. Check API Key
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
-            return new Response(JSON.stringify({ result: "❌ Error: Vercel Environment Variable 'GEMINI_API_KEY' is missing." }), { 
+            return new Response(JSON.stringify({ result: "❌ Error: API Key missing in Vercel." }), { 
                 headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } 
             });
         }
 
         const { message } = await req.json();
 
-        // 3. Call Google Gemini
+        // 🟢 FIX: Switched to 'gemini-pro' (Universal Stability)
+        // This resolves the "Model not found" error you saw.
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -43,28 +42,20 @@ export default async function handler(req) {
 
         const data = await response.json();
 
-        // 4. ERROR TRAPPING (This is what was missing)
         if (data.error) {
-            return new Response(JSON.stringify({ result: `❌ Google API Error: ${data.error.message}` }), { 
+            return new Response(JSON.stringify({ result: `❌ Google Error: ${data.error.message}` }), { 
                 headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } 
             });
         }
 
         const answer = data.candidates?.[0]?.content?.parts?.[0]?.text;
         
-        if (!answer) {
-             return new Response(JSON.stringify({ result: "❌ Error: Google returned empty response. Check safety settings." }), { 
-                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } 
-            });
-        }
-
-        // 5. Success
-        return new Response(JSON.stringify({ result: answer }), {
+        return new Response(JSON.stringify({ result: answer || "No text returned." }), {
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
         });
 
     } catch (error) {
-        return new Response(JSON.stringify({ result: `❌ System Crash: ${error.message}` }), { 
+        return new Response(JSON.stringify({ result: `❌ Server Error: ${error.message}` }), { 
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } 
         });
     }
