@@ -56,6 +56,8 @@
                     <button onclick="scrollToSection('features')" class="hover:text-black transition">Workflow</button>
                     <button onclick="scrollToSection('security')" class="hover:text-black transition">Security</button>
                     <button onclick="scrollToSection('about')" class="hover:text-black transition">About</button>
+                    <span class="text-gray-300">|</span>
+                    <button onclick="authManager.checkAuthAndRedirect()" class="hover:text-apple-blue transition">Enterprise & API</button>
                 </div>
                 <div class="flex gap-3">
                     <button onclick="authManager.checkAuthAndRedirect()" class="hidden md:block bg-[#1d1d1f] text-white px-5 py-1.5 rounded-full text-xs font-medium hover:bg-black transition shadow-lg transform active:scale-95" id="nav-cta-btn">Log In</button>
@@ -78,10 +80,40 @@
                 </button>
             </div>
             <p class="text-xs text-gray-400 mb-16 font-medium">No credit card required. SOC-2 Certified Security.</p>
+            
+            <div class="relative max-w-2xl mx-auto group cursor-pointer" onclick="authManager.checkAuthAndRedirect()">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 blur-[60px] opacity-20 rounded-full group-hover:opacity-30 transition duration-500"></div>
+                <div class="relative bg-white/90 backdrop-blur-xl rounded-2xl p-2 shadow-2xl border border-white/50 ring-1 ring-black/5 transform transition hover:scale-[1.01]">
+                    <div class="flex items-center px-6 py-5 bg-white/50 rounded-xl">
+                        <i class="fa-solid fa-magnifying-glass text-gray-400 mr-4 text-lg"></i>
+                        <span id="typewriter-text" class="text-gray-500 text-lg font-light"></span><span class="cursor"></span>
+                        <div class="ml-auto bg-apple-blue w-10 h-10 rounded-full flex items-center justify-center text-white shadow-md group-hover:bg-[#0077ED] transition">
+                            <i class="fa-solid fa-arrow-up text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-10 border-y border-gray-200/60 bg-white/50 backdrop-blur-sm">
+            <div class="max-w-6xl mx-auto px-6 text-center">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-6">Trusted by professionals at</p>
+                <div class="flex flex-wrap justify-center gap-12 opacity-40 grayscale">
+                    <span class="text-xl font-bold font-serif">Deloitte.</span>
+                    <span class="text-xl font-bold font-sans tracking-tight">EY</span>
+                    <span class="text-xl font-bold font-serif italic">KPMG</span>
+                    <span class="text-xl font-bold font-mono">pwc</span>
+                    <span class="text-xl font-bold font-sans">BDO</span>
+                </div>
+            </div>
         </section>
 
         <section id="features" class="py-24 px-6">
             <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl font-semibold mb-4 text-[#1d1d1f]">Your Tax Operating System.</h2>
+                    <p class="text-gray-500 text-lg">Stop switching between ChatGPT, Outlook, and Google.</p>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="apple-card p-8 rounded-[32px] shadow-sm border border-gray-100 h-full">
                         <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 text-apple-blue text-xl"><i class="fa-solid fa-scale-balanced"></i></div>
@@ -124,7 +156,9 @@
                 <button onclick="authManager.showProfileCreation()" class="w-full py-3 bg-apple-blue text-white rounded-xl font-bold shadow-lg hover:bg-[#0077ED] transition transform active:scale-95" id="auth-action-btn">Continue</button>
             </div>
             
-            <button onclick="authManager.continueAsGuest()" class="w-full py-3 mt-3 bg-white border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition">Continue as Guest</button>
+            <button onclick="authManager.continueAsGuest()" class="w-full py-3 mt-3 bg-white border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition">
+                Continue as Guest
+            </button>
 
             <div class="text-center mt-6">
                 <p class="text-sm text-gray-500">
@@ -152,9 +186,9 @@
                 <button onclick="authManager.logout()" class="text-xs text-gray-400 hover:text-gray-600">Sign Out</button>
             </div>
             <div class="px-3 space-y-1">
-                <button class="w-full text-left px-3 py-2 rounded-lg bg-white shadow-sm flex items-center gap-3 text-sm font-medium text-apple-blue transition"><i class="fa-solid fa-message w-5"></i> Assistant</button>
-                <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-solid fa-list-check w-5"></i> Reminders</button>
-                <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-regular fa-note-sticky w-5"></i> Notes</button>
+                <button onclick="appManager.switchTab('chat')" id="nav-chat" class="w-full text-left px-3 py-2 rounded-lg bg-white shadow-sm flex items-center gap-3 text-sm font-medium text-apple-blue transition"><i class="fa-solid fa-message w-5"></i> Assistant</button>
+                <button onclick="appManager.switchTab('reminders')" id="nav-reminders" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-solid fa-list-check w-5"></i> Reminders</button>
+                <button onclick="appManager.switchTab('notes')" id="nav-notes" class="w-full text-left px-3 py-2 rounded-lg hover:bg-white/50 flex items-center gap-3 text-sm font-medium text-gray-600 transition"><i class="fa-regular fa-note-sticky w-5"></i> Notes</button>
             </div>
             <div class="mt-8 px-4">
                 <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">Recent Research</div>
@@ -188,8 +222,35 @@
                     </div>
                 </div>
             </div>
+
+            <div id="view-reminders" class="h-full hidden flex bg-white animate-fade-in">
+                <div class="w-64 bg-[#F2F1F6] border-r border-[#D1D1D6] p-4 flex flex-col gap-4 hidden md:flex">
+                    <h2 class="text-2xl font-bold text-gray-800 px-2">Lists</h2>
+                    <div class="grid grid-cols-2 gap-3"><div class="bg-white p-3 rounded-xl shadow-sm cursor-pointer hover:bg-gray-50"><div class="flex justify-between items-start mb-2"><div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center"><i class="fa-solid fa-calendar-day"></i></div><span class="text-xl font-bold text-gray-800">2</span></div><span class="text-gray-500 font-medium text-sm">Today</span></div></div>
+                </div>
+                <div class="flex-1 p-8 bg-white overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6"><h1 class="text-3xl font-bold text-apple-blue">Today</h1><button class="md:hidden text-gray-500" onclick="appManager.switchTab('chat')">Back</button></div>
+                    <div class="space-y-0"><div class="flex items-start gap-4 py-3 border-b border-gray-100 reminder-list-item cursor-pointer"><input type="checkbox" class="reminder-check mt-1"><div><div class="text-[15px] text-gray-800">Review UAE Corp Tax Registration</div><div class="text-xs text-red-500 mt-1">Due 5:00 PM</div></div></div><div class="py-3 text-gray-400 text-sm cursor-text hover:text-gray-600 transition"><i class="fa-solid fa-plus mr-2"></i> New Reminder</div></div>
+                </div>
+            </div>
+
+            <div id="view-notes" class="h-full hidden flex bg-white animate-fade-in">
+                <div class="w-72 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
+                    <div class="p-4 border-b border-gray-100"><h2 class="font-bold text-lg">TaxPilot Notes</h2><div class="text-xs text-gray-400">3 Notes</div></div>
+                    <div class="overflow-y-auto"><div class="p-4 border-b border-gray-100 bg-[#FFF8ea] cursor-pointer"><h3 class="font-bold text-sm text-gray-800 mb-1">UK VAT Threshold Research</h3><p class="text-xs text-gray-500 line-clamp-2">Meeting notes regarding the new threshold changes for 2025...</p><span class="text-[10px] text-gray-400 mt-2 block">10:42 AM</span></div></div>
+                </div>
+                <div class="flex-1 bg-white p-10 overflow-y-auto">
+                     <div class="flex justify-between items-center mb-6 md:hidden"><button class="text-gray-500" onclick="appManager.switchTab('chat')">Back</button></div>
+                    <div class="text-gray-400 text-xs text-center mb-6">Today at 10:42 AM</div>
+                    <h1 class="text-2xl font-bold text-gray-900 mb-4">UK VAT Threshold Research</h1>
+                    <div class="prose prose-stone text-gray-700"><p>Research conducted using TaxPilot AI.</p><ul><li>Current threshold confirmed at £90,000 (frozen).</li></ul></div>
+                </div>
+            </div>
         </main>
     </div>
+
+    <div id="modal-privacy" class="fixed inset-0 z-[200] hidden bg-black/30 backdrop-blur-sm flex items-center justify-center" onclick="if(event.target.id === 'modal-privacy') modalManager.close('privacy')"><div class="bg-white p-8 rounded-2xl max-w-lg shadow-2xl animate-fade-in"><h2 class="text-2xl font-bold mb-4">Privacy Policy</h2><p class="text-gray-600 mb-4">We do not store your client data.</p><button class="bg-black text-white px-4 py-2 rounded-lg" onclick="modalManager.close('privacy')">Close</button></div></div>
+    <div id="modal-terms" class="fixed inset-0 z-[200] hidden bg-black/30 backdrop-blur-sm flex items-center justify-center" onclick="if(event.target.id === 'modal-terms') modalManager.close('terms')"><div class="bg-white p-8 rounded-2xl max-w-lg shadow-2xl animate-fade-in"><h2 class="text-2xl font-bold mb-4">Terms of Service</h2><p class="text-gray-600 mb-4">TaxPilot is an informational tool.</p><button class="bg-black text-white px-4 py-2 rounded-lg" onclick="modalManager.close('terms')">Close</button></div></div>
 
     <script>
         // --- AUTH & HISTORY ---
@@ -272,11 +333,19 @@
                 document.getElementById('auth-view').classList.add('hidden');
                 document.getElementById('profile-view').classList.add('hidden');
                 document.getElementById('app-view').classList.remove('hidden');
-                typewriterController.start();
+                typewriterController.stop();
             },
+            switchTab(tab) {
+                document.querySelectorAll('#nav-chat, #nav-reminders, #nav-notes').forEach(el => el.classList.remove('bg-white', 'shadow-sm', 'text-apple-blue'));
+                document.getElementById('nav-' + tab).classList.add('bg-white', 'shadow-sm', 'text-apple-blue');
+                document.getElementById('view-chat').classList.add('hidden');
+                document.getElementById('view-reminders').classList.add('hidden');
+                document.getElementById('view-notes').classList.add('hidden');
+                document.getElementById('view-' + tab).classList.remove('hidden');
+            }
         };
 
-        // --- HYBRID CHAT LOGIC (API + SAFE FALLBACK) ---
+        // --- HYBRID CHAT LOGIC (REAL AI + FALLBACK) ---
         const messageController = {
             handleEnter(e) { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.sendMessage(); }},
             async sendMessage(overrideText) {
@@ -284,18 +353,23 @@
                 const text = overrideText || input.value.trim();
                 if(!text) return;
                 
-                // Show User Message
+                // 1. Show User Message
                 const stream = document.getElementById('chat-stream');
                 const userDiv = document.createElement('div');
                 userDiv.className = 'flex justify-end animate-fade-in max-w-3xl mx-auto w-full';
                 userDiv.innerHTML = `<div class="user-bubble px-4 py-2.5 text-[15px] max-w-[80%]">${text}</div>`;
                 stream.appendChild(userDiv);
-                
-                input.value = '';
-                stream.scrollTop = stream.scrollHeight;
+                input.value = ''; stream.scrollTop = stream.scrollHeight;
                 chatHistory.add(text);
 
-                // Add Loading
+                // 2. CHECK LOCAL BRAIN FIRST (Instant, "Hero" Answers)
+                const localResponse = checkLocalBrain(text);
+                if (localResponse) {
+                    setTimeout(() => renderAIResponse(localResponse, stream), 600); // Slight delay for realism
+                    return;
+                }
+
+                // 3. IF NO LOCAL MATCH -> CALL VERCEL API
                 const loadingDiv = document.createElement('div');
                 loadingDiv.className = 'flex gap-4 max-w-3xl mx-auto w-full animate-fade-in';
                 loadingDiv.id = "loading-bubble";
@@ -304,7 +378,6 @@
                 stream.scrollTop = stream.scrollHeight;
 
                 try {
-                    // 1. Try Vercel Backend
                     const response = await fetch('/api/chat', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -313,24 +386,25 @@
                     
                     const data = await response.json();
                     document.getElementById("loading-bubble").remove();
-
+                    
                     if (data.result) {
-                        renderResponse(data.result, stream);
+                        renderAIResponse(data.result, stream);
                     } else {
-                        // 2. If Backend returns empty (Fallback)
-                        renderResponse(generateSimulationResponse(text), stream);
+                        // FALLBACK TO SIMULATION IF SERVER FAILS
+                        renderAIResponse(generateSimulationResponse(text), stream);
                     }
 
                 } catch (e) {
-                    console.error("Using Fallback Brain:", e);
+                    console.error(e);
                     document.getElementById("loading-bubble").remove();
-                    // 3. If Backend Fails Completely (Fallback)
-                    renderResponse(generateSimulationResponse(text), stream);
+                    // FALLBACK TO SIMULATION
+                    renderAIResponse(generateSimulationResponse(text), stream);
                 }
             }
         };
 
-        function renderResponse(markdownText, stream) {
+        // --- HELPER: RENDER AI RESPONSE ---
+        function renderAIResponse(markdownText, stream) {
             const aiDiv = document.createElement('div');
             aiDiv.className = 'flex gap-4 max-w-3xl mx-auto w-full animate-fade-in';
             aiDiv.innerHTML = `
@@ -339,6 +413,7 @@
                     <div class="ai-bubble text-[15px] leading-relaxed prose prose-sm max-w-none text-gray-800">${marked.parse(markdownText)}</div>
                     <div class="flex gap-2 mt-3">
                         <button class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-600 transition flex items-center gap-2"><i class="fa-solid fa-list text-blue-500"></i> Key Summary</button>
+                        <button class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-600 transition flex items-center gap-2"><i class="fa-solid fa-file-pdf text-red-500"></i> Export PDF</button>
                     </div>
                 </div>
             `;
@@ -346,12 +421,22 @@
             stream.scrollTop = stream.scrollHeight;
         }
 
-        // --- FALLBACK BRAIN (CRASH PROOFING) ---
-        function generateSimulationResponse(query) {
+        // --- LOCAL BRAIN (FOR HERO DEMOS) ---
+        function checkLocalBrain(query) {
             const q = query.toLowerCase();
-            if(q.includes('malaysia')) return `**Malaysia Corporate Tax (YA 2025)**\n\n* **Standard Rate:** 24%\n* **SME Rate:** 15% on first RM150k, 17% next RM450k.\n\n[Source: LHDN Official Portal]`;
-            if(q.includes('dubai') || q.includes('uae')) return `**UAE Corporate Tax (2025)**\n\n* **Rate:** 9% on profits > AED 375,000.\n* **0%** on qualifying Free Zone income.\n\n[Source: FTA Decree-Law 47]`;
-            return `I am analyzing the global tax database for **${query}**.\n\n* **Standard Rate:** Retrieving latest 2025 data...\n* **Status:** Please verify with a local tax authority.\n\n[Source: Global Tax Regulations 2025]`;
+            if(q === 'hi' || q === 'hello') return "Hi! How can I help you with your tax research today?";
+            
+            // Hero: Dubai
+            if(q.includes('dubai') || q.includes('uae')) return `Here is the tax situation in **Dubai (UAE) as of 2025**:\n\n* ✅ **Personal Income Tax:** **0%**. Salaries aren't taxed.\n* 🏢 **Corporate Tax:** **9%** on profits > AED 375,000. (0% below threshold).\n* 🌍 **Global Minimum Tax:** Applies to MNEs with revenue > €750m (15% rate).\n* 🛍️ **VAT:** **5%** standard rate.\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=tax.gov.ae"> Source: FTA Federal Decree-Law No. 47 [Verified]</a>`;
+            
+            // Hero: Malaysia
+            if(q.includes('malaysia')) return `Here is the breakdown for **Malaysia Corporate Income Tax (YA 2025)**:\n\n* ✅ **Standard Rate:** **24%**. Applies to resident & non-resident companies.\n* 📉 **SME Preferential Rates** (Paid-up capital ≤ RM2.5m):\n    * **15%** on first RM 150,000.\n    * **17%** on RM 150,001 to RM 600,000.\n    * **24%** on balance.\n\n<a href="#" class="source-chip"><img src="https://www.google.com/s2/favicons?domain=hasil.gov.my"> Source: LHDN Official Portal [Verified]</a>`;
+
+            return null; // Return null means "Go use the Real API"
+        }
+
+        function generateSimulationResponse(query) {
+             return `**Researching: ${query}**\n\nI am analyzing the global tax database for 2025...\n\n* **Status:** Retrieving latest circulars...\n* **Action:** Please specify a Country (e.g., Malaysia, UAE) for a verified citation.\n\n<div class="source-chip"><i class="fa-solid fa-circle-notch fa-spin"></i> Indexing Global Tax Laws...</div>`;
         }
 
         // --- UTILS ---
@@ -373,6 +458,11 @@
                 }
                 this.timeout = setTimeout(() => this.tick(), this.isDeleting ? 30 : 80);
             }
+        };
+
+        const modalManager = {
+            open(id) { document.getElementById('modal-'+id).classList.remove('hidden'); },
+            close(id) { document.getElementById('modal-'+id).classList.add('hidden'); }
         };
 
         function scrollToSection(id) {
