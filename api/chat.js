@@ -1,10 +1,9 @@
-// api/chat.js
 export const config = {
-    runtime: 'edge', // Essential for speed
+    runtime: 'edge',
 };
 
 export default async function handler(req) {
-    // 1. CORS Setup (Essential for your frontend to talk to this backend)
+    // 1. CORS Headers (Allows your website to talk to this server)
     if (req.method === 'OPTIONS') {
         return new Response(null, {
             headers: {
@@ -20,14 +19,15 @@ export default async function handler(req) {
     }
 
     try {
+        // 2. Get Message & API Key
         const { message } = await req.json();
         const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey) {
-            return new Response(JSON.stringify({ error: 'Server Config Error: API Key missing' }), { status: 500 });
+            return new Response(JSON.stringify({ error: 'Configuration Error: API Key missing in Vercel' }), { status: 500 });
         }
 
-        // 2. Call Google Gemini
+        // 3. Call Google Gemini
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
             {
@@ -36,14 +36,13 @@ export default async function handler(req) {
                 body: JSON.stringify({
                     contents: [{
                         parts: [{
-                            text: `You are TaxPilot, a professional AI tax consultant. 
+                            text: `You are TaxPilot, a professional tax research AI. 
                             User Question: ${message}
-                            
-                            Instructions: 
-                            - Answer professionally for 2025 tax regulations.
+                            Instructions:
+                            - Answer based on 2025 tax regulations.
                             - Use Markdown (bolding, lists).
-                            - Cite authoritative sources (e.g. [Source: IRS]).
-                            - Keep it concise.`
+                            - Cite authoritative sources (e.g. [Source: HMRC]).
+                            - Be professional and concise.`
                         }]
                     }]
                 })
@@ -52,7 +51,7 @@ export default async function handler(req) {
 
         const data = await response.json();
         const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
-        
+
         return new Response(JSON.stringify({ result: answer }), {
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
         });
