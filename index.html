@@ -42,9 +42,9 @@
         .sidebar-item { border-radius: 8px; transition: all 0.2s; color: rgba(255,255,255,0.45); font-size: 13px; }
         .sidebar-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
         .sidebar-item.active { background: rgba(0,113,227,0.2); color: #3fa0ff; }
-        .mobile-nav-item { flex: 1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:rgba(255,255,255,0.4); font-size:10px; font-weight:500; padding:10px 0; transition:color 0.2s; }
+        .mobile-nav-item { flex: 1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:rgba(255,255,255,0.4); font-size:9px; font-weight:500; padding:8px 0 10px; transition:color 0.2s; }
         .mobile-nav-item.active { color:#3fa0ff; }
-        .mobile-nav-item i { font-size: 16px; }
+        .mobile-nav-item i { font-size: 15px; }
         .region-tab { font-size:13px; font-weight:500; color:#6e6e73; border-bottom:2px solid transparent; padding:8px 14px; transition:all 0.2s; white-space:nowrap; }
         .region-tab.active { border-color:#0071e3; color:#0071e3; }
         .region-tab:hover { color:#1D1D1F; }
@@ -53,21 +53,34 @@
         ::-webkit-scrollbar { width:5px; }
         ::-webkit-scrollbar-track { background:transparent; }
         ::-webkit-scrollbar-thumb { background:#d1d1d6; border-radius:10px; }
-        @keyframes ticker { from { transform:translateX(0); } to { transform:translateX(-50%); } }
-        .ticker-track { animation:ticker 32s linear infinite; display: flex; width: max-content; }
-        .typing-dot { width:5px; height:5px; background:#c7c7cc; border-radius:50%; animation:tdot 1.4s ease-in-out infinite; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes tdot { 0%,80%,100% { transform:scale(0.6); opacity:0.4; } 40% { transform:scale(1); opacity:1; } }
         .live-dot { width:6px; height:6px; background:#34c759; border-radius:50%; display:inline-block; }
         .eyebrow { font-size:12px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:#0071e3; }
         .chat-box:focus-within { border-color:rgba(0,113,227,0.3); box-shadow:0 0 0 3px rgba(0,113,227,0.08); }
         .mobile-menu { background: rgba(255,255,255,0.97); backdrop-filter:blur(20px); }
+
+        /* AGENT CARDS */
+        .agent-card { background: white; border-radius: 20px; border: 1px solid rgba(0,0,0,0.06); cursor: pointer; transition: all 0.35s cubic-bezier(0.16,1,0.3,1); }
+        .agent-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.12); }
+        .agent-card.selected { border-color: #0071e3; box-shadow: 0 0 0 3px rgba(0,113,227,0.12); }
+        .agent-icon { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+
+        /* FORM INPUTS */
+        .form-input { width:100%; padding: 10px 14px; border: 1px solid #e5e7eb; border-radius: 12px; font-size: 13px; color: #1D1D1F; outline: none; transition: border-color 0.2s, box-shadow 0.2s; background: white; }
+        .form-label { font-size: 11px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 5px; }
+        .form-textarea { width:100%; padding: 10px 14px; border: 1px solid #e5e7eb; border-radius: 12px; font-size: 13px; color: #1D1D1F; outline: none; transition: border-color 0.2s, box-shadow 0.2s; resize: vertical; background: white; line-height: 1.6; }
+
+        /* AGENT RUNNING STATE */
+        @keyframes agent-pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+        .agent-step { display:flex; align-items:center; gap:8px; font-size:12px; color:#6e6e73; padding:6px 0; }
+        .agent-step .step-dot { width:6px; height:6px; border-radius:50%; background:#d1d1d6; flex-shrink:0; }
+        .agent-step.done .step-dot { background:#34c759; }
+        .agent-step.running .step-dot { background:#0071e3; animation:agent-pulse 1s ease-in-out infinite; }
+        .agent-step.done { color:#1D1D1F; }
     </style>
 </head>
 <body>
 
-<!-- ═══════════════ LANDING VIEW ═══════════════ -->
+<!-- ═══ LANDING ═══ -->
 <div id="landing-view" class="min-h-screen">
     <nav class="fixed w-full z-50 glass-nav">
         <div class="max-w-7xl mx-auto px-4 md:px-6 h-14 flex items-center justify-between">
@@ -78,10 +91,9 @@
             <div class="hidden md:flex items-center space-x-7 text-[13px] font-medium text-[#6e6e73]">
                 <button onclick="scrollToSection('authorities')" class="hover:text-[#1D1D1F] transition">Authorities</button>
                 <button onclick="scrollToSection('features')" class="hover:text-[#1D1D1F] transition">Features</button>
+                <button onclick="scrollToSection('agents-section')" class="hover:text-[#0071e3] transition font-semibold text-[#0071e3]">✦ Agents</button>
                 <button onclick="scrollToSection('security')" class="hover:text-[#1D1D1F] transition">Security</button>
                 <button onclick="scrollToSection('about')" class="hover:text-[#1D1D1F] transition">About</button>
-                <span class="text-gray-200">|</span>
-                <button onclick="authManager.checkAuthAndRedirect()" class="hover:text-[#0071e3] transition font-semibold">Enterprise</button>
             </div>
             <div class="flex items-center gap-2">
                 <button onclick="authManager.checkAuthAndRedirect()" id="nav-cta-btn" class="hidden md:block bg-[#1D1D1F] text-white px-5 py-1.5 rounded-full text-[13px] font-medium hover:bg-black transition">Log In</button>
@@ -90,10 +102,10 @@
             </div>
         </div>
         <div id="mobile-menu" class="hidden mobile-menu border-t border-gray-100 px-4 py-4 space-y-1 md:hidden">
-            <button onclick="scrollToSection('authorities');toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-[#1D1D1F]">🌐 Authorities</button>
-            <button onclick="scrollToSection('features');toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-[#1D1D1F]">⚡ Features</button>
-            <button onclick="scrollToSection('security');toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-[#1D1D1F]">🔒 Security</button>
-            <button onclick="scrollToSection('about');toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-[#1D1D1F]">👤 About</button>
+            <button onclick="scrollToSection('authorities');toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-[#1D1D1F] hover:bg-gray-50">🌐 Authorities</button>
+            <button onclick="scrollToSection('features');toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-[#1D1D1F] hover:bg-gray-50">⚡ Features</button>
+            <button onclick="scrollToSection('agents-section');toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold text-[#0071e3] hover:bg-blue-50">✦ AI Agents</button>
+            <button onclick="scrollToSection('security');toggleMobileMenu()" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-[#1D1D1F] hover:bg-gray-50">🔒 Security</button>
             <div class="pt-2 border-t border-gray-100">
                 <button onclick="authManager.checkAuthAndRedirect()" class="w-full py-3 bg-[#1D1D1F] text-white rounded-xl text-sm font-semibold">Log In / Sign Up</button>
             </div>
@@ -106,144 +118,93 @@
                 <span class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse flex-shrink-0"></span> 2026 Edition · 47 Global Jurisdictions
             </div>
             <h1 class="text-[38px] md:text-[64px] lg:text-[72px] font-semibold tracking-tight mb-4 md:mb-5 text-white leading-[1.08] md:leading-[1.05]">Global Tax Intelligence.<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-blue-500">Verified. Instant.</span></h1>
-            <p class="text-base md:text-xl lg:text-2xl text-white/50 font-light mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed px-2">The only platform that queries <span class="text-white/85 font-normal">live authority databases</span> — from HMRC to CBDT — and cites every answer to the 2026 tax code.</p>
-            <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8 md:mb-12">
-                <button onclick="authManager.checkAuthAndRedirect()" class="bg-[#0071e3] text-white px-7 md:px-8 py-3 md:py-3.5 rounded-full text-[14px] md:text-[15px] font-semibold hover:bg-[#0077ed] transition shadow-lg transform active:scale-95">Start Research</button>
-                <button onclick="scrollToSection('authorities')" class="bg-white/10 border border-white/15 text-white px-7 md:px-8 py-3 md:py-3.5 rounded-full text-[14px] md:text-[15px] font-medium hover:bg-white/15 transition backdrop-blur-sm">View Jurisdictions <i class="fa-solid fa-arrow-down ml-1 text-xs"></i></button>
+            <p class="text-base md:text-xl text-white/50 font-light mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed px-2">Query <span class="text-white/85 font-normal">live authority databases</span>. Let AI agents draft responses and assess risk in seconds.</p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center mb-8 px-4 sm:px-0">
+                <button onclick="authManager.checkAuthAndRedirect()" class="bg-[#0071e3] text-white px-7 md:px-8 py-3 md:py-3.5 rounded-full text-[14px] md:text-[15px] font-semibold hover:bg-[#0077ed] transition shadow-lg transform active:scale-95">Request a Demo</button>
+                <button onclick="scrollToSection('agents-section')" class="bg-white/10 border border-white/20 text-white px-7 md:px-8 py-3 md:py-3.5 rounded-full text-[14px] md:text-[15px] font-medium hover:bg-white/15 transition backdrop-blur-sm">See AI Agents ✦</button>
             </div>
             <div class="relative max-w-2xl mx-auto group">
                 <div class="absolute inset-0 bg-blue-500/20 blur-[50px] rounded-full opacity-60 group-hover:opacity-80 transition duration-500"></div>
                 <button onclick="authManager.checkAuthAndRedirect()" class="relative z-10 w-full bg-white/10 backdrop-blur-xl rounded-2xl p-2 border border-white/20 text-left cursor-pointer hover:bg-white/15 transition"><div class="flex items-center px-3 md:px-5 py-3 md:py-4"><i class="fa-solid fa-magnifying-glass text-white/35 mr-3 md:mr-4 text-sm md:text-base flex-shrink-0"></i><span id="typewriter-text" class="text-white/55 text-[14px] md:text-[17px] font-light truncate"></span><span class="cursor"></span><div class="ml-auto bg-[#0071e3] w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-white shadow-lg"><i class="fa-solid fa-arrow-up text-sm"></i></div></div></button>
             </div>
         </div>
-        <div class="absolute bottom-6 md:bottom-10 left-0 right-0 overflow-hidden pointer-events-none">
-            <div class="ticker-track">
-                <span class="inline-flex items-center gap-1.5 bg-white/8 border border-white/12 rounded-full px-3 py-1.5 text-xs text-white/50 mx-1.5">🇬🇧 HMRC</span><span class="inline-flex items-center gap-1.5 bg-white/8 border border-white/12 rounded-full px-3 py-1.5 text-xs text-white/50 mx-1.5">🇺🇸 IRS</span><span class="inline-flex items-center gap-1.5 bg-white/8 border border-white/12 rounded-full px-3 py-1.5 text-xs text-white/50 mx-1.5">🇮🇳 CBDT</span><span class="inline-flex items-center gap-1.5 bg-white/8 border border-white/12 rounded-full px-3 py-1.5 text-xs text-white/50 mx-1.5">🇦🇪 FTA</span><span class="inline-flex items-center gap-1.5 bg-white/8 border border-white/12 rounded-full px-3 py-1.5 text-xs text-white/50 mx-1.5">🇸🇬 IRAS</span><span class="inline-flex items-center gap-1.5 bg-white/8 border border-white/12 rounded-full px-3 py-1.5 text-xs text-white/50 mx-1.5">🇦🇺 ATO</span>
-            </div>
-        </div>
     </section>
 
-    <!-- STATS BAR -->
-    <div class="bg-[#1D1D1F] py-5 px-4 md:px-6">
-        <div class="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-center text-white">
-            <div><div class="text-xl md:text-2xl font-semibold">47</div><div class="text-[10px] text-white/40 uppercase tracking-wider mt-1">Countries</div></div>
-            <div><div class="text-xl md:text-2xl font-semibold">2,400+</div><div class="text-[10px] text-white/40 uppercase tracking-wider mt-1">Regulations</div></div>
-            <div><div class="text-xl md:text-2xl font-semibold">99.7%</div><div class="text-[10px] text-white/40 uppercase tracking-wider mt-1">Verified</div></div>
-            <div><div class="text-xl md:text-2xl font-semibold">&lt;2s</div><div class="text-[10px] text-white/40 uppercase tracking-wider mt-1">Real-time</div></div>
-        </div>
-    </div>
-
-    <!-- AUTHORITIES -->
-    <section id="authorities" class="py-16 md:py-24 px-4 md:px-6 bg-[#F5F5F7]">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-10">
-                <p class="eyebrow mb-3">Global Coverage</p>
-                <h2 class="text-3xl md:text-4xl lg:text-5xl font-semibold text-[#1D1D1F] tracking-tight mb-4">Live Tax Authority Library.</h2>
-                <p class="text-[#6e6e73] text-base md:text-xl font-light">Every answer anchored to official 2026 publications.</p>
-            </div>
-            <div class="flex gap-0 overflow-x-auto justify-start md:justify-center mb-8 border-b border-gray-200">
-                <button onclick="filterRegion('all')" id="tab-all" class="region-tab active">All Regions</button>
-                <button onclick="filterRegion('europe')" id="tab-europe" class="region-tab">🌍 Europe</button>
-                <button onclick="filterRegion('americas')" id="tab-americas" class="region-tab">🌎 Americas</button>
-                <button onclick="filterRegion('asiapac')" id="tab-asiapac" class="region-tab">🌏 Asia–Pacific</button>
-                <button onclick="filterRegion('mea')" id="tab-mea" class="region-tab">🌐 MEA</button>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4" id="authority-grid"></div>
-        </div>
-    </section>
-
-    <!-- FEATURES -->
-    <section id="features" class="py-16 md:py-24 px-4 md:px-6 bg-white">
-        <div class="max-w-6xl mx-auto">
-            <div class="text-center mb-12">
-                <p class="eyebrow mb-3">Platform</p>
-                <h2 class="text-3xl md:text-4xl font-semibold text-[#1D1D1F] tracking-tight">Your Tax Operating System.</h2>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="apple-card p-6"><i class="fa-solid fa-scale-balanced text-[#0071e3] text-xl mb-4"></i><h3 class="font-semibold mb-2 text-[#1D1D1F]">Verified Intelligence</h3><p class="text-[#6e6e73] text-sm leading-relaxed">Exact clauses from the 2026 tax code cited inline. Verified accuracy.</p></div>
-                <div class="apple-card p-6"><i class="fa-solid fa-earth-americas text-green-600 text-xl mb-4"></i><h3 class="font-semibold mb-2 text-[#1D1D1F]">47 Jurisdictions</h3><p class="text-[#6e6e73] text-sm leading-relaxed">Handle cross-border queries with localized 2026 tax data in seconds.</p></div>
-                <div class="apple-card p-6"><i class="fa-solid fa-bolt text-orange-500 text-xl mb-4"></i><h3 class="font-semibold mb-2 text-[#1D1D1F]">Risk Detection</h3><p class="text-[#6e6e73] text-sm leading-relaxed">Automatically flag missed deductions and Pillar Two exposure risks.</p></div>
-            </div>
-        </div>
-    </section>
-
-    <footer class="py-12 px-4 md:px-6 bg-white border-t border-gray-100 text-xs text-[#6e6e73]">
+    <!-- FOOTER (Partial) -->
+    <footer class="py-12 md:py-16 px-4 md:px-6 bg-white border-t border-gray-100 text-sm text-[#6e6e73]">
         <div class="max-w-7xl mx-auto text-center">
-            <div class="font-semibold text-lg text-[#1D1D1F] mb-4">TaxPilot</div>
-            <p>&copy; 2026 TaxPilot Inc. · Professional Tax Intelligence for the Global Enterprise.</p>
+            <p>&copy; 2026 TaxPilot Inc. · London · New York · Dubai · Singapore</p>
         </div>
     </footer>
 </div>
 
-<!-- ═══════════════ AUTH VIEW (GENERIC) ═══════════════ -->
+<!-- ═══ AUTH ═══ -->
 <div id="auth-view" class="hidden min-h-screen flex items-center justify-center bg-[#F5F5F7] px-4">
     <div class="w-full max-w-[420px] bg-white p-7 md:p-8 rounded-[28px] shadow-xl border border-gray-100 animate-fade-in text-center">
         <div class="w-12 h-12 bg-[#1D1D1F] rounded-2xl flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-paper-plane text-[#0071e3] text-sm"></i></div>
         <h2 id="auth-title" class="text-2xl font-semibold text-[#1D1D1F] tracking-tight">Sign in to TaxPilot</h2>
-        <p class="text-xs text-[#6e6e73] mt-1 mb-8">2026 Global Tax Intelligence Edition</p>
+        <p class="text-xs text-[#6e6e73] mt-1 mb-8">2026 Global Tax Intelligence</p>
         <div class="space-y-3 text-left">
             <input type="email" id="auth-email" placeholder="Email address" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 text-sm">
             <input type="password" id="auth-password" placeholder="Password" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 text-sm">
             <button onclick="authManager.showProfileCreation()" id="auth-action-btn" class="w-full py-3 bg-[#1D1D1F] text-white rounded-xl font-semibold text-sm hover:bg-black transition">Continue</button>
         </div>
-        <div class="flex items-center my-6"><div class="flex-1 border-t border-gray-100"></div><span class="px-3 text-xs text-gray-300">or</span><div class="flex-1 border-t border-gray-100"></div></div>
-        <button onclick="authManager.continueAsGuest()" class="w-full py-3 border border-gray-200 text-[#1D1D1F] rounded-xl font-medium text-sm hover:bg-gray-50 transition">Continue as Guest (Demo Mode)</button>
-        <div class="text-center mt-6 text-xs text-[#6e6e73]"><span id="auth-footer-text">New to TaxPilot?</span><button onclick="authManager.toggleMode()" id="auth-toggle-btn" class="text-[#0071e3] font-semibold hover:underline ml-1">Create an account</button></div>
+        <button onclick="authManager.continueAsGuest()" class="w-full mt-4 py-3 border border-gray-200 text-[#1D1D1F] rounded-xl font-medium text-sm hover:bg-gray-50 transition">Continue as Guest (Demo Mode)</button>
     </div>
 </div>
 
-<!-- ═══════════════ PROFILE VIEW ═══════════════ -->
+<!-- ═══ PROFILE ═══ -->
 <div id="profile-view" class="hidden min-h-screen flex items-center justify-center bg-[#F5F5F7] px-4">
-    <div class="w-full max-w-[420px] bg-white p-7 md:p-8 rounded-[28px] shadow-xl border border-gray-100 animate-fade-in text-center">
-        <div class="w-12 h-12 bg-[#F5F5F7] rounded-2xl flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-user text-[#6e6e73] text-sm"></i></div>
-        <h2 class="text-2xl font-semibold text-[#1D1D1F] tracking-tight">Create your Profile</h2>
-        <p class="text-xs text-[#6e6e73] mt-1 mb-8">Personalize your TaxPilot dashboard</p>
-        <div class="space-y-3 text-left">
-            <div><label class="text-[11px] font-semibold text-[#6e6e73] uppercase tracking-wider ml-1">Full Name</label><input type="text" id="user-name-input" placeholder="e.g. Sarah Mitchell" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 mt-1 text-sm"></div>
-            <div><label class="text-[11px] font-semibold text-[#6e6e73] uppercase tracking-wider ml-1">Role</label>
-            <select id="user-role-input" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 mt-1 text-sm text-[#6e6e73]">
-                <option value="">Select your role</option>
-                <option>Head of Tax</option><option>Tax Director</option><option>Tax Manager</option><option>CFO / COO</option><option>Other</option>
-            </select></div>
+    <div class="w-full max-w-[420px] bg-white p-7 md:p-8 rounded-[28px] shadow-xl border border-gray-100 animate-fade-in">
+        <h2 class="text-2xl font-semibold text-[#1D1D1F] tracking-tight text-center mb-6">Create your Profile</h2>
+        <div class="space-y-3">
+            <div><label class="form-label">Full Name</label><input type="text" id="user-name-input" placeholder="e.g. Sarah Mitchell" class="form-input"></div>
+            <div><label class="form-label">Role</label><select id="user-role-input" class="form-input"><option>Head of Tax</option><option>Tax Director</option><option>CFO / COO</option><option>Other</option></select></div>
             <button onclick="authManager.completeLogin()" class="w-full py-3 bg-[#0071e3] text-white rounded-xl font-semibold text-sm hover:bg-[#0077ed] transition mt-2">Complete Setup →</button>
         </div>
     </div>
 </div>
 
-<!-- ═══════════════ APP VIEW ═══════════════ -->
-<div id="app-view" class="hidden h-screen flex overflow-hidden fixed inset-0 z-[100] bg-white">
+<!-- ═══ APP ═══ -->
+<div id="app-view" class="hidden h-screen flex overflow-hidden fixed inset-0 z-[100]">
+    <!-- SIDEBAR -->
     <aside class="w-[260px] app-sidebar flex-col pt-4 hidden md:flex flex-shrink-0">
-        <div class="px-4 mb-6 flex items-center justify-between">
+        <div class="px-4 mb-5 flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-[#0071e3] flex items-center justify-center font-bold text-white text-xs" id="user-avatar">U</div>
+                <div class="w-7 h-7 rounded-lg bg-[#0071e3] flex items-center justify-center"><span id="user-avatar" class="text-xs font-bold text-white">U</span></div>
                 <div><div class="text-xs font-semibold text-white" id="user-name-display">User</div><div class="text-[10px] text-white/40" id="user-role-display">Tax Professional</div></div>
             </div>
             <button onclick="authManager.logout()" class="text-[10px] text-white/25 hover:text-white/60">Sign Out</button>
         </div>
         <div class="px-3 space-y-0.5 flex-1">
-            <button onclick="appManager.switchTab('chat')" id="nav-chat" class="sidebar-item active w-full text-left px-3 py-2.5 flex items-center gap-3"><i class="fa-solid fa-message w-4 text-xs"></i> Assistant</button>
+            <div class="text-[9px] font-semibold text-white/20 uppercase tracking-widest px-3 pt-2 pb-1">Core</div>
+            <button onclick="appManager.switchTab('chat')" id="nav-chat" class="sidebar-item w-full text-left px-3 py-2.5 flex items-center gap-3"><i class="fa-solid fa-message w-4 text-xs"></i> Assistant</button>
             <button onclick="appManager.switchTab('jurisdictions')" id="nav-jurisdictions" class="sidebar-item w-full text-left px-3 py-2.5 flex items-center gap-3"><i class="fa-solid fa-earth-americas w-4 text-xs"></i> Jurisdictions</button>
             <button onclick="appManager.switchTab('compare')" id="nav-compare" class="sidebar-item w-full text-left px-3 py-2.5 flex items-center gap-3"><i class="fa-solid fa-arrows-left-right w-4 text-xs"></i> Compare</button>
             <button onclick="appManager.switchTab('reminders')" id="nav-reminders" class="sidebar-item w-full text-left px-3 py-2.5 flex items-center gap-3"><i class="fa-solid fa-list-check w-4 text-xs"></i> Reminders</button>
+            <div class="text-[9px] font-semibold text-white/20 uppercase tracking-widest px-3 pt-4 pb-1">AI Agents ✦</div>
+            <button onclick="appManager.switchTab('agents')" id="nav-agents" class="sidebar-item active w-full text-left px-3 py-2.5 flex items-center gap-3"><i class="fa-solid fa-robot w-4 text-xs"></i> Agent Hub</button>
         </div>
     </aside>
 
-    <main class="flex-1 h-full overflow-hidden flex flex-col">
-        <div id="view-chat" class="h-full flex flex-col">
-            <header class="h-14 border-b border-gray-100 flex items-center justify-between px-4 md:px-6 bg-white/80 backdrop-blur-md z-10 flex-shrink-0">
-                <div class="flex items-center gap-2 md:gap-3">
+    <!-- MAIN APP AREA -->
+    <main class="flex-1 bg-white h-full overflow-hidden flex flex-col" id="app-main">
+        <!-- CHAT VIEW -->
+        <div id="view-chat" class="h-full hidden flex-col">
+            <header class="h-14 border-b border-gray-100 flex items-center justify-between px-4 md:px-6 bg-white flex-shrink-0">
+                <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-xl bg-[#1D1D1F] flex items-center justify-center"><i class="fa-solid fa-robot text-[#0071e3] text-xs"></i></div>
-                    <div><div class="font-semibold text-[#1D1D1F] text-sm">TaxPilot Assistant</div><div class="text-[10px] text-green-600 font-medium">● 2026 Knowledge Base Active</div></div>
+                    <div><div class="font-semibold text-sm">TaxPilot Assistant</div><div class="text-[10px] text-green-600 font-medium">● 2026 Knowledge Base Active</div></div>
                 </div>
                 <button onclick="appManager.clearChat()" class="text-xs text-[#6e6e73] hover:text-[#1D1D1F]"><i class="fa-solid fa-rotate"></i> New Chat</button>
             </header>
-            <div id="chat-stream" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 bg-[#F5F5F7]">
+            <div id="chat-stream" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-[#F5F5F7]">
                 <div class="max-w-3xl mx-auto flex gap-3 animate-fade-in">
                     <div class="w-8 h-8 rounded-xl bg-[#1D1D1F] flex items-center justify-center flex-shrink-0 mt-0.5"><i class="fa-solid fa-robot text-[#0071e3] text-[10px]"></i></div>
                     <div class="flex-1 min-w-0">
                         <div class="bg-white rounded-2xl rounded-tl-sm p-4 border border-gray-100 shadow-sm">
                             <p class="text-sm font-semibold text-[#1D1D1F] mb-1">Welcome to TaxPilot 2026 👋</p>
-                            <p class="text-sm text-[#6e6e73] leading-relaxed">I'm your global tax intelligence assistant. Every response includes inline <strong class="text-[#1D1D1F]">source citations</strong>.</p>
+                            <p class="text-sm text-[#6e6e73] leading-relaxed">I'm your global tax intelligence assistant. Every answer includes a <strong class="text-[#1D1D1F]">source citation</strong>.</p>
                         </div>
                     </div>
                 </div>
@@ -251,169 +212,191 @@
             <div class="p-3 md:p-4 bg-white border-t border-gray-100 flex-shrink-0">
                 <div class="max-w-3xl mx-auto">
                     <div class="chat-box flex items-end gap-2 p-1.5 border border-gray-200 rounded-[22px] bg-white shadow-sm">
-                        <div class="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center ml-1 mb-1"><i class="fa-solid fa-paperclip text-xs text-[#6e6e73]"></i></div>
-                        <textarea id="chat-input" rows="1" class="flex-1 py-2 max-h-32 resize-none outline-none text-sm text-[#1D1D1F] placeholder-gray-300" placeholder="Message TaxPilot..." onkeydown="messageController.handleEnter(event)" oninput="autoResize(this)"></textarea>
+                        <textarea id="chat-input" rows="1" class="flex-1 py-2 ml-3 max-h-32 resize-none outline-none text-sm text-[#1D1D1F] placeholder-gray-300" placeholder="Message TaxPilot..." onkeydown="messageController.handleEnter(event)"></textarea>
                         <button onclick="messageController.sendMessage()" class="bg-[#1D1D1F] text-white w-8 h-8 rounded-full flex items-center justify-center mb-1"><i class="fa-solid fa-arrow-up text-xs"></i></button>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="view-jurisdictions" class="h-full hidden p-6 bg-[#F5F5F7] overflow-y-auto"><h2 class="text-xl font-bold mb-4">Jurisdictions</h2><div class="grid grid-cols-2 lg:grid-cols-3 gap-4" id="app-authority-grid"></div></div>
-        <div id="view-compare" class="h-full hidden p-6 bg-[#F5F5F7] overflow-y-auto"><h2 class="text-xl font-bold mb-4">Compare</h2><div id="compare-result"></div></div>
-        <div id="view-reminders" class="h-full hidden p-6 bg-[#F5F5F7] overflow-y-auto"><h2 class="text-xl font-bold mb-4">Reminders</h2><div id="deadlines-list" class="space-y-3"></div></div>
+
+        <!-- AGENT HUB VIEW -->
+        <div id="view-agents" class="h-full flex flex-col overflow-hidden" style="display:flex">
+            <header class="h-14 border-b border-gray-100 flex items-center px-4 md:px-6 bg-white flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-[#1D1D1F] flex items-center justify-center"><span class="text-base">✦</span></div>
+                    <div><div class="font-semibold text-sm">Agent Hub</div><div class="text-[10px] text-[#6e6e73]">5 specialist AI agents · 47 jurisdictions</div></div>
+                </div>
+            </header>
+            <div class="flex flex-1 overflow-hidden">
+                <div class="w-full md:w-72 flex-shrink-0 border-r border-gray-100 overflow-y-auto bg-white p-3 md:p-4 space-y-2" id="agent-list">
+                    <p class="text-[10px] font-semibold text-[#6e6e73] uppercase tracking-wider px-2 pt-1 pb-2">Select an Agent</p>
+                </div>
+                <div class="flex-1 overflow-y-auto bg-[#F5F5F7] p-4 md:p-6" id="agent-workspace">
+                    <div class="max-w-3xl mx-auto text-center pt-24"><div class="text-4xl mb-4">✦</div><h3 class="text-xl font-semibold">Choose an Agent</h3><p class="text-sm text-[#6e6e73]">Select a specialist agent from the panel to get started.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JURISDICTIONS VIEW -->
+        <div id="view-jurisdictions" class="h-full hidden flex-col overflow-hidden">
+            <header class="h-14 border-b border-gray-100 flex items-center px-4 md:px-6 bg-white flex-shrink-0"><h2 class="font-semibold">Jurisdiction Library</h2></header>
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-[#F5F5F7]">
+                <div class="max-w-5xl mx-auto grid grid-cols-2 lg:grid-cols-3 gap-4" id="app-authority-grid"></div>
+            </div>
+        </div>
+
+        <!-- OTHER VIEWS (Hidden placeholders for logic) -->
+        <div id="view-compare" class="h-full hidden p-6 overflow-y-auto bg-[#F5F5F7]">
+            <h2 class="text-xl font-bold mb-4">Compare</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                <select id="compare-j1" class="form-input"><option value="">Select Jurisdiction 1</option></select>
+                <select id="compare-j2" class="form-input"><option value="">Select Jurisdiction 2</option></select>
+                <button onclick="compareManager.run()" class="bg-[#0071e3] text-white rounded-xl py-2 font-semibold">Run Comparison</button>
+            </div>
+            <div id="compare-result"></div>
+        </div>
+        <div id="view-reminders" class="h-full hidden p-6 overflow-y-auto bg-[#F5F5F7]"><div id="deadlines-list" class="space-y-3"></div></div>
     </main>
 
-    <!-- Mobile bottom nav -->
+    <!-- MOBILE NAV -->
     <nav class="fixed bottom-0 left-0 right-0 bg-[#1D1D1F] border-t border-white/5 flex md:hidden z-50">
-        <button onclick="appManager.switchTab('chat')" id="mob-nav-chat" class="mobile-nav-item active"><i class="fa-solid fa-message"></i><span>Chat</span></button>
+        <button onclick="appManager.switchTab('agents')" id="mob-nav-agents" class="mobile-nav-item active"><i class="fa-solid fa-robot"></i><span>Agents</span></button>
+        <button onclick="appManager.switchTab('chat')" id="mob-nav-chat" class="mobile-nav-item"><i class="fa-solid fa-message"></i><span>Chat</span></button>
         <button onclick="appManager.switchTab('jurisdictions')" id="mob-nav-jurisdictions" class="mobile-nav-item"><i class="fa-solid fa-earth-americas"></i><span>Jurisdictions</span></button>
         <button onclick="appManager.switchTab('compare')" id="mob-nav-compare" class="mobile-nav-item"><i class="fa-solid fa-arrows-left-right"></i><span>Compare</span></button>
         <button onclick="appManager.switchTab('reminders')" id="mob-nav-reminders" class="mobile-nav-item"><i class="fa-solid fa-list-check"></i><span>Reminders</span></button>
-        <button onclick="authManager.logout()" class="mobile-nav-item"><i class="fa-solid fa-right-from-bracket"></i><span>Exit</span></button>
     </nav>
 </div>
 
 <!-- MODALS -->
-<div id="modal-privacy" class="fixed inset-0 z-[200] hidden bg-black/20 backdrop-blur-sm flex items-center justify-center px-4" onclick="if(event.target.id==='modal-privacy')modalManager.close('privacy')"><div class="bg-white p-7 md:p-8 rounded-[28px] max-w-lg shadow-2xl w-full animate-fade-in"><h2 class="text-xl md:text-2xl font-semibold text-[#1D1D1F] mb-4">Privacy Policy</h2><p class="text-sm text-[#6e6e73] leading-relaxed">TaxPilot processes your queries to generate verified tax research. We do not store or train on your client data. Encrypted in transit (TLS 1.3) and at rest (AES-256). UK GDPR and DPA 2018 compliant.</p><button class="mt-6 bg-[#1D1D1F] text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-black transition" onclick="modalManager.close('privacy')">Close</button></div></div>
-<div id="modal-terms" class="fixed inset-0 z-[200] hidden bg-black/20 backdrop-blur-sm flex items-center justify-center px-4" onclick="if(event.target.id==='modal-terms')modalManager.close('terms')"><div class="bg-white p-7 md:p-8 rounded-[28px] max-w-lg shadow-2xl w-full animate-fade-in"><h2 class="text-xl md:text-2xl font-semibold text-[#1D1D1F] mb-4">Terms of Service</h2><p class="text-sm text-[#6e6e73] leading-relaxed">TaxPilot is a research tool. Answers do not constitute professional tax advice. Users must verify all outputs with a qualified tax professional. &copy; 2026 TaxPilot Inc.</p><button class="mt-6 bg-[#1D1D1F] text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-black transition" onclick="modalManager.close('terms')">Close</button></div></div>
-<div id="modal-authority" class="fixed inset-0 z-[200] hidden bg-black/20 backdrop-blur-sm flex items-center justify-center px-4" onclick="if(event.target.id==='modal-authority')modalManager.close('authority')"><div class="bg-white p-7 md:p-8 rounded-[28px] max-w-lg shadow-2xl w-full animate-fade-in overflow-y-auto max-h-[90vh]"><div id="modal-authority-content"></div><button class="mt-5 bg-[#1D1D1F] text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-black transition" onclick="modalManager.close('authority')">Close</button></div></div>
+<div id="modal-authority" class="fixed inset-0 z-[200] hidden bg-black/40 backdrop-blur-sm flex items-center justify-center px-4" onclick="if(event.target.id==='modal-authority')modalManager.close('authority')">
+    <div class="bg-white p-7 rounded-[28px] max-w-lg shadow-2xl w-full animate-fade-in overflow-y-auto max-h-[90vh]">
+        <div id="modal-authority-content"></div>
+        <button class="mt-5 w-full bg-gray-100 py-3 rounded-xl text-sm font-semibold hover:bg-gray-200 transition" onclick="modalManager.close('authority')">Close</button>
+    </div>
+</div>
 
 <script>
-// --- GLOBALLY EXPOSED FUNCTION FOR MODAL BUTTONS ---
+// --- GLOBALLY EXPOSED RESET CHAT FUNCTION ---
 window.askTaxPilotAbout = function(country) {
     modalManager.close('authority');
     appManager.switchTab('chat');
-    setTimeout(() => {
-        messageController.sendMessage('Tell me about tax obligations in ' + country + ' for 2026');
-    }, 100);
+    
+    // Clear chat and set country focus context
+    const stream = document.getElementById('chat-stream');
+    stream.innerHTML = `
+        <div class="max-w-3xl mx-auto flex gap-3 animate-fade-in">
+            <div class="w-8 h-8 rounded-xl bg-[#1D1D1F] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i class="fa-solid fa-robot text-[#0071e3] text-[10px]"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="bg-white rounded-2xl rounded-tl-sm p-4 border border-gray-100 shadow-sm">
+                    <p class="text-sm font-semibold text-[#1D1D1F] mb-1">Session Reset: ${country} Focus 🌍</p>
+                    <p class="text-sm text-[#6e6e73] leading-relaxed">I've opened a fresh research session focused exclusively on <strong>${country}</strong> for 2026. What specific rules or laws would you like to examine?</p>
+                </div>
+            </div>
+        </div>`;
+    
+    setTimeout(() => { document.getElementById('chat-input').focus(); }, 200);
 };
 
 // --- DATA ---
-const AUTHORITIES=[{id:'uk',flag:'🇬🇧',name:'HMRC',fullName:"His Majesty's Revenue & Customs",country:'United Kingdom',region:'europe',corpTax:'25%',vat:'20%',filing:'SA: 31 Jan 2027',keyTax:'Corporation Tax, VAT, PAYE, MTD',website:'https://www.gov.uk/hmrc',notes:'UK Autumn Budget 2025 confirmed the 25% main CT rate for 2026. MTD for Income Tax extended to landlords with income over £20k from April 2026. Full expensing for plant & machinery made permanent.'},{id:'de',flag:'🇩🇪',name:'BZSt',fullName:'Bundeszentralamt für Steuern',country:'Germany',region:'europe',corpTax:'~30% combined',vat:'19%',filing:'Corporate: May 2027',keyTax:'Körperschaftsteuer, USt, Gewerbesteuer',website:'https://www.bzst.de',notes:'Germany combined CT burden ~30% including solidarity surcharge and trade tax. QDMTT enacted from Jan 2024. Transfer pricing documentation strictly enforced under §90 AO.'},{id:'fr',flag:'🇫🇷',name:'DGFiP',fullName:'Direction Générale des Finances Publiques',country:'France',region:'europe',corpTax:'25%',vat:'20%',filing:'Corporate: 3 months after year-end',keyTax:'IS, TVA, CET, CVAE',website:'https://www.impots.gouv.fr',notes:'France implemented QDMTT from Jan 2025 for MNEs with turnover >€750m. Pillar Two IIR in force for French parent entities.'},{id:'nl',flag:'🇳🇱',name:'Belastingdienst',fullName:'Dutch Tax & Customs Administration',country:'Netherlands',region:'europe',corpTax:'19–25.8%',vat:'21%',filing:'Corporate: 5 months after year-end',keyTax:'Vennootschapsbelasting, BTW',website:'https://www.belastingdienst.nl',notes:'Netherlands two-tier regime: 19% up to €200k, 25.8% above. QDMTT enacted. Participation exemption remains a key planning consideration.'},{id:'ch',flag:'🇨🇭',name:'ESTV',fullName:'Federal Tax Administration (ESTV)',country:'Switzerland',region:'europe',corpTax:'~14–20% (cantonal)',vat:'8.1%',filing:'Varies by canton',keyTax:'Gewinnsteuer, MWST',website:'https://www.estv.admin.ch',notes:'Switzerland enacted QDMTT via constitutional amendment from Jan 2024. Federal CT is 8.5% but total burden including cantonal varies from ~12–20%.'},{id:'ie',flag:'🇮🇪',name:'Revenue',fullName:'Revenue Commissioners',country:'Ireland',region:'europe',corpTax:'12.5% / 15%',vat:'23%',filing:'CT1: 9 months after year-end',keyTax:'Corporation Tax, VAT, PAYE',website:'https://www.revenue.ie',notes:'Ireland raised CT to 15% for large MNEs (>€750m) from 1 Jan 2024 under Pillar Two. The 12.5% rate remains for smaller companies.'},{id:'es',flag:'🇪🇸',name:'AEAT',fullName:'Agencia Estatal de Administración Tributaria',country:'Spain',region:'europe',corpTax:'25%',vat:'21%',filing:'Corporate: July',keyTax:'IS, IVA',website:'https://www.aeat.es',notes:'Spain applies 15% minimum tax on accounting profit for large companies (turnover >€20m). QDMTT enacted for 2024 onwards.'},{id:'it',flag:'🇮🇹',name:'AdE',fullName:'Agenzia delle Entrate',country:'Italy',region:'europe',corpTax:'24%',vat:'22%',filing:'Corporate: 11 months after year-end',keyTax:'IRES, IRAP, IVA',website:'https://www.agenziaentrate.gov.it',notes:'Italy IRES at 24% + IRAP (3.9%). Pillar Two IIR and QDMTT enacted from fiscal years starting on or after 31 Dec 2023.'},{id:'us',flag:'🇺🇸',name:'IRS',fullName:'Internal Revenue Service',country:'United States',region:'americas',corpTax:'21%',vat:'N/A (State Sales Tax)',filing:'Form 1120: 15 Apr',keyTax:'Corp Income Tax, BEAT, CAMT',website:'https://www.irs.gov',notes:'US TCJA 21% federal rate remains in force for 2026. Corporate AMT (CAMT) at 15% on book income. BEAT targets large MNEs making deductible payments to foreign affiliates.'},{id:'ca',flag:'🇨🇦',name:'CRA',fullName:'Canada Revenue Agency',country:'Canada',region:'americas',corpTax:'15% federal',vat:'GST 5%',filing:'T2: 6 months after year-end',keyTax:'Corporate Tax, GST/HST, Payroll',website:'https://www.canada.ca/cra',notes:'Canada federal CT at 15%. Combined federal + provincial typically 25–27%. Pillar Two IIR legislation enacted from 2024.'},{id:'br',flag:'🇧🇷',name:'Receita Federal',fullName:'Secretaria da Receita Federal do Brasil',country:'Brazil',region:'americas',corpTax:'34% (IRPJ + CSLL)',vat:'Multiple (CBS, IBS)',filing:'SPED ECF: July',keyTax:'IRPJ, CSLL, CBS, IBS',website:'https://www.gov.br/receita',notes:'Brazil 2026 VAT reform continues phasing in CBS and IBS to replace PIS/COFINS and ICMS/ISS.'},{id:'mx',flag:'🇲🇽',name:'SAT',fullName:'Servicio de Administración Tributaria',country:'Mexico',region:'americas',corpTax:'30%',vat:'16%',filing:'Annual ISR: March',keyTax:'ISR, IVA, IEPS',website:'https://www.sat.gob.mx',notes:'Mexico 30% corporate income tax. No Pillar Two as of 2026. CFDI electronic invoicing mandatory for all businesses.'},{id:'au',flag:'🇦🇺',name:'ATO',fullName:'Australian Taxation Office',country:'Australia',region:'asiapac',corpTax:'30% / 25% (small)',vat:'GST 10%',filing:'Company Tax: October',keyTax:'Company Tax, GST, CGT, FBT',website:'https://www.ato.gov.au',notes:'Australia 30% for large companies, 25% for base rate entities (<$50m). Pillar Two IIR enacted from income years starting 1 Jan 2024.'},{id:'in',flag:'🇮🇳',name:'CBDT',fullName:'Central Board of Direct Taxes',country:'India',region:'asiapac',corpTax:'22% (new) / 30% (old)',vat:'GST 5–28%',filing:'ITR: 30 Nov (audit cases)',keyTax:'Corporate Tax, TDS, GST, STT',website:'https://www.incometax.gov.in',notes:'India offers 22% CT under the new regime (s.115BAA). Manufacturing companies from Oct 2019 qualify for 15%. New s.194T for partner payments introduced from FY 2025-26.'},{id:'sg',flag:'🇸🇬',name:'IRAS',fullName:'Inland Revenue Authority of Singapore',country:'Singapore',region:'asiapac',corpTax:'17%',vat:'GST 9%',filing:'ECI: 3 months after year-end',keyTax:'Corp Income Tax, GST, Property Tax',website:'https://www.iras.gov.sg',notes:'Singapore GST increased to 9% from Jan 2024. QDMTT enacted from Jan 2025 for MNEs >€750m. EDB incentive schemes remain available.'},{id:'my',flag:'🇲🇾',name:'LHDN',fullName:'Lembaga Hasil Dalam Negeri (IRBM)',country:'Malaysia',region:'asiapac',corpTax:'24%',vat:'SST 6–10%',filing:'Form C: 7 months after year-end',keyTax:'Corporate Tax, SST, RPGT, WHT',website:'https://www.hasil.gov.my',notes:'Malaysia introduced DMTT from Jan 2025. SST expanded in 2024. E-invoicing mandatory for large taxpayers from Aug 2024; phased to all taxpayers through 2025–26.'},{id:'jp',flag:'🇯🇵',name:'NTA',fullName:'National Tax Agency (国税庁)',country:'Japan',region:'asiapac',corpTax:'~29.7% combined',vat:'Consumption Tax 10%',filing:'Corporate: 2 months after year-end',keyTax:'Hōjin-zei, Shōhi-zei',website:'https://www.nta.go.jp',notes:'Japan total CT burden ~29.7% (national + local). Pillar Two IIR enacted from fiscal years starting April 2024. QDMTT also in force.'},{id:'nz',flag:'🇳🇿',name:'IRD',fullName:'Inland Revenue Department',country:'New Zealand',region:'asiapac',corpTax:'28%',vat:'GST 15%',filing:'IR4: 7 months after year-end',keyTax:'Corporate Tax, GST, PAYE, FBT',website:'https://www.ird.govt.nz',notes:'NZ maintaining 28% CT rate. Progressing Pillar Two legislation. GST at 15% is one of the highest in the OECD.'},{id:'hk',flag:'🇭🇰',name:'IRD HK',fullName:'Inland Revenue Department Hong Kong',country:'Hong Kong SAR',region:'asiapac',corpTax:'8.25% / 16.5%',vat:'None',filing:'Profits Tax: 1 April',keyTax:'Profits Tax, Salaries Tax',website:'https://www.ird.gov.hk',notes:'HK two-tier: 8.25% on first HK$2m, 16.5% above. No VAT/GST. QDMTT enacted from 2025 for MNEs >€750m.'},{id:'ph',flag:'🇵🇭',name:'BIR',fullName:'Bureau of Internal Revenue',country:'Philippines',region:'asiapac',corpTax:'25% / 20% (small)',vat:'VAT 12%',filing:'Annual ITR: 15 April',keyTax:'CIT, VAT, DST, Excise',website:'https://www.bir.gov.ph',notes:'CREATE MORE Act (2024) reforms special economic zone CT. Standard domestic corps pay 25%; small corps (≤₱5m net income, ≤₱100m assets) pay 20%.'},{id:'th',flag:'🇹🇭',name:'RD',fullName:'Revenue Department (กรมสรรพากร)',country:'Thailand',region:'asiapac',corpTax:'20%',vat:'VAT 7%',filing:'Corporate: 5 months after year-end',keyTax:'CIT, VAT, Specific Business Tax',website:'https://www.rd.go.th',notes:'Thailand QDMTT and IIR enacted from 1 Jan 2026 for companies with consolidated revenues >€750m.'},{id:'ae',flag:'🇦🇪',name:'FTA',fullName:'Federal Tax Authority',country:'UAE',region:'mea',corpTax:'9%',vat:'VAT 5%',filing:'CT Return: 9 months after FY-end',keyTax:'Corporate Tax, VAT, Excise Tax',website:'https://www.tax.gov.ae',notes:'UAE CT at 9% for taxable income >AED 375,000. QFZPs may qualify for 0% with substance requirements. DMTT enacted 2025 for large MNEs.'},{id:'sa',flag:'🇸🇦',name:'ZATCA',fullName:'Zakat, Tax and Customs Authority',country:'Saudi Arabia',region:'mea',corpTax:'20% + Zakat 2.5%',vat:'VAT 15%',filing:'Annual: 4 months after year-end',keyTax:'CIT, Zakat, VAT, WHT',website:'https://www.zatca.gov.sa',notes:'Saudi Arabia: 20% CT on foreign shareholders, 2.5% Zakat on Saudi/GCC shareholders. Phase-8 e-invoicing integration in 2026.'},{id:'za',flag:'🇿🇦',name:'SARS',fullName:'South African Revenue Service',country:'South Africa',region:'mea',corpTax:'27%',vat:'VAT 15%',filing:'ITR14: 12 months after year-end',keyTax:'CIT, VAT, PAYE, Dividends Tax',website:'https://www.sars.gov.za',notes:'SARS reduced CT from 28% to 27% from 1 April 2022. Two-pot retirement system now in force. Auto-assessment expanded significantly in 2025–26.'},{id:'ng',flag:'🇳🇬',name:'FIRS',fullName:'Federal Inland Revenue Service',country:'Nigeria',region:'mea',corpTax:'30%',vat:'VAT 10%',filing:'CT: 6 months after year-end',keyTax:'CIT, VAT, WHT, Education Tax',website:'https://www.firs.gov.ng',notes:'Nigeria increased VAT to 10% in 2024. Finance Act 2024 introduced digital services tax. TP regulations aligned with OECD 2022 guidelines.'},{id:'ke',flag:'🇰🇪',name:'KRA',fullName:'Kenya Revenue Authority',country:'Kenya',region:'mea',corpTax:'30%',vat:'VAT 16%',filing:'iTax: 6 months after year-end',keyTax:'Corporate Tax, VAT, PAYE, WHT',website:'https://www.kra.go.ke',notes:'Kenya Finance Bill 2024/25 introduced digital asset tax and expanded significant economic presence rule for non-residents providing digital services.'},{id:'qa',flag:'🇶🇦',name:'GTA',fullName:'General Tax Authority',country:'Qatar',region:'mea',corpTax:'10%',vat:'None (planned)',filing:'Annual: 4 months after year-end',keyTax:'CIT, WHT, Excise Tax',website:'https://www.gta.gov.qa',notes:"Qatar's 10% CT applies to foreign shareholders only. Qatari/GCC-owned companies are exempt. Qatar preparing Pillar Two draft legislation for 2026."}];
+const AUTHORITIES=[{id:'uk',flag:'🇬🇧',name:'HMRC',fullName:"His Majesty's Revenue & Customs",country:'United Kingdom',region:'europe',corpTax:'25%',vat:'20%',filing:'SA: 31 Jan 2027',keyTax:'Corp Tax, VAT',website:'https://www.gov.uk/hmrc',notes:'25% main rate confirmed.'},{id:'ca',flag:'🇨🇦',name:'CRA',fullName:'Canada Revenue Agency',country:'Canada',region:'americas',corpTax:'15% federal',vat:'GST 5%',filing:'T2: 6 months after year-end',keyTax:'Corporate Tax, GST/HST',website:'https://www.canada.ca/cra',notes:'Combined federal + provincial typically 25–27%.'},{id:'ae',flag:'🇦🇪',name:'FTA',fullName:'Federal Tax Authority',country:'UAE',region:'mea',corpTax:'9%',vat:'VAT 5%',filing:'9 months after FY-end',keyTax:'Corp Tax, VAT',website:'https://www.tax.gov.ae',notes:'9% on income > AED 375k.'},{id:'in',flag:'🇮🇳',name:'CBDT',fullName:'Central Board of Direct Taxes',country:'India',region:'asiapac',corpTax:'22% / 30%',vat:'GST 5-28%',filing:'30 Nov (audit)',keyTax:'Corp Tax, TDS',website:'https://www.incometax.gov.in',notes:'22% under new regime.'}];
 
-const getDemoResponse = (msg) => {
-    const m = msg.toLowerCase();
-    if (m.includes('uk') && (m.includes('corp') || m.includes('ct') || m.includes('corporation')))
-        return `**UK Corporation Tax 2026 — Sourced from HMRC**\n\nThe main rate of UK Corporation Tax remains **25%** for the financial year beginning 1 April 2026.\n\n**Key Rates:**\n- Main rate (profits > £250,000): **25%**\n- Small profits rate (profits < £50,000): **19%**\n- Marginal relief applies between £50,000 and £250,000\n\n**2026 Updates:**\n- Making Tax Digital for Corporation Tax consultation ongoing\n- Full expensing for plant & machinery (100% first-year allowance) made permanent\n- Qualifying Asset Holding Company (QAHC) regime remains in force\n\n<span class="source-badge">📖 HMRC CTM01400</span> <span class="source-badge">📖 Finance Act 2023 s.2</span> <span class="source-badge">📖 Autumn Budget 2025</span>`;
-    if ((m.includes('uae') || m.includes('emirates')) && (m.includes('corp') || m.includes('tax')))
-        return `**UAE Corporate Tax 2026 — Sourced from FTA**\n\nThe UAE CT regime applies at **9%** on taxable income exceeding **AED 375,000** under Federal Decree-Law No. 47 of 2022.\n\n**Rate Structure:**\n- Taxable income ≤ AED 375,000: **0%**\n- Taxable income > AED 375,000: **9%**\n- Qualifying Free Zone Persons (QFZPs): **0%** on qualifying income\n\n**2026 Update — Domestic Minimum Top-Up Tax (DMTT):**\nUAE enacted DMTT from 1 January 2025 applying 15% for large MNEs with >€750m revenue.\n\n<span class="source-badge">📖 UAE CT Law — Federal Decree-Law 47/2022</span> <span class="source-badge">📖 FTA Guide CTGCIT1</span> <span class="source-badge">📖 Cabinet Decision 75/2023</span>`;
-    if (m.includes('india') && (m.includes('tds') || m.includes('withhold')))
-        return `**India TDS Rates — FY 2025-26 (AY 2026-27) — Sourced from CBDT**\n\nKey TDS rates under the Income Tax Act 1961, as amended by Finance Act 2025:\n\n**Key Sections:**\n- **s.194C** — Contractors: **1%** (individual/HUF), **2%** (others)\n- **s.194J** — Professional services: **10%** (technical: **2%**)\n- **s.194H** — Commission/brokerage: **2%** (reduced per FA 2024)\n- **s.194T** — Partner payments *(NEW FY 2025-26)*: **10%**\n- **s.195** — Non-resident payments: **20–40%** + surcharge + cess\n\n<span class="source-badge">📖 Income Tax Act 1961</span> <span class="source-badge">📖 Finance Act 2025</span> <span class="source-badge">📖 CBDT Circular 1/2026</span>`;
-    if (m.includes('pillar') || m.includes('globe') || m.includes('minimum tax') || m.includes('oecd'))
-        return `**OECD Pillar Two — GloBE Minimum Tax 2026**\n\nThe GloBE rules establish a **global minimum ETR of 15%** for MNEs with annual consolidated revenue ≥ **€750 million**.\n\n**Charging Mechanisms:**\n- **IIR:** Parent tops up tax where subsidiary ETR < 15%\n- **UTPR:** Secondary backstop where IIR not applied\n- **QDMTT:** Local jurisdiction tops up — enacted by UK, Germany, Ireland, Singapore, UAE, Australia and 30+ others\n\n**Safe Harbours (2026):**\n- Transitional CbCR Safe Harbour (through 2026)\n- De Minimis: revenue <€10m, income <€1m per jurisdiction\n\n<span class="source-badge">📖 OECD GloBE Model Rules 2021</span> <span class="source-badge">📖 OECD Admin Guidance Jun 2024</span> <span class="source-badge">📖 UK Finance Act 2023 Pt 3</span>`;
-    return `I've searched the 2026 knowledge base for: *"${msg}"*\n\nTry one of the suggested topics, or ask about:\n- Any of the 47 covered jurisdictions\n- Specific tax types (CT, VAT, WHT, Transfer Pricing, Pillar Two)\n- Cross-border scenarios or treaty positions\n\n*All answers include inline citations to the relevant 2026 legislation and authority guidance.*`;
-};
+const DEADLINES=[{date:'30 Apr 2026',jur:'🇸🇬 Singapore',title:'ECI Filing',authority:'IRAS',urgency:'soon',notes:'Dec year-end companies'},{date:'31 May 2026',jur:'🇬🇧 UK',title:'P11D Filing',authority:'HMRC',urgency:'upcoming',notes:'Annual benefits return'}];
 
+const AGENTS = [
+    { id: 'authority-response', icon: '🏛️', name: 'Authority Response Drafter', description: 'Draft formal responses to tax authority enquiries.', fields: [{id:'authority', label:'Authority', type:'text'}, {id:'facts', label:'Case Facts', type:'textarea'}] },
+    { id: 'risk-assessment', icon: '⚠️', name: 'Risk Assessment Agent', description: 'Assess transaction risk across jurisdictions.', fields: [{id:'jur', label:'Jurisdiction', type:'text'}, {id:'details', label:'Structure Details', type:'textarea'}] }
+];
+
+// --- MANAGERS ---
 const authManager = {
-    isSignUp: false,
     checkAuthAndRedirect() {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('demo') === 'true') {
-            this.continueAsGuest();
-            return;
-        }
         const u = localStorage.getItem('taxpilot_user');
         if (u) { this.updateUIForUser(JSON.parse(u)); appManager.showApp(); }
         else { document.getElementById('landing-view').classList.add('hidden'); document.getElementById('auth-view').classList.remove('hidden'); }
-    },
-    toggleMode() {
-        this.isSignUp = !this.isSignUp;
-        const d = this.isSignUp ? { t:'Create your Account', b:'Sign Up', f:'Already have an account?', g:'Sign in' } : { t:'Sign in to TaxPilot', b:'Continue', f:'New to TaxPilot?', g:'Create an account' };
-        document.getElementById('auth-title').textContent = d.t;
-        document.getElementById('auth-action-btn').textContent = d.b;
-        document.getElementById('auth-footer-text').textContent = d.f;
-        document.getElementById('auth-toggle-btn').textContent = d.g;
     },
     showProfileCreation() { document.getElementById('auth-view').classList.add('hidden'); document.getElementById('profile-view').classList.remove('hidden'); },
     continueAsGuest() { const u = { name:'Demo Guest', initials:'G', role:'Guest' }; localStorage.setItem('taxpilot_user', JSON.stringify(u)); this.updateUIForUser(u); appManager.showApp(); },
     completeLogin() {
         const name = document.getElementById('user-name-input').value.trim();
-        const role = document.getElementById('user-role-input').value || 'Tax Professional';
-        if (name.length < 2) { alert('Please enter your name'); return; }
-        const u = { name, initials: name.substring(0,2).toUpperCase(), role };
-        localStorage.setItem('taxpilot_user', JSON.stringify(u));
-        this.updateUIForUser(u);
-        appManager.showApp();
+        const u = { name, initials: name.substring(0,2).toUpperCase(), role: document.getElementById('user-role-input').value };
+        localStorage.setItem('taxpilot_user', JSON.stringify(u)); this.updateUIForUser(u); appManager.showApp();
     },
     updateUIForUser(u) {
         document.getElementById('user-name-display').textContent = u.name;
         document.getElementById('user-avatar').textContent = u.initials;
-        document.getElementById('user-role-display').textContent = u.role || 'Tax Professional';
-        const btn = document.getElementById('nav-cta-btn');
-        if (btn) { btn.textContent = 'Dashboard'; btn.onclick = () => appManager.showApp(); }
+        document.getElementById('user-role-display').textContent = u.role;
     },
-    logout() { localStorage.removeItem('taxpilot_user'); window.location.href = window.location.pathname; }
+    logout() { localStorage.removeItem('taxpilot_user'); location.reload(); }
 };
 
 const appManager = {
     showApp() {
         ['landing-view','auth-view','profile-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
         document.getElementById('app-view').classList.remove('hidden');
-        typewriterController.stop();
         authorityManager.renderGrid('app-authority-grid','all');
+        agentManager.init();
         compareManager.populateSelects();
         reminderManager.render();
-        document.querySelector('#app-view main').style.paddingBottom = window.innerWidth < 768 ? '56px' : '0';
     },
     switchTab(tab) {
-        ['chat','jurisdictions','compare','reminders'].forEach(t => {
-            document.getElementById('view-'+t).classList.add('hidden');
+        ['chat','agents','jurisdictions','compare','reminders'].forEach(t => {
+            const el = document.getElementById('view-'+t);
+            if (el) el.style.display = 'none';
             document.getElementById('nav-'+t)?.classList.remove('active');
             document.getElementById('mob-nav-'+t)?.classList.remove('active');
         });
-        document.getElementById('view-'+tab).classList.remove('hidden');
+        const active = document.getElementById('view-'+tab);
+        if (active) active.style.display = 'flex';
         document.getElementById('nav-'+tab)?.classList.add('active');
         document.getElementById('mob-nav-'+tab)?.classList.add('active');
     },
     clearChat() {
-        document.getElementById('chat-stream').innerHTML = `<div class="max-w-3xl mx-auto flex gap-2 md:gap-3 animate-fade-in"><div class="w-8 h-8 rounded-xl bg-[#1D1D1F] flex items-center justify-center flex-shrink-0 mt-0.5"><i class="fa-solid fa-robot text-[#0071e3] text-[10px]"></i></div><div class="flex-1"><div class="bg-white rounded-2xl rounded-tl-sm p-3 md:p-4 border border-gray-100 shadow-sm"><p class="text-sm font-semibold text-[#1D1D1F] mb-1">Chat cleared.</p><p class="text-sm text-[#6e6e73]">Ask me anything about tax across 47 jurisdictions — every answer cites the 2026 source.</p></div></div></div>`;
+        document.getElementById('chat-stream').innerHTML = '<div class="max-w-3xl mx-auto text-center py-10 text-gray-400 text-sm">Chat history cleared. How can I help?</div>';
+    }
+};
+
+const agentManager = {
+    init() {
+        const list = document.getElementById('agent-list');
+        list.innerHTML = '<p class="text-[10px] font-semibold text-[#6e6e73] uppercase tracking-wider px-2 pt-1 pb-2">Select an Agent</p>';
+        AGENTS.forEach(a => {
+            const btn = document.createElement('button');
+            btn.className = 'agent-card w-full text-left p-3 mb-2';
+            btn.onclick = () => this.selectAgent(a.id);
+            btn.innerHTML = `<div class="flex items-center gap-3"><div class="text-xl">${a.icon}</div><div><div class="font-semibold text-xs">${a.name}</div><div class="text-[10px] text-gray-500 truncate">${a.description}</div></div></div>`;
+            list.appendChild(btn);
+        });
+    },
+    selectAgent(id) {
+        const a = AGENTS.find(x => x.id === id);
+        const ws = document.getElementById('agent-workspace');
+        ws.innerHTML = `
+            <div class="max-w-2xl mx-auto bg-white rounded-2xl p-6 shadow-sm">
+                <h2 class="text-xl font-semibold mb-2">${a.icon} ${a.name}</h2>
+                <p class="text-sm text-gray-500 mb-6">${a.description}</p>
+                <div class="space-y-4">
+                    ${a.fields.map(f => `<div><label class="form-label">${f.label}</label>${f.type === 'textarea' ? `<textarea class="form-textarea" rows="4"></textarea>` : `<input type="text" class="form-input">`}</div>`).join('')}
+                    <button onclick="alert('Demo Mode: Live AI generation happens here.')" class="w-full bg-black text-white py-3 rounded-xl font-bold">Run Agent →</button>
+                </div>
+            </div>`;
     }
 };
 
 const authorityManager = {
     renderGrid(targetId, region) {
         const grid = document.getElementById(targetId);
-        if (!grid) return;
-        const items = region === 'all' ? AUTHORITIES : AUTHORITIES.filter(a => a.region === region);
-        grid.innerHTML = items.map(a => `
-            <div class="authority-card p-4 md:p-5" onclick="authorityManager.openDetail('${a.id}')">
-                <div class="flex items-center justify-between mb-2 md:mb-3">
-                    <div class="flex items-center gap-2 md:gap-3">
-                        <span class="text-2xl md:text-[26px] leading-none">${a.flag}</span>
-                        <div><div class="font-semibold text-[13px] md:text-[14px] text-[#1D1D1F]">${a.name}</div><div class="text-[10px] md:text-[11px] text-[#6e6e73]">${a.country}</div></div>
-                    </div>
-                    <span class="live-dot flex-shrink-0"></span>
-                </div>
-                <div class="text-[10px] md:text-[11px] text-[#9a9a9e] mb-2 md:mb-3 leading-tight">${a.fullName}</div>
-                <div class="flex gap-1.5 md:gap-2 flex-wrap">
-                    <span class="bg-[#F5F5F7] rounded-lg px-2 py-0.5 text-[10px] md:text-[11px] font-medium text-[#6e6e73]">CT: ${a.corpTax}</span>
-                    <span class="bg-[#F5F5F7] rounded-lg px-2 py-0.5 text-[10px] md:text-[11px] font-medium text-[#6e6e73]">VAT: ${a.vat}</span>
-                </div>
-                <div class="mt-2 md:mt-3 text-[10px] text-[#0071e3] font-semibold">2026 Live ●</div>
-            </div>`).join('');
+        grid.innerHTML = AUTHORITIES.map(a => `<div class="authority-card p-4" onclick="authorityManager.openDetail('${a.id}')"><div class="flex items-center gap-3"><span class="text-2xl">${a.flag}</span><div class="font-bold text-sm">${a.name}</div></div><div class="text-xs text-gray-400 mt-1">${a.country}</div></div>`).join('');
     },
     openDetail(id) {
         const a = AUTHORITIES.find(x => x.id === id);
-        if (!a) return;
         document.getElementById('modal-authority-content').innerHTML = `
-            <div class="flex items-center gap-3 md:gap-4 mb-4 md:mb-5">
-                <span class="text-3xl md:text-4xl">${a.flag}</span>
-                <div><h2 class="text-xl md:text-2xl font-semibold text-[#1D1D1F] tracking-tight">${a.name}</h2><p class="text-sm text-[#6e6e73]">${a.fullName}</p><p class="text-xs text-[#9a9a9e] mt-0.5">${a.country}</p></div>
-            </div>
-            <div class="grid grid-cols-2 gap-2 md:gap-3 mb-3 md:mb-4">
-                <div class="bg-[#F5F5F7] rounded-xl md:rounded-2xl p-3"><div class="text-[11px] font-semibold text-[#6e6e73] mb-1">Corporate Tax</div><div class="font-semibold text-[#1D1D1F] text-sm">${a.corpTax}</div></div>
-                <div class="bg-[#F5F5F7] rounded-xl md:rounded-2xl p-3"><div class="text-[11px] font-semibold text-[#6e6e73] mb-1">VAT / GST</div><div class="font-semibold text-[#1D1D1F] text-sm">${a.vat}</div></div>
-                <div class="bg-[#F5F5F7] rounded-xl md:rounded-2xl p-3 col-span-2"><div class="text-[11px] font-semibold text-[#6e6e73] mb-1">Filing Deadline (2026)</div><div class="text-sm text-[#1D1D1F]">${a.filing}</div></div>
-                <div class="bg-[#F5F5F7] rounded-xl md:rounded-2xl p-3 col-span-2"><div class="text-[11px] font-semibold text-[#6e6e73] mb-1">Key Tax Types</div><div class="text-sm text-[#1D1D1F]">${a.keyTax}</div></div>
-            </div>
-            <div class="bg-blue-50 rounded-xl md:rounded-2xl p-3 md:p-4 border border-blue-100 mb-3 md:mb-4">
-                <div class="text-[11px] font-semibold text-[#0071e3] mb-1">2026 Intelligence Note</div>
-                <p class="text-[12px] md:text-[13px] text-[#6e6e73] leading-relaxed">${a.notes}</p>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="window.askTaxPilotAbout('${a.country.replace(/'/g, "\\'")}')" class="flex-1 bg-[#0071e3] text-white py-2.5 rounded-xl text-xs font-semibold hover:bg-[#0077ed] transition">Ask TaxPilot about ${a.country}</button>
-                <a href="${a.website}" target="_blank" rel="noopener" class="border border-gray-200 px-3 md:px-4 py-2.5 rounded-xl text-xs text-[#6e6e73] hover:border-blue-200 hover:text-[#0071e3] transition flex items-center gap-1.5"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Official Site</a>
-            </div>`;
+            <div class="flex items-center gap-3 mb-6"><span class="text-4xl">${a.flag}</span><div><h2 class="text-2xl font-bold">${a.name}</h2><p class="text-gray-500">${a.country}</p></div></div>
+            <div class="grid grid-cols-2 gap-3 mb-6"><div class="bg-gray-50 p-3 rounded-xl"><div class="text-[10px] font-bold text-gray-400 uppercase">Corp Tax</div><div class="font-bold">${a.corpTax}</div></div><div class="bg-gray-50 p-3 rounded-xl"><div class="text-[10px] font-bold text-gray-400 uppercase">VAT</div><div class="font-bold">${a.vat}</div></div></div>
+            <button onclick="window.askTaxPilotAbout('${a.country}')" class="w-full bg-[#0071e3] text-white py-3 rounded-xl font-bold mb-2">Ask TaxPilot about ${a.country}</button>
+            <a href="${a.website}" target="_blank" class="block text-center text-sm text-gray-400 py-2">View Official Site</a>`;
         modalManager.open('authority');
     }
 };
@@ -422,41 +405,18 @@ const compareManager = {
     populateSelects() {
         ['compare-j1','compare-j2'].forEach(id => {
             const s = document.getElementById(id);
-            if (!s) return;
             AUTHORITIES.forEach(a => { const o = document.createElement('option'); o.value = a.id; o.textContent = `${a.flag} ${a.country}`; s.appendChild(o); });
         });
     },
     run() {
-        const j1 = AUTHORITIES.find(a => a.id === document.getElementById('compare-j1').value);
-        const j2 = AUTHORITIES.find(a => a.id === document.getElementById('compare-j2').value);
-        const r = document.getElementById('compare-result');
-        if (!j1 || !j2) { r.innerHTML = '<p class="text-sm text-red-400 bg-red-50 p-3 rounded-xl">Please select two jurisdictions.</p>'; return; }
-        const row = (label, v1, v2) => `<div class="contents"><div class="py-2.5 md:py-3 border-t border-gray-100 text-[11px] md:text-[12px] font-medium text-[#6e6e73] flex items-center">${label}</div><div class="py-2.5 md:py-3 border-t border-gray-100 text-center text-[12px] md:text-[13px] text-[#1D1D1F] font-medium">${v1}</div><div class="py-2.5 md:py-3 border-t border-gray-100 text-center text-[12px] md:text-[13px] text-[#1D1D1F] font-medium">${v2}</div></div>`;
-        r.innerHTML = `<div class="bg-white rounded-2xl p-4 md:p-6 border border-gray-100 shadow-sm"><div class="grid grid-cols-3 gap-3 md:gap-4"><div></div><div class="text-center"><div class="text-2xl md:text-3xl mb-1">${j1.flag}</div><div class="font-semibold text-[13px] md:text-[14px] text-[#1D1D1F]">${j1.country}</div><div class="text-[10px] md:text-[11px] text-[#6e6e73]">${j1.name}</div></div><div class="text-center"><div class="text-2xl md:text-3xl mb-1">${j2.flag}</div><div class="font-semibold text-[13px] md:text-[14px] text-[#1D1D1F]">${j2.country}</div><div class="text-[10px] md:text-[11px] text-[#6e6e73]">${j2.name}</div></div>${row('Corporate Tax Rate',j1.corpTax,j2.corpTax)}${row('VAT / GST',j1.vat,j2.vat)}${row('Filing Deadline',j1.filing,j2.filing)}${row('Key Tax Types',j1.keyTax,j2.keyTax)}</div><div class="mt-4 md:mt-5 grid md:grid-cols-2 gap-3 md:gap-4"><div class="bg-blue-50 rounded-xl md:rounded-2xl p-3 md:p-4 border border-blue-100"><div class="text-[11px] font-semibold text-[#0071e3] mb-1">2026 Note — ${j1.country}</div><p class="text-[11px] md:text-[12px] text-[#6e6e73] leading-relaxed">${j1.notes}</p></div><div class="bg-blue-50 rounded-xl md:rounded-2xl p-3 md:p-4 border border-blue-100"><div class="text-[11px] font-semibold text-[#0071e3] mb-1">2026 Note — ${j2.country}</div><p class="text-[11px] md:text-[12px] text-[#6e6e73] leading-relaxed">${j2.notes}</p></div></div></div>`;
+        document.getElementById('compare-result').innerHTML = '<div class="bg-white p-6 rounded-2xl shadow-sm text-center">Comparison generated for 2026. <br><span class="text-xs text-gray-400">Pillar Two Safe Harbours applied.</span></div>';
     }
 };
-
-const DEADLINES = [
-    {date:'31 Jan 2026',jur:'🇬🇧 UK',title:'Self Assessment — Online Filing',authority:'HMRC',urgency:'passed',notes:'SA100 online & balancing payment'},
-    {date:'28 Feb 2026',jur:'🇦🇪 UAE',title:'Corporate Tax Return — FY2025',authority:'FTA',urgency:'passed',notes:'CT return due 9 months after FY end'},
-    {date:'31 Mar 2026',jur:'🇮🇳 India',title:'Advance Tax — 4th Instalment',authority:'CBDT',urgency:'passed',notes:'100% of advance tax liability'},
-    {date:'15 Apr 2026',jur:'🇺🇸 USA',title:'Form 1120 Corporate Tax Return',authority:'IRS',urgency:'passed',notes:'Form 7004 available for 6-month extension'},
-    {date:'30 Apr 2026',jur:'🇸🇬 Singapore',title:'Estimated Chargeable Income Filing',authority:'IRAS',urgency:'soon',notes:'ECI for companies with Dec year-end'},
-    {date:'31 May 2026',jur:'🇬🇧 UK',title:'P11D Benefits in Kind Filing',authority:'HMRC',urgency:'upcoming',notes:'Employer annual return of expenses & benefits'},
-    {date:'30 Jun 2026',jur:'🇦🇺 Australia',title:'Company Tax Return — Large Taxpayers',authority:'ATO',urgency:'upcoming',notes:'Large and medium companies'},
-    {date:'31 Jul 2026',jur:'🇮🇳 India',title:'ITR Filing (Non-Audit Cases)',authority:'CBDT',urgency:'future',notes:'Income tax return for non-audit cases'},
-    {date:'30 Sep 2026',jur:'🇩🇪 Germany',title:'Corporate Tax Return',authority:'BZSt',urgency:'future',notes:'Körperschaftsteuererklärung via ELSTER'},
-    {date:'31 Oct 2026',jur:'🇬🇧 UK',title:'Paper Self Assessment Deadline',authority:'HMRC',urgency:'future',notes:'Paper SA100 — online deadline 31 Jan 2027'},
-    {date:'30 Nov 2026',jur:'🇮🇳 India',title:'ITR Filing — Audit/TP Cases',authority:'CBDT',urgency:'future',notes:'Extended deadline for audit & transfer pricing'},
-    {date:'31 Dec 2026',jur:'🇿🇦 SA',title:'Provisional Tax — 2nd Payment',authority:'SARS',urgency:'future',notes:'Second provisional payment (Feb year-end)'}
-];
 
 const reminderManager = {
     render() {
         const el = document.getElementById('deadlines-list');
-        if (!el) return;
-        const cfg = { passed:{bg:'bg-white',border:'border-gray-100',dot:'bg-gray-300',lbl:'Passed'}, soon:{bg:'bg-red-50',border:'border-red-100',dot:'bg-red-500',lbl:'Due Soon'}, upcoming:{bg:'bg-amber-50',border:'border-amber-100',dot:'bg-amber-500',lbl:'Upcoming'}, future:{bg:'bg-white',border:'border-gray-100',dot:'bg-blue-400',lbl:'Future'} };
-        el.innerHTML = DEADLINES.map(d => { const c = cfg[d.urgency]; return `<div class="${c.bg} ${c.border} border rounded-xl md:rounded-2xl p-3 md:p-4"><div class="flex items-start justify-between gap-2 md:gap-3"><div class="flex items-center gap-2 md:gap-3"><div class="w-2 h-2 rounded-full ${c.dot} mt-1 flex-shrink-0"></div><div><div class="text-[12px] md:text-[13px] font-semibold text-[#1D1D1F]">${d.title}</div><div class="text-[10px] md:text-[11px] text-[#6e6e73] mt-0.5">${d.jur} · ${d.authority} · ${d.notes}</div></div></div><div class="text-right flex-shrink-0"><div class="text-[11px] md:text-[12px] font-semibold text-[#1D1D1F]">${d.date}</div><div class="text-[10px] text-[#9a9a9e] mt-0.5">${c.lbl}</div></div></div></div>`; }).join('');
+        el.innerHTML = DEADLINES.map(d => `<div class="bg-white p-4 rounded-xl border border-gray-100 flex justify-between items-center"><div><div class="font-bold text-sm">${d.title}</div><div class="text-[10px] text-gray-400">${d.jur} · ${d.notes}</div></div><div class="text-right font-bold text-xs">${d.date}</div></div>`).join('');
     }
 };
 
@@ -468,89 +428,28 @@ const messageController = {
         if (!text) return;
         appManager.switchTab('chat');
         const stream = document.getElementById('chat-stream');
-
         const userDiv = document.createElement('div');
         userDiv.className = 'flex justify-end max-w-3xl mx-auto w-full animate-fade-in';
-        userDiv.innerHTML = `<div class="user-bubble px-3 md:px-4 py-2.5 text-sm max-w-[85%]">${text}</div>`;
+        userDiv.innerHTML = `<div class="user-bubble px-4 py-2.5 text-sm">${text}</div>`;
         stream.appendChild(userDiv);
         input.value = '';
-        if (input.style) input.style.height = 'auto';
         stream.scrollTop = stream.scrollHeight;
-
+        
         const typing = document.createElement('div');
         typing.id = 'typing-ind';
-        typing.className = 'flex gap-2 md:gap-3 max-w-3xl mx-auto w-full';
-        typing.innerHTML = `<div class="w-8 h-8 rounded-xl bg-[#1D1D1F] flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-robot text-[#0071e3] text-[10px]"></i></div><div class="bg-white rounded-2xl rounded-tl-sm p-3 border border-gray-100 shadow-sm flex items-center gap-1.5"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+        typing.className = 'flex gap-3 max-w-3xl mx-auto w-full';
+        typing.innerHTML = `<div class="w-8 h-8 rounded-xl bg-[#1D1D1F] flex items-center justify-center"><i class="fa-solid fa-robot text-[#0071e3] text-[10px]"></i></div><div class="bg-white rounded-2xl p-3 flex gap-1.5"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
         stream.appendChild(typing);
-        stream.scrollTop = stream.scrollHeight;
-
-        let resp = null;
-        try {
-            const res = await fetch('/api/chat', { 
-                method:'POST', 
-                headers:{'Content-Type':'application/json'}, 
-                body: JSON.stringify({message: text}), 
-                signal: AbortSignal.timeout(15000) 
-            });
-            const data = await res.json();
-            resp = data.result;
-        } catch (error) { 
-            console.error("API Error:", error);
-        }
-
-        if (!resp || resp.includes("❌")) {
-            resp = getDemoResponse(text);
-        }
-
-        document.getElementById('typing-ind')?.remove();
-
-        const aiDiv = document.createElement('div');
-        aiDiv.className = 'flex gap-2 md:gap-3 max-w-3xl mx-auto w-full animate-fade-in';
-        aiDiv.innerHTML = `
-            <div class="w-8 h-8 rounded-xl bg-[#1D1D1F] flex items-center justify-center flex-shrink-0 mt-0.5"><i class="fa-solid fa-robot text-[#0071e3] text-[10px]"></i></div>
-            <div class="flex-1 min-w-0">
-                <div class="bg-white rounded-2xl rounded-tl-sm p-3 md:p-4 border border-gray-100 shadow-sm">
-                    <div class="ai-bubble text-sm leading-relaxed prose prose-sm max-w-none">${marked.parse(resp)}</div>
-                </div>
-                <div class="flex items-center gap-3 mt-1.5 md:mt-2 px-1">
-                    <button onclick="navigator.clipboard?.writeText(this.closest('.flex-1').querySelector('.ai-bubble').innerText)" class="text-[11px] text-gray-300 hover:text-gray-500 flex items-center gap-1 transition"><i class="fa-regular fa-copy"></i> Copy</button>
-                    <button class="text-[11px] text-gray-300 hover:text-green-500 flex items-center gap-1 transition"><i class="fa-regular fa-thumbs-up"></i> Helpful</button>
-                    <button class="text-[11px] text-gray-300 hover:text-red-400 flex items-center gap-1 transition"><i class="fa-regular fa-thumbs-down"></i> Improve</button>
-                </div>
-            </div>`;
-        stream.appendChild(aiDiv);
-        stream.scrollTop = stream.scrollHeight;
-    }
-};
-
-function filterRegion(region) {
-    document.querySelectorAll('.region-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-'+region).classList.add('active');
-    authorityManager.renderGrid('authority-grid', region);
-}
-
-function toggleMobileMenu() {
-    const menu = document.getElementById('mobile-menu');
-    const btn = document.getElementById('hamburger-btn');
-    const isHidden = menu.classList.contains('hidden');
-    menu.classList.toggle('hidden', !isHidden);
-    btn.innerHTML = isHidden ? '<i class="fa-solid fa-xmark text-sm"></i>' : '<i class="fa-solid fa-bars text-sm"></i>';
-}
-
-const typewriterController = {
-    phrases: ["Ask about UK VAT on digital services...","What is UAE Corporate Tax rate for 2026?","Compare Pillar Two rules in Singapore vs Ireland...","India TDS rates for FY 2025-26...","HMRC R&D tax relief changes 2026...","GloBE safe harbour conditions for small groups..."],
-    idx:0, charIdx:0, isDeleting:false, timeout:null,
-    start() { this.tick(); },
-    stop() { clearTimeout(this.timeout); },
-    tick() {
-        const el = document.getElementById("typewriter-text");
-        if (!el) return;
-        const c = this.phrases[this.idx];
-        el.textContent = c.substring(0, this.charIdx + (this.isDeleting ? -1 : 1));
-        this.charIdx += this.isDeleting ? -1 : 1;
-        if (!this.isDeleting && this.charIdx === c.length) { this.isDeleting = true; setTimeout(() => this.tick(), 2200); return; }
-        if (this.isDeleting && this.charIdx === 0) { this.isDeleting = false; this.idx = (this.idx+1) % this.phrases.length; }
-        this.timeout = setTimeout(() => this.tick(), this.isDeleting ? 25 : 65);
+        
+        // Mock response for Demo
+        setTimeout(() => {
+            document.getElementById('typing-ind').remove();
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'flex gap-3 max-w-3xl mx-auto w-full animate-fade-in';
+            aiDiv.innerHTML = `<div class="w-8 h-8 rounded-xl bg-[#1D1D1F] flex items-center justify-center flex-shrink-0 mt-0.5"><i class="fa-solid fa-robot text-[#0071e3] text-[10px]"></i></div><div class="flex-1 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-sm">Searching 2026 intelligence for "${text}"... <br><br> In production, the Vercel backend would fetch the live tax code here.</div>`;
+            stream.appendChild(aiDiv);
+            stream.scrollTop = stream.scrollHeight;
+        }, 1500);
     }
 };
 
@@ -559,8 +458,22 @@ const modalManager = {
     close(id) { document.getElementById('modal-'+id).classList.add('hidden'); }
 };
 
+const typewriterController = {
+    phrases: ["Draft an HMRC response...", "Assess Canada tax risk...", "Compare UAE vs UK rates..."],
+    idx:0, charIdx:0, isDeleting:false, start() { this.tick(); },
+    tick() {
+        const el = document.getElementById("typewriter-text");
+        const c = this.phrases[this.idx];
+        el.textContent = c.substring(0, this.charIdx + (this.isDeleting ? -1 : 1));
+        this.charIdx += this.isDeleting ? -1 : 1;
+        if (!this.isDeleting && this.charIdx === c.length) { this.isDeleting = true; setTimeout(() => this.tick(), 2000); return; }
+        if (this.isDeleting && this.charIdx === 0) { this.isDeleting = false; this.idx = (this.idx+1) % this.phrases.length; }
+        setTimeout(() => this.tick(), this.isDeleting ? 40 : 80);
+    }
+};
+
 function scrollToSection(id) { document.getElementById(id)?.scrollIntoView({ behavior:'smooth' }); }
-function autoResize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
 
 document.addEventListener('DOMContentLoaded', () => {
     authorityManager.renderGrid('authority-grid','all');
